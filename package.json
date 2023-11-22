@@ -1,5 +1,5 @@
 {
-  "name": "@govtechsg/token-registry",
+  "name": "@tradetrust-tt/token-registry",
   "version": "1.0.0",
   "files": [
     "dist",
@@ -7,7 +7,7 @@
   ],
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
-  "repository": "git@github.com:Open-Attestation/token-registry.git",
+  "repository": "git@github.com:TradeTrust/token-registry.git",
   "author": "GovTech",
   "license": "Apache-2.0",
   "scripts": {
