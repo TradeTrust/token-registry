@@ -10,7 +10,7 @@
 <p align="center"> 
   <a href="https://circleci.com/gh/Open-Attestation/token-registry/tree/master" alt="Circle CI"><img src="https://img.shields.io/circleci/build/github/Open-Attestation/token-registry/master" /></a>
   <a href="https://codecov.io/gh/Open-Attestation/token-registry" alt="Code Coverage"><img src="https://codecov.io/gh/Open-Attestation/token-registry/branch/master/graph/badge.svg?token=Y4R9SWXATG" /></a>
-  <a href="https://www.npmjs.com/package/@govtechsg/token-registry" alt="NPM"><img src="https://img.shields.io/npm/dw/@govtechsg/token-registry" /></a>
+  <a href="https://www.npmjs.com/package/@tradetrust-tt/token-registry" alt="NPM"><img src="https://img.shields.io/npm/dw/@tradetrust-tt/token-registry" /></a>
   <img src="https://img.shields.io/github/license/open-attestation/token-registry" />
 </p>
 
@@ -45,7 +45,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
 ## Installation
 
 ```sh
-npm install --save @govtechsg/token-registry
+npm install --save @tradetrust-tt/token-registry
 ```
 
 ---
@@ -66,7 +66,7 @@ See issue [#108](https://github.com/Open-Attestation/token-registry/issues/108) 
 #### Connect to existing token registry
 
 ```ts
-import { TradeTrustToken__factory } from "@govtechsg/token-registry/contracts";
+import { TradeTrustToken__factory } from "@tradetrust-tt/token-registry/contracts";
 
 const connectedRegistry = TradeTrustToken__factory.connect(tokenRegistryAddress, signer);
 ```
@@ -98,7 +98,7 @@ The actual owners will use the Title Escrow contract to perform their ownership 
 #### Connect to Title Escrow
 
 ```ts
-import { TitleEscrow__factory } from "@govtechsg/token-registry/contracts";
+import { TitleEscrow__factory } from "@tradetrust-tt/token-registry/contracts";
 
 const connectedEscrow = TitleEscrow__factory.connect(existingTitleEscrowAddress, signer);
 ```
@@ -216,7 +216,7 @@ The following functions can be called on the token contract by the admin user to
 #### Grant a role to a user
 
 ```ts
-import { constants } from "@govtechsg/token-registry";
+import { constants } from "@tradetrust-tt/token-registry";
 
 await tokenRegistry.grantRole(constants.roleHash.MinterRole, "0xbabe");
 ```
@@ -226,7 +226,7 @@ Can only be called by default admin or role admin.
 #### Revoke a role from a user
 
 ```ts
-import { constants } from "@govtechsg/token-registry";
+import { constants } from "@tradetrust-tt/token-registry";
 
 await tokenRegistry.revokeRole(constants.roleHash.AccepterRole, "0xbabe");
 ```
@@ -239,7 +239,7 @@ The standard setup does not add the role-admin roles so that users don't deploy 
 If you need a more complex setup, you can add the admin roles to the designated roles.
 
 ```ts
-import { constants } from "@govtechsg/token-registry";
+import { constants } from "@tradetrust-tt/token-registry";
 const { roleHash } = constants;
 
 await tokenRegistry.setRoleAdmin(roleHash.MinterRole, roleHash.MinterAdminRole);
