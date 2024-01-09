@@ -7,6 +7,7 @@ const ChainId = {
   XDCApothem: 51,
   HederaMainnet: 295,
   HederaTestnet: 296,
+  StabilityTestnet: 20180427,
 };
 
 export const contractAddress = {
@@ -18,6 +19,7 @@ export const contractAddress = {
     [ChainId.XDC]: "0x50BfCc1b699fD2308B978B7a6A26e3C3Bbad16DC",
     [ChainId.XDCApothem]: "0xce28778bE6cF32ef3Ccbc09910258DF592F3b6F1",
     [ChainId.HederaTestnet]: "0xde5aBf7B2416b99cba15021E3CF35A2a56ac83c1",
+    [ChainId.StabilityTestnet]: "0x3ED34ef70c542B740534FE134cA6DA4fF7563E76",
   },
   Deployer: {
     [ChainId.Ethereum]: "0x92470d0Fc33Cbf2f04B39696733806a15eD7eef3",
