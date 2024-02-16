@@ -366,6 +366,7 @@ Here's a list of network names currently pre-configured:
 - `xdcapothem` (XDC Apothem TestNet)
 - `hederamainet` (Hedera Network Mainnet)
 - `hederatestnet` (Hedera Network TestNet)
+- `stabilitytestnet` (Stability TestNet)
 
 > 💡 You can configure existing and add other networks you wish to deploy to in the `hardhat.config.ts` file.
 

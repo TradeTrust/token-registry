@@ -105,6 +105,10 @@ const config: HardhatUserConfig = {
       ...networkConfig,
       url: "https://testnet.hashio.io/api",
     },
+    stabilitytestnet: {
+      ...networkConfig,
+      url: "https://free.testnet.stabilityprotocol.com"
+    },
     /**
      * Polygon
      */
