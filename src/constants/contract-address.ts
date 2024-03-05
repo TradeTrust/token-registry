@@ -19,6 +19,7 @@ export const contractAddress = {
     [ChainId.XDC]: "0x50BfCc1b699fD2308B978B7a6A26e3C3Bbad16DC",
     [ChainId.XDCApothem]: "0xce28778bE6cF32ef3Ccbc09910258DF592F3b6F1",
     [ChainId.HederaTestnet]: "0xde5aBf7B2416b99cba15021E3CF35A2a56ac83c1",
+    [ChainId.HederaMainnet]: "0x4c6977052B300E707DA2Dd136f6379e27416f850",
     [ChainId.StabilityTestnet]: "0xd334a95bbA0b666981fD067A5Edd505aFB6cFa1d",
   },
   Deployer: {
