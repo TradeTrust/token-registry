@@ -7,6 +7,7 @@ const ChainId = {
   XDCApothem: 51,
   HederaMainnet: 295,
   HederaTestnet: 296,
+  Stability: 101010,
   StabilityTestnet: 20180427,
 };
 
@@ -18,7 +19,9 @@ export const contractAddress = {
     [ChainId.PolygonMumbai]: "0x5aA71Cc9559bC5e54E9504a81496d9F8454721F5",
     [ChainId.XDC]: "0x50BfCc1b699fD2308B978B7a6A26e3C3Bbad16DC",
     [ChainId.XDCApothem]: "0xce28778bE6cF32ef3Ccbc09910258DF592F3b6F1",
-    [ChainId.HederaTestnet]: "0xde5aBf7B2416b99cba15021E3CF35A2a56ac83c1",
+    [ChainId.HederaTestnet]: "0x5B5F8d94782be18E22420f3276D5ef5a1bc65C53",
+    [ChainId.HederaMainnet]: "0x335ae7ef2a70952d3f7cd4b76f5597067f61157e",
+    [ChainId.Stability]: "0x5B5F8d94782be18E22420f3276D5ef5a1bc65C53",
     [ChainId.StabilityTestnet]: "0xd334a95bbA0b666981fD067A5Edd505aFB6cFa1d",
   },
   Deployer: {
