@@ -107,7 +107,7 @@ const config: HardhatUserConfig = {
     },
     stabilitytestnet: {
       ...networkConfig,
-      url: "https://free.testnet.stabilityprotocol.com"
+      url: "https://free.testnet.stabilityprotocol.com",
     },
     /**
      * Polygon
@@ -123,6 +123,10 @@ const config: HardhatUserConfig = {
       url: "https://matic-mumbai.chainstacklabs.com",
       // Uncomment line below if using Infura
       // url: `https://polygon-mumbai.infura.io/v3/${INFURA_APP_ID}`,
+    },
+    amoy: {
+      ...networkConfig,
+      url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
     },
     /**
      * Development
