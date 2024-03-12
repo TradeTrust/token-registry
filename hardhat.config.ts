@@ -12,8 +12,15 @@ import "./tasks";
 
 dotenv.config();
 
-const { INFURA_APP_ID, MNEMONIC, DEPLOYER_PK, COINMARKETCAP_API_KEY, ETHERSCAN_API_KEY, POLYGONSCAN_API_KEY } =
-  process.env;
+const {
+  INFURA_APP_ID,
+  MNEMONIC,
+  DEPLOYER_PK,
+  COINMARKETCAP_API_KEY,
+  ETHERSCAN_API_KEY,
+  POLYGONSCAN_API_KEY,
+  STABILITY_API_KEY,
+} = process.env;
 const IS_CI_ENV = process.env.NODE_ENV === "ci";
 
 if (!IS_CI_ENV && !INFURA_APP_ID) {
@@ -108,6 +115,11 @@ const config: HardhatUserConfig = {
     stabilitytestnet: {
       ...networkConfig,
       url: "https://free.testnet.stabilityprotocol.com",
+    },
+    stability: {
+      ...networkConfig,
+      // To get a API key, visit https://portal.stabilityprotocol.com
+      url: `https://gtn.stabilityprotocol.com/?api_key=${STABILITY_API_KEY}`,
     },
     /**
      * Polygon

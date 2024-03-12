@@ -32,6 +32,7 @@ export const contractAddress = {
     [ChainId.Polygon]: "0x92470d0Fc33Cbf2f04B39696733806a15eD7eef3",
     [ChainId.PolygonMumbai]: "0x9eBC30E7506E6Ce36eAc5507FCF0121BaF7AeA57",
     [ChainId.StabilityTestnet]: "0xc9A4F6b4f7afAeC816f2CFB715bB92384Fa46BCa",
+    [ChainId.Stability]: "0x163A63415d1bf6DeE66B0624e2313fB9127a599b",
   },
   TokenImplementation: {
     [ChainId.Ethereum]: "0xd3F09dD800525Ecf7e452C3c167C7c716632d016",
@@ -40,5 +41,6 @@ export const contractAddress = {
     [ChainId.PolygonMumbai]: "0x83A533397eFE1d90baA26dEc7743626d7598656F",
     [ChainId.PolygonAmoy]: "0xbA351CF5EC041EF661699ab5cfF605850b6Dcd91",
     [ChainId.StabilityTestnet]: "0x6cDc8cD1d9c3f28DC59F5021401687E98bd18740",
+    [ChainId.Stability]: "0xc9A4F6b4f7afAeC816f2CFB715bB92384Fa46BCa",
   },
 };

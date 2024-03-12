@@ -367,6 +367,7 @@ Here's a list of network names currently pre-configured:
 - `hederamainet` (Hedera Network Mainnet)
 - `hederatestnet` (Hedera Network TestNet)
 - `stabilitytestnet` (Stability TestNet)
+- `stability` (Stability Global Trust Network)
 
 > 💡 You can configure existing and add other networks you wish to deploy to in the `hardhat.config.ts` file.
 
@@ -383,6 +384,7 @@ INFURA_APP_ID=
 ETHERSCAN_API_KEY=
 POLYGONSCAN_API_KEY=
 COINMARKETCAP_API_KEY=
+STABILITY_API_KEY=
 
 # Deployer Private Key
 DEPLOYER_PK=
