@@ -119,7 +119,7 @@ const config: HardhatUserConfig = {
     stability: {
       ...networkConfig,
       // To get a API key, visit https://portal.stabilityprotocol.com
-      url: `https://gtn.stabilityprotocol.com/?api_key=${STABILITY_API_KEY}`,
+      url: `https://gtn.stabilityprotocol.com/zgt/${STABILITY_API_KEY}`,
     },
     /**
      * Polygon
