@@ -6,7 +6,7 @@ import { TASK_DEPLOY_TOKEN_IMPL } from "./task-names";
 task(TASK_DEPLOY_TOKEN_IMPL)
   .setDescription("Deploys the token implementation contract")
   .addFlag("verify", "Verify on Etherscan")
-  .setAction(async ({ verify }, hre) => {
+  .setAction(async ({ verify, network }, hre) => {
     const { ethers } = hre;
     try {
       const [deployer] = await ethers.getSigners();
@@ -15,7 +15,7 @@ task(TASK_DEPLOY_TOKEN_IMPL)
       console.log(`[Deployer] ${deployerAddress}`);
 
       const registryImplContract = await deployContract<TradeTrustTokenStandard>({
-        params: [],
+        params: network === ("stability" || "stabilitytestnet") ? [{ maxFeePerGas: 0 }] : [],
         contractName: "TradeTrustTokenStandard",
         hre,
       });

@@ -6,7 +6,7 @@ import { TASK_DEPLOY_ESCROW_FACTORY } from "./task-names";
 task(TASK_DEPLOY_ESCROW_FACTORY)
   .setDescription("Deploys a new Title Escrow factory")
   .addFlag("verify", "Verify on Etherscan")
-  .setAction(async ({ verify }, hre) => {
+  .setAction(async ({ verify, network }, hre) => {
     const { ethers } = hre;
     try {
       const [deployer] = await ethers.getSigners();
@@ -15,7 +15,7 @@ task(TASK_DEPLOY_ESCROW_FACTORY)
       console.log(`[Deployer] ${deployerAddress}`);
 
       const titleEscrowFactoryContract = await deployContract<TitleEscrowFactory>({
-        params: [],
+        params: network === ("stability" || "stabilitytestnet") ? [{ maxFeePerGas: 0 }] : [],
         contractName: "TitleEscrowFactory",
         hre,
       });
