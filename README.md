@@ -264,7 +264,7 @@ Starting from v4, we have included an easy and cost-effective way to deploy the 
 For users who want to quickly deploy their contracts without too much hassle, you’ll only have to supply the name and symbol of your token to the command, and you’re ready to roll!
 
 ```
-npx hardhat deploy:token --network stabilitytestnet --name "The Great Shipping Co." --symbol GSC
+npx hardhat deploy:token --network stability --name "The Great Shipping Co." --symbol GSC
 ```
 
 👆 This is the easiest and most cost-effective method to deploy. Currently, this is supported on Ethereum, Sepolia, Polygon, Stability and Stability Testnet. The deployed contract will inherit all the standard functionality from our on-chain contracts. This helps to save deployment costs and make the process more convenient for users and integrators.
