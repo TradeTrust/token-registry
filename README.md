@@ -340,10 +340,10 @@ deploy:factory: Deploys a new Title Escrow factory
 If you want to deploy your own modified version or simply want to have your own copy of the Title Escrow factory, you can use this command:
 
 ```
-npx hardhat deploy:factory --network rinkeby
+npx hardhat deploy:factory --network amoy
 ```
 
-👆 This will deploy a new Title Escrow factory on the _Rinkeby_ network without verifying the contract.
+👆 This will deploy a new Title Escrow factory on the _Amoyy_ network without verifying the contract.
 To verify the contract, pass in the `--verify` flag.
 
 ## Verification
