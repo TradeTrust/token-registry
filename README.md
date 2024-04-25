@@ -264,10 +264,10 @@ Starting from v4, we have included an easy and cost-effective way to deploy the 
 For users who want to quickly deploy their contracts without too much hassle, you’ll only have to supply the name and symbol of your token to the command, and you’re ready to roll!
 
 ```
-npx hardhat deploy:token --network mumbai --name "The Great Shipping Co." --symbol GSC
+npx hardhat deploy:token --network stability --name "The Great Shipping Co." --symbol GSC
 ```
 
-👆 This is the easiest and most cost-effective method to deploy. Currently, this is supported on Ethereum, Sepolia, Polygon and Polygon Mumbai. The deployed contract will inherit all the standard functionality from our on-chain contracts. This helps to save deployment costs and make the process more convenient for users and integrators.
+👆 This is the easiest and most cost-effective method to deploy. Currently, this is supported on Ethereum, Sepolia, Polygon, Stability and Stability Testnet. The deployed contract will inherit all the standard functionality from our on-chain contracts. This helps to save deployment costs and make the process more convenient for users and integrators.
 
 > 💡 Remember to supply the`--network` argument with the name of the network you wish to deploy on.
 > See [Network Configuration](#network-configuration) section for more info on the list of network names.
@@ -304,10 +304,10 @@ deploy:token: Deploys the TradeTrust token
 If you would like to deploy your own modified version of the token contract or simply just deploy your own copy of the contract, you can use the `--standalone` flag.
 
 ```
-npx hardhat deploy:token --network mumbai --name "The Great Shipping Co." --symbol GSC --verify --standalone
+npx hardhat deploy:token --network polygon --name "The Great Shipping Co." --symbol GSC --verify --standalone
 ```
 
-👆 This will deploy a _full token contract_ with the name _The Great Shipping Co._ under the symbol _GSC_ on the Polygon _mumbai_
+👆 This will deploy a _full token contract_ with the name _The Great Shipping Co._ under the symbol _GSC_ on the Polygon
 network using the default Title Escrow factory. The contract will also be _verified_ on Etherscan.
 
 #### Using an existing Title Escrow Factory
@@ -340,10 +340,10 @@ deploy:factory: Deploys a new Title Escrow factory
 If you want to deploy your own modified version or simply want to have your own copy of the Title Escrow factory, you can use this command:
 
 ```
-npx hardhat deploy:factory --network rinkeby
+npx hardhat deploy:factory --network amoy
 ```
 
-👆 This will deploy a new Title Escrow factory on the _Rinkeby_ network without verifying the contract.
+👆 This will deploy a new Title Escrow factory on the _Amoyy_ network without verifying the contract.
 To verify the contract, pass in the `--verify` flag.
 
 ## Verification
@@ -361,7 +361,7 @@ Here's a list of network names currently pre-configured:
 - `mainnet` (Ethereum)
 - `sepolia`
 - `polygon` (Polygon Mainnet)
-- `mumbai` (Polygon Mumbai)
+- `amoy` (Polygon Amoy)
 - `xdc` (XDC Network Mainnet)
 - `xdcapothem` (XDC Apothem TestNet)
 - `hederamainet` (Hedera Network Mainnet)
