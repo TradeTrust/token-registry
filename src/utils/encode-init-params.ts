@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-interface Params {
+export interface Params {
   name: string;
   symbol: string;
   deployer: string;
