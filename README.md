@@ -299,17 +299,6 @@ deploy:token: Deploys the TradeTrust token
 > 💡 Tip: Note that the `--factory` argument is optional. When not provided, the task will use the default Title Escrow Factory.
 > You can also reuse a Title Escrow factory that you have previously deployed by passing its address to the `--factory` argument.
 
-#### Stand-alone Contract
-
-If you would like to deploy your own modified version of the token contract or simply just deploy your own copy of the contract, you can use the `--standalone` flag.
-
-```
-npx hardhat deploy:token --network polygon --name "The Great Shipping Co." --symbol GSC --verify --standalone
-```
-
-👆 This will deploy a _full token contract_ with the name _The Great Shipping Co._ under the symbol _GSC_ on the Polygon
-network using the default Title Escrow factory. The contract will also be _verified_ on Etherscan.
-
 #### Using an existing Title Escrow Factory
 
 To use an existing or your own version of Title Escrow factory, you can supply its address to the `—factory` argument. This option only works with the `--standalone` flag.
