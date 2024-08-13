@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "../TradeTrustToken.sol";
 
 contract TradeTrustTokenMock is TradeTrustToken {
+  // mapping(uint256 => address) private _owners; // Declare the _owners mapping
+
   constructor(
     string memory name,
     string memory symbol,
