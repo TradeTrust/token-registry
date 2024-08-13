@@ -395,6 +395,7 @@ describe("Title Escrow", async () => {
         //   [mockTitleEscrowContract] = await loadFixture(deployMockFixtureRunner);
         // });
         beforeEach(async () => {
+          fakeAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
           const deployMockFixtureRunner = async (): Promise<[TitleEscrowMock, TradeTrustTokenMock]> => {
             // Deploying the title escrow factory contract mock to return the title escrow mock correctly
             const titleEscrowFactoryGetterMock = (await (
