@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
-import { expect } from ".";
 import { SimpleCaller, TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
+import { expect } from ".";
 import faker from "faker";
 import { deployTokenFixture } from "./fixtures";
 import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
