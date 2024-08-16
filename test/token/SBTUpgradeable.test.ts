@@ -124,31 +124,11 @@ describe("SBTUpgradeable", async () => {
         await expect(mockSbtContract.safeMintWithDataInternal(erc721ReceiverContract.address, tokenId, data))
           .to.emit(erc721ReceiverContract, "TokenReceived")
           .withArgs(users.beneficiary.address, users.holder.address, true, mockSbtContract.address, tokenId);
-
-        // The following code (commented out) checks if the onERC721Received function was called with specific arguments.
-        // expect(erc721ReceiverContract.onERC721Received).to.have.been.calledWith(
-        //   deployer.address,
-        //   ethers.constants.AddressZero,
-        //   tokenId,
-        //   "0x1234"
-        // );
       });
 
       it("should call onERC721Received without data", async () => {
-        // The following code (commented out) was meant to test the minting process without additional data.
-        // It checks if onERC721Received was called with the expected arguments.
-        // await mockSbtContract.safeMintInternal(erc721ReceiverContract.address, tokenId);
-
         // The expectation here is that calling safeMintInternal without data should revert.
         await expect(mockSbtContract.safeMintInternal(erc721ReceiverContract.address, tokenId)).to.be.reverted;
-
-        // The following code (commented out) checks if the onERC721Received function was called with specific arguments. This test won't work with our solidity mock contracts.
-        // expect(erc721ReceiverContract.onERC721Received).to.have.been.calledWith(
-        //   deployer.address,
-        //   ethers.constants.AddressZero,
-        //   tokenId,
-        //   "0x"
-        // );
       });
 
       it("should revert with standard reason when onERC721Received reverts without reason", async () => {
@@ -322,7 +302,6 @@ describe("SBTUpgradeable", async () => {
       });
 
       it("should revert when transferring to a non ERC721Receiver implementer", async () => {
-        // erc721ReceiverContract.onERC721Received.returns("0x1234");
         const fakeAddress = ethers.Wallet.createRandom().address;
         // Define fake bytecode (e.g., simple contract that returns true on `isContract` call)
         const fakeCode = "0x60006000"; // Minimal example, real contract code would be more complex

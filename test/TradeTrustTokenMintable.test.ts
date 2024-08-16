@@ -33,9 +33,6 @@ describe("TradeTrustTokenMintable", async () => {
     registrySymbol = "GSC";
 
     deployMockTitleEscrowAndTokenFixtureRunner = async () => {
-      // const mockTitleEscrowFactoryContractFixture = (await (
-      //   await smock.mock("TitleEscrowFactory", users.carrier)
-      // ).deploy()) as unknown as MockContract<TitleEscrowFactory>;
       const mockTitleEscrowFactoryContractFixture = (await (
         await ethers.getContractFactory("TitleEscrowFactory")
       ).deploy()) as TitleEscrowFactory;

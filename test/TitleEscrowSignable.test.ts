@@ -49,16 +49,6 @@ describe("TitleEscrowSignable", async () => {
 
       return [titleEscrowWithProxy];
     };
-
-    //   deployTokenFixtureRunner = async () =>
-    //     createDeployFixtureRunner(
-    //       ...(await deployTokenFixture<TradeTrustTokenMock>({
-    //         tokenContractName: "TradeTrustTokenMock",
-    //         tokenName: registryName,
-    //         tokenInitials: registrySymbol,
-    //         deployer: users.carrier,
-    //       }))
-    //     );
   });
 
   beforeEach(async () => {
@@ -170,11 +160,6 @@ describe("TitleEscrowSignable", async () => {
 
       await titleEscrowContract.initialize(fakeRegistryContract.address, fakeTokenId);
 
-      // await users.carrier.sendTransaction({
-      //   to: fakeRegistryContract.address,
-      //   value: ethers.utils.parseEther("0.1"),
-      // });
-
       const data = new ethers.utils.AbiCoder().encode(
         ["address", "address"],
         [users.beneficiary.address, users.holder.address]
@@ -222,9 +207,6 @@ describe("TitleEscrowSignable", async () => {
 
       describe("When title escrow is inactive", () => {
         beforeEach(async () => {
-          // fakeRegistryContract.ownerOf.returns(faker.finance.ethereumAddress());
-          // await titleEscrowContract.connect(fakeRegistryContract.wallet as Signer).shred();
-
           await titleEscrowContract.connect(users.holder).transferHolder(users.beneficiary.address);
           await titleEscrowContract.connect(users.beneficiary).surrender();
           await titleEscrowContract.connect(registrySigner as Signer).shred();
@@ -245,11 +227,8 @@ describe("TitleEscrowSignable", async () => {
 
       describe("When title escrow is not holding token", () => {
         beforeEach(async () => {
-          // fakeRegistryContract.ownerOf.returns(faker.finance.ethereumAddress());
-
           await titleEscrowContract.connect(users.holder).transferHolder(users.beneficiary.address);
           await titleEscrowContract.connect(users.beneficiary).surrender();
-          // // await titleEscrowContract.connect(registrySigner as Signer).shred();
         });
 
         it("should revert when calling: transferBeneficiaryWithSig", async () => {

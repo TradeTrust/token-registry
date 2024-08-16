@@ -26,10 +26,6 @@ import {
   impersonateAccount,
   TestUsers,
 } from "./helpers";
-// import createFakeRegistry from "../src/utils/fakes/fakeRegistry";
-// import { Provider } from "@ethersproject/abstract-provider";
-// import TradeTrustAbi from "../artifacts/contracts/TradeTrustToken.sol/TradeTrustToken.json";
-// import FakeRegistry from "./../contracts/fakes/fakeRegistry";
 
 describe("Title Escrow", async () => {
   let users: TestUsers;
@@ -143,9 +139,6 @@ describe("Title Escrow", async () => {
       let fakeRegistry: any;
 
       beforeEach(async () => {
-        // fakeRegistry = (await smock.fake("TradeTrustToken")) as FakeContract<TradeTrustToken>;
-        // fakeAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
-
         // using registry contract as fake registry, no special set state is needed for these tests
         fakeRegistry = registryContract;
         (fakeRegistry as any).wallet = await impersonateAccount({
@@ -184,11 +177,6 @@ describe("Title Escrow", async () => {
             ["address", "address"],
             [users.beneficiary.address, users.holder.address]
           );
-
-          //   await users.carrier.sendTransaction({
-          //     to: fakeRegistry.address,
-          //     value: ethers.utils.parseEther("0.1"),
-          //   });
         });
 
         describe("Minting Token Receive", () => {

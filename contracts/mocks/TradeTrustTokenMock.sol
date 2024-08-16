@@ -4,8 +4,6 @@ pragma solidity ^0.8.0;
 import "../TradeTrustToken.sol";
 
 contract TradeTrustTokenMock is TradeTrustToken {
-  // mapping(uint256 => address) private _owners; // Declare the _owners mapping
-
   constructor(
     string memory name,
     string memory symbol,
@@ -14,7 +12,7 @@ contract TradeTrustTokenMock is TradeTrustToken {
 
   function mintInternal(address to, uint256 tokenId) public virtual onlyRole(MINTER_ROLE) returns (bool) {
     _safeMint(to, tokenId);
-    return true; 
+    return true;
   }
 
   function burnInternal(uint256 tokenId) public virtual {
