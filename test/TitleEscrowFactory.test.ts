@@ -1,13 +1,13 @@
-import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import faker from "faker";
-import { ContractTransaction } from "ethers";
 import { TitleEscrow, TitleEscrowFactory, TitleEscrowFactoryCallerMock } from "@tradetrust/contracts";
 import { TitleEscrowCreatedEvent } from "@tradetrust/contracts/contracts/TitleEscrowFactory";
+import { ContractTransaction } from "ethers";
+import faker from "faker";
+import { ethers } from "hardhat";
 import { expect } from ".";
-import { deployEscrowFactoryFixture } from "./fixtures";
-import { computeTitleEscrowAddress, getEventFromReceipt } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
+import { computeTitleEscrowAddress, getEventFromReceipt } from "../src/utils";
+import { deployEscrowFactoryFixture } from "./fixtures";
 import { createDeployFixtureRunner, getTestUsers, TestUsers } from "./helpers";
 
 describe("TitleEscrowFactory", async () => {

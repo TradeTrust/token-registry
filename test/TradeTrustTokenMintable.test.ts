@@ -1,12 +1,12 @@
-import { ethers } from "hardhat";
 import { SimpleCaller, TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
-import faker from "faker";
-import { deployTokenFixture } from "./fixtures";
-import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
-import { computeTitleEscrowAddress } from "../src/utils";
-import { contractInterfaceId, defaultAddress } from "../src/constants";
 import { LogDescription } from "ethers/lib/utils";
+import faker from "faker";
+import { ethers } from "hardhat";
 import { expect } from ".";
+import { contractInterfaceId, defaultAddress } from "../src/constants";
+import { computeTitleEscrowAddress } from "../src/utils";
+import { deployTokenFixture } from "./fixtures";
+import { getTestUsers, getTitleEscrowContract, TestUsers } from "./helpers";
 
 describe("TradeTrustTokenMintable", async () => {
   let users: TestUsers;
