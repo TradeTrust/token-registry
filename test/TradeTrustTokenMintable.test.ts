@@ -6,6 +6,7 @@ import { deployTokenFixture } from "./fixtures";
 import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
+import { LogDescription } from "ethers/lib/utils";
 
 describe("TradeTrustTokenMintable", async () => {
   let users: TestUsers;
@@ -120,20 +121,22 @@ describe("TradeTrustTokenMintable", async () => {
 
       const receipt = await tx.wait();
       const { logs } = receipt;
-      let escrowEvent = null;
-      for (const log of logs) {
+
+      let escrowEventName: string = "";
+      logs.some((log) => {
         try {
-          const decoded = mockTitleEscrowFactoryContract.interface.parseLog(log);
+          const decoded: LogDescription = mockTitleEscrowFactoryContract.interface.parseLog(log);
           if (decoded.name === "TitleEscrowCreated") {
-            escrowEvent = decoded;
-            break;
+            escrowEventName = decoded.name;
+            return true;
           }
         } catch (e) {
-          break;
+          return true;
         }
-      }
+        return false;
+      });
 
-      expect(escrowEvent?.name).to.equal("TitleEscrowCreated");
+      expect(escrowEventName).to.equal("TitleEscrowCreated");
       expect(logs?.length).to.equal(1);
     });
 
