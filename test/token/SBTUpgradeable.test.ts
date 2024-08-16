@@ -113,16 +113,12 @@ describe("SBTUpgradeable", async () => {
     });
 
     describe("_safeMint", () => {
-      let _beneficiary: string;
-      let _holder: string;
-      beforeEach(async () => {
-        _beneficiary = users.beneficiary.address;
-        _holder = users.holder.address;
-      });
-
       it("should call onERC721Received with data", async () => {
         // Prepare the data to be passed along with the minting.
-        const data = new ethers.utils.AbiCoder().encode(["address", "address"], [_beneficiary, _holder]);
+        const data = new ethers.utils.AbiCoder().encode(
+          ["address", "address"],
+          [users.beneficiary.address, users.holder.address]
+        );
 
         // Expect the safeMintWithDataInternal function to emit a TokenReceived event with the specified arguments.
         await expect(mockSbtContract.safeMintWithDataInternal(erc721ReceiverContract.address, tokenId, data))

@@ -146,7 +146,7 @@ describe("Title Escrow", async () => {
         // fakeRegistry = (await smock.fake("TradeTrustToken")) as FakeContract<TradeTrustToken>;
         // fakeAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
 
-        //using registry contract as fake registry, no special set state is needed for these tests
+        // using registry contract as fake registry, no special set state is needed for these tests
         fakeRegistry = registryContract;
         (fakeRegistry as any).wallet = await impersonateAccount({
           address: fakeRegistry.address,
@@ -385,9 +385,9 @@ describe("Title Escrow", async () => {
             });
 
             // Deploy the Title Escrow mock contract and initialize it with the required parameters
-            const mockTitleEscrowContract = await deployTitleEscrowMockFixture({ deployer: users.carrier });
+            mockTitleEscrowContract = await deployTitleEscrowMockFixture({ deployer: users.carrier });
 
-            //setting the title escrow  address in the escrow factory so that it can return the correct title escrow when called by registry
+            // setting the title escrow  address in the escrow factory so that it can return the correct title escrow when called by registry
             await titleEscrowFactoryGetterMock.setAddress(mockTitleEscrowContract.address);
 
             await mockTitleEscrowContract.initializeMock(
@@ -397,8 +397,8 @@ describe("Title Escrow", async () => {
               fakeAddress,
               fakeAddress
             );
-            //minting the token directly to the title escrow contract to set the correct ownerof function
-            //this mintinter is a mock function which dosen't deploys the escrow contract
+            // minting the token directly to the title escrow contract to set the correct ownerof function
+            // this mintinter is a mock function which dosen't deploys the escrow contract
             await registryContractMock.mintInternal(mockTitleEscrowContract.address, tokenId);
             // achieving active status as
             await mockTitleEscrowContract.setActive(false);
