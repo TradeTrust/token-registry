@@ -7,6 +7,7 @@ import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 import { LogDescription } from "ethers/lib/utils";
+import { expect } from ".";
 
 describe("TradeTrustTokenMintable", async () => {
   let users: TestUsers;
