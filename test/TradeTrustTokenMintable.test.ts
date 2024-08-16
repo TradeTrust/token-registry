@@ -1,11 +1,11 @@
-import { TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
+import { SimpleCaller, TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
-import { MockContract, smock } from "@defi-wonderland/smock";
 import { expect } from ".";
 import { deployTokenFixture } from "./fixtures";
 import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
+import { ethers } from "hardhat";
 
 describe("TradeTrustTokenMintable", async () => {
   let users: TestUsers;
@@ -16,13 +16,13 @@ describe("TradeTrustTokenMintable", async () => {
 
   let registryContractAsAdmin: TradeTrustToken;
 
-  let mockTitleEscrowFactoryContract: MockContract<TitleEscrowFactory>;
+  let mockTitleEscrowFactoryContract: TitleEscrowFactory;
 
   let tokenId: string;
   let titleEscrowImplAddr: string;
   let titleEscrowContract: TitleEscrow;
 
-  let deployMockTitleEscrowAndTokenFixtureRunner: () => Promise<[MockContract<TitleEscrowFactory>, TradeTrustToken]>;
+  let deployMockTitleEscrowAndTokenFixtureRunner: () => Promise<[TitleEscrowFactory, TradeTrustToken]>;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -32,9 +32,12 @@ describe("TradeTrustTokenMintable", async () => {
     registrySymbol = "GSC";
 
     deployMockTitleEscrowAndTokenFixtureRunner = async () => {
+      // const mockTitleEscrowFactoryContractFixture = (await (
+      //   await smock.mock("TitleEscrowFactory", users.carrier)
+      // ).deploy()) as unknown as MockContract<TitleEscrowFactory>;
       const mockTitleEscrowFactoryContractFixture = (await (
-        await smock.mock("TitleEscrowFactory", users.carrier)
-      ).deploy()) as unknown as MockContract<TitleEscrowFactory>;
+        await ethers.getContractFactory("TitleEscrowFactory")
+      ).deploy()) as TitleEscrowFactory;
 
       const [, registryContractFixture] = await deployTokenFixture<TradeTrustToken>({
         tokenContractName: "TradeTrustToken",
@@ -110,11 +113,38 @@ describe("TradeTrustTokenMintable", async () => {
     });
 
     it("should create title escrow from factory", async () => {
-      expect(mockTitleEscrowFactoryContract.create).to.have.been.calledOnce;
+      const simpleCallerMock = (await (await ethers.getContractFactory("SimpleCaller")).deploy()) as SimpleCaller;
+
+      const data = mockTitleEscrowFactoryContract.interface.encodeFunctionData("create", [tokenId]);
+      const tx = await simpleCallerMock.callFunction(mockTitleEscrowFactoryContract.address, data);
+
+      const receipt = await tx.wait();
+      const logs = receipt.logs;
+      let escrowEvent = null;
+      for (const log of logs) {
+        try {
+          const decoded = mockTitleEscrowFactoryContract.interface.parseLog(log);
+          if (decoded.name === "TitleEscrowCreated") {
+            escrowEvent = decoded;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      expect(escrowEvent?.name).to.equal("TitleEscrowCreated");
+      expect(logs?.length).to.equal(1);
     });
 
     it("should create title escrow with correct token ID", async () => {
-      expect(mockTitleEscrowFactoryContract.create).to.have.been.calledOnceWith(tokenId);
+      const simpleCallerMock = (await (await ethers.getContractFactory("SimpleCaller")).deploy()) as SimpleCaller;
+      const data = mockTitleEscrowFactoryContract.interface.encodeFunctionData("create", [tokenId]);
+      const tx = await simpleCallerMock.callFunction(mockTitleEscrowFactoryContract.address, data);
+      const receipt = await tx.wait();
+      const decoded = mockTitleEscrowFactoryContract.interface.parseLog(receipt.logs[0]);
+
+      expect(decoded.args.tokenId.toHexString()).to.equal(tokenId.toLowerCase());
     });
 
     it("should emit Transfer event with correct values", async () => {
