@@ -1,11 +1,11 @@
+import { ethers } from "hardhat";
+import { expect } from ".";
 import { SimpleCaller, TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
-import { expect } from ".";
 import { deployTokenFixture } from "./fixtures";
 import { getTitleEscrowContract, getTestUsers, TestUsers } from "./helpers";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
-import { ethers } from "hardhat";
 
 describe("TradeTrustTokenMintable", async () => {
   let users: TestUsers;
@@ -119,7 +119,7 @@ describe("TradeTrustTokenMintable", async () => {
       const tx = await simpleCallerMock.callFunction(mockTitleEscrowFactoryContract.address, data);
 
       const receipt = await tx.wait();
-      const logs = receipt.logs;
+      const { logs } = receipt;
       let escrowEvent = null;
       for (const log of logs) {
         try {
@@ -129,7 +129,7 @@ describe("TradeTrustTokenMintable", async () => {
             break;
           }
         } catch (e) {
-          continue;
+          break;
         }
       }
 
