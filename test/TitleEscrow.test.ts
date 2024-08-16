@@ -141,19 +141,6 @@ describe("Title Escrow", async () => {
     describe("IERC721Receiver Behaviour", () => {
       let fakeAddress: string;
       let fakeRegistry: any;
-      // let deployTokenFixtureRunner: DeployTokenFixtureRunner;
-
-      // before(async () => {
-      //   deployTokenFixtureRunner = async () =>
-      //     createDeployFixtureRunner(
-      //       ...(await deployTokenFixture<TradeTrustToken>({
-      //         tokenContractName: "TradeTrustToken",
-      //         tokenName: "The Great Shipping Company",
-      //         tokenInitials: "GSC",
-      //         deployer: users.carrier,
-      //       }))
-      //     );
-      // });
 
       beforeEach(async () => {
         // fakeRegistry = (await smock.fake("TradeTrustToken")) as FakeContract<TradeTrustToken>;
@@ -380,20 +367,6 @@ describe("Title Escrow", async () => {
       describe("When title escrow is not active", () => {
         let fakeAddress: string;
         let mockTitleEscrowContract: TitleEscrowMock;
-
-        // beforeEach(async () => {
-        //   fakeAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
-        //   fakeRegistry = (await smock.fake("TradeTrustToken")) as FakeContract<TradeTrustToken>;
-        //   mockTitleEscrowContract = (await (
-        //     await smock.mock("TitleEscrow")
-        //   ).deploy()) as unknown as MockContract<TitleEscrow>;
-        //   await mockTitleEscrowContract.setVariable("_initialized", false);
-
-        //     return [mockTitleEscrowContract as TitleEscrowMock, registryContractMock as TradeTrustTokenMock];
-        //   };
-
-        //   [mockTitleEscrowContract] = await loadFixture(deployMockFixtureRunner);
-        // });
         beforeEach(async () => {
           fakeAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
           const deployMockFixtureRunner = async (): Promise<[TitleEscrowMock, TradeTrustTokenMock]> => {

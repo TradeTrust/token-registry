@@ -14,7 +14,7 @@ contract TradeTrustTokenMock is TradeTrustToken {
 
   function mintInternal(address to, uint256 tokenId) public virtual onlyRole(MINTER_ROLE) returns (bool) {
     _safeMint(to, tokenId);
-    return true;
+    return true; 
   }
 
   function burnInternal(uint256 tokenId) public virtual {
