@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { ethers } from "hardhat";
 import { TDocDeployer } from "@tradetrust/contracts";
+import { ethers } from "hardhat";
 import ERC1967Proxy from "./artifacts/ERC1967Proxy.json";
 
 export const deployTDocDeployerFixture = async ({ deployer }: { deployer: SignerWithAddress }) => {
