@@ -1,5 +1,5 @@
-import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   TitleEscrow,
   TitleEscrowFactoryGetterMock,
@@ -7,25 +7,25 @@ import {
   TradeTrustToken,
   TradeTrustTokenMock,
 } from "@tradetrust/contracts";
-import faker from "faker";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { Signer } from "ethers";
+import faker from "faker";
+import { ethers } from "hardhat";
 import { expect } from ".";
+import { contractInterfaceId, defaultAddress } from "../src/constants";
 import {
-  deployTokenFixture,
   deployTitleEscrowFixture,
-  DeployTokenFixtureRunner,
   deployTitleEscrowMockFixture,
+  deployTokenFixture,
+  DeployTokenFixtureRunner,
 } from "./fixtures";
+import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
 import {
+  createDeployFixtureRunner,
+  getTestUsers,
   getTitleEscrowContract,
   impersonateAccount,
-  getTestUsers,
   TestUsers,
-  createDeployFixtureRunner,
 } from "./helpers";
-import { contractInterfaceId, defaultAddress } from "../src/constants";
-import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
 // import createFakeRegistry from "../src/utils/fakes/fakeRegistry";
 // import { Provider } from "@ethersproject/abstract-provider";
 // import TradeTrustAbi from "../artifacts/contracts/TradeTrustToken.sol/TradeTrustToken.json";

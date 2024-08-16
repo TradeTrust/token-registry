@@ -1,11 +1,11 @@
 /* eslint-disable no-underscore-dangle */
-import { ethers } from "hardhat";
-import faker from "faker";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { SigHelperMock } from "@tradetrust/contracts";
 import { Signature } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { expect, assert } from ".";
+import faker from "faker";
+import { ethers } from "hardhat";
+import { assert, expect } from ".";
 import { createDeployFixtureRunner, getTestUsers, TestUsers } from "./helpers";
 
 describe("SigHelper", async () => {

@@ -2,9 +2,9 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
 import { expect } from ".";
-import { getTestUsers, TestUsers, createDeployFixtureRunner, toAccessControlRevertMessage } from "./helpers";
-import { deployTokenFixture, DeployTokenFixtureRunner } from "./fixtures";
 import { roleHash } from "../src/constants";
+import { deployTokenFixture, DeployTokenFixtureRunner } from "./fixtures";
+import { createDeployFixtureRunner, getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
 
 describe("TradeTrustTokenBaseURI", async () => {
   let users: TestUsers;

@@ -1,15 +1,15 @@
 /* eslint-disable no-underscore-dangle */
-import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import faker from "faker";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { TitleEscrowFactoryGetterMock, TitleEscrowSignable, TradeTrustTokenMock } from "@tradetrust/contracts";
 import { Signature, Signer } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { expect, assert } from ".";
-import { getTestUsers, impersonateAccount, TestUsers } from "./helpers";
-import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
+import faker from "faker";
+import { ethers } from "hardhat";
+import { assert, expect } from ".";
 import { contractInterfaceId } from "../src/constants";
 import { deployTokenFixture } from "./fixtures";
+import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
+import { getTestUsers, impersonateAccount, TestUsers } from "./helpers";
 
 type BeneficiaryTransferData = {
   beneficiary: string;
