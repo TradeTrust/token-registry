@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 contract SimpleCaller {
-  //   event SimpleCallerCalled(address target);
   /**
    * @dev Calls a function of another contract.
    * @param target The address of the target contract.
@@ -15,7 +14,6 @@ contract SimpleCaller {
     (bool success, bytes memory result) = target.call{ value: msg.value }(data);
 
     require(success, "Function call failed");
-    // emit SimpleCallerCalled(target);
     return result;
   }
 }

@@ -9,8 +9,7 @@ export const deployTokenFixture = async <T extends Contract | unknown>({
   tokenInitials,
   deployer,
   escrowFactoryAddress = undefined,
-}: // useMock = false,
-{
+}: {
   tokenContractName: string;
   tokenName: string;
   tokenInitials: string;
@@ -29,17 +28,9 @@ export const deployTokenFixture = async <T extends Contract | unknown>({
   }
 
   const tradeTrustTokenFactory = await ethers.getContractFactory(tokenContractName);
-  // const tradeTrustTokenContract: T;
-
-  // if (useMock) {
-  //   tradeTrustTokenContract = (await (
-  //     await smock.mock(tokenContractName, deployer)
-  //   ).deploy(tokenName, tokenInitials, escrowFactoryAddress)) as unknown as T;
-  // } else {
   const tradeTrustTokenContract: T = (await tradeTrustTokenFactory
     .connect(deployer)
     .deploy(tokenName, tokenInitials, escrowFactoryAddress)) as T;
-  // }
 
   return [titleEscrowFactoryContract, tradeTrustTokenContract];
 };
