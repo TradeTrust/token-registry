@@ -16,7 +16,11 @@ contract TradeTrustToken is TradeTrustTokenBase {
    * @param symbol The symbol of the token.
    * @param titleEscrowFactory_ The address of the TitleEscrowFactory contract.
    */
-  constructor(string memory name, string memory symbol, address titleEscrowFactory_) {
+  constructor(
+    string memory name,
+    string memory symbol,
+    address titleEscrowFactory_
+  ) {
     _genesis = block.number;
     _titleEscrowFactory = titleEscrowFactory_;
     initialize(name, symbol, _msgSender());
@@ -28,7 +32,11 @@ contract TradeTrustToken is TradeTrustTokenBase {
    * @param symbol The symbol of the token.
    * @param admin The address of the admin.
    */
-  function initialize(string memory name, string memory symbol, address admin) internal initializer {
+  function initialize(
+    string memory name,
+    string memory symbol,
+    address admin
+  ) internal initializer {
     __TradeTrustTokenBase_init(name, symbol, admin);
   }
 
