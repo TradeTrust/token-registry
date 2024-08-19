@@ -128,13 +128,12 @@ describe("TradeTrustTokenMintable", async () => {
             return true;
           }
         } catch (e) {
-          return true;
+          return false;
         }
         return false;
       });
-
-      expect(escrowEventName).to.equal("TitleEscrowCreated");
       expect(logs?.length).to.equal(1);
+      expect(escrowEventName).to.equal("TitleEscrowCreated");    
     });
 
     it("should create title escrow with correct token ID", async () => {
@@ -143,7 +142,7 @@ describe("TradeTrustTokenMintable", async () => {
       const tx = await simpleCallerMock.callFunction(mockTitleEscrowFactoryContract.address, data);
       const receipt = await tx.wait();
       const decoded = mockTitleEscrowFactoryContract.interface.parseLog(receipt.logs[0]);
-
+      expect(receipt.logs?.length).to.equal(1);
       expect(decoded.args.tokenId.toHexString()).to.equal(tokenId.toLowerCase());
     });
 
