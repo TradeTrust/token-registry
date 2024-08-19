@@ -120,7 +120,7 @@ contract SBTUpgradeable is
   /**
    * @dev See {IERC721-safeTransferFrom}.
    */
- function transferFrom(
+  function transferFrom(
     address from,
     address to,
     uint256 tokenId
@@ -147,7 +147,7 @@ contract SBTUpgradeable is
    *
    * Emits a {Transfer} event.
    */
- function _safeTransfer(
+  function _safeTransfer(
     address from,
     address to,
     uint256 tokenId,
