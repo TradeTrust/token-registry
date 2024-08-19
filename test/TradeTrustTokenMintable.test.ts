@@ -133,7 +133,7 @@ describe("TradeTrustTokenMintable", async () => {
         return false;
       });
       expect(logs?.length).to.equal(1);
-      expect(escrowEventName).to.equal("TitleEscrowCreated");    
+      expect(escrowEventName).to.equal("TitleEscrowCreated");
     });
 
     it("should create title escrow with correct token ID", async () => {
