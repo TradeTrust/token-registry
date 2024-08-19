@@ -46,5 +46,5 @@ abstract contract TradeTrustTokenMintable is TradeTrustSBT, RegistryAccess, ITra
     _safeMint(newTitleEscrow, tokenId, abi.encode(beneficiary, holder));
 
     return newTitleEscrow;
-  } 
+  }
 }
