@@ -1,13 +1,13 @@
-import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { TDocDeployer, TradeTrustTokenStandard } from "@tradetrust/contracts";
 import { DeploymentEvent } from "@tradetrust/contracts/contracts/utils/TDocDeployer";
-import faker from "faker";
 import { ContractTransaction } from "ethers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import faker from "faker";
+import { ethers } from "hardhat";
 import { expect } from ".";
+import { contractInterfaceId, defaultAddress } from "../src/constants";
 import { encodeInitParams, getEventFromReceipt } from "../src/utils";
-import { defaultAddress, contractInterfaceId } from "../src/constants";
 import { deployTDocDeployerFixture, deployTradeTrustTokenStandardFixture } from "./fixtures";
 import { createDeployFixtureRunner, getTestUsers, TestUsers } from "./helpers";
 

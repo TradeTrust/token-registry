@@ -5,3 +5,4 @@ export { deployTitleEscrowFixture } from "./deploy-title-escrow.fixture";
 export { deployTradeTrustTokenStandardFixture } from "./deploy-registry-impl.fixture";
 export { deployTDocDeployerFixture } from "./deploy-impl-deployer.fixture";
 export { DeployTokenFixtureRunner } from "./deploy-token-fixture-runner";
+export { deployTitleEscrowMockFixture } from "./deploy-title-escrow-mock.fixture";

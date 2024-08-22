@@ -1,10 +1,10 @@
-import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import faker from "faker";
 import { TitleEscrow, TradeTrustToken } from "@tradetrust/contracts";
-import { roleHash } from "../src/constants";
+import faker from "faker";
+import { ethers } from "hardhat";
 import { expect } from ".";
+import { roleHash } from "../src/constants";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
 import { getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
 
