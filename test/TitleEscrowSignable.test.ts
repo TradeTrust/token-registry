@@ -1,15 +1,15 @@
 /* eslint-disable no-underscore-dangle */
-import { ethers } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import faker from "faker";
-import { TitleEscrowSignable, TradeTrustToken } from "@tradetrust/contracts";
-import { Signature, Signer } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { FakeContract, smock } from "@defi-wonderland/smock";
-import { expect, assert } from ".";
-import { getTestUsers, TestUsers } from "./helpers";
-import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
+import { TitleEscrowFactoryGetterMock, TitleEscrowSignable, TradeTrustTokenMock } from "@tradetrust/contracts";
+import { Signature, Signer } from "ethers";
+import faker from "faker";
+import { ethers } from "hardhat";
+import { assert, expect } from ".";
 import { contractInterfaceId } from "../src/constants";
+import { deployTokenFixture } from "./fixtures";
+import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
+import { getTestUsers, impersonateAccount, TestUsers } from "./helpers";
 
 type BeneficiaryTransferData = {
   beneficiary: string;
@@ -31,6 +31,7 @@ describe("TitleEscrowSignable", async () => {
   let domain: Record<string, any>;
 
   let deployFixturesRunner: () => Promise<[TitleEscrowSignable]>;
+  // let deployTokenFixtureRunner: DeployTokenFixtureRunner;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -132,32 +133,42 @@ describe("TitleEscrowSignable", async () => {
   });
 
   describe("Operational Behaviours", () => {
-    let fakeRegistryContract: FakeContract<TradeTrustToken>;
+    let fakeRegistryContract: TradeTrustTokenMock;
     let fakeTokenId: string;
     let titleEscrowContractAsBeneficiary: TitleEscrowSignable;
+    let registrySigner: Signer;
 
     beforeEach(async () => {
-      fakeRegistryContract = (await smock.fake("TradeTrustToken")) as FakeContract<TradeTrustToken>;
+      // Deploying the title escrow factory contract mock to return the title escrow mock correctly
+      const titleEscrowFactoryGetterMock = (await (
+        await ethers.getContractFactory("TitleEscrowFactoryGetterMock")
+      ).deploy()) as TitleEscrowFactoryGetterMock;
+      await titleEscrowFactoryGetterMock.setAddress(titleEscrowContract.address);
+
+      const [, registryContract] = await deployTokenFixture<TradeTrustTokenMock>({
+        tokenContractName: "TradeTrustTokenMock",
+        tokenName: "The Great Shipping Company",
+        tokenInitials: "GSC",
+        deployer: users.carrier,
+        escrowFactoryAddress: titleEscrowFactoryGetterMock.address,
+      });
+      fakeRegistryContract = registryContract;
+      registrySigner = await impersonateAccount({ address: fakeRegistryContract.address });
 
       fakeTokenId = faker.datatype.hexaDecimal(64);
       titleEscrowContractAsBeneficiary = titleEscrowContract.connect(users.beneficiary);
 
       await titleEscrowContract.initialize(fakeRegistryContract.address, fakeTokenId);
 
-      await users.carrier.sendTransaction({
-        to: fakeRegistryContract.address,
-        value: ethers.utils.parseEther("0.1"),
-      });
-
       const data = new ethers.utils.AbiCoder().encode(
         ["address", "address"],
         [users.beneficiary.address, users.holder.address]
       );
       await titleEscrowContract
-        .connect(fakeRegistryContract.wallet as Signer)
+        .connect(registrySigner as Signer)
         .onERC721Received(ethers.constants.AddressZero, ethers.constants.AddressZero, fakeTokenId, data);
 
-      fakeRegistryContract.ownerOf.returns(titleEscrowContract.address);
+      await fakeRegistryContract.mintInternal(titleEscrowContract.address, fakeTokenId);
     });
 
     describe("Registry State Validations", () => {
@@ -167,7 +178,7 @@ describe("TitleEscrowSignable", async () => {
         nominee: faker.finance.ethereumAddress(),
         registry: faker.finance.ethereumAddress(),
         tokenId: faker.datatype.hexaDecimal(64),
-        deadline: faker.datatype.number(),
+        deadline: Math.ceil(new Date().getTime() / 1000) + 60, // created a deadline 1 minute ahead of current time
         nonce: 0,
       };
       const fakeSig = {
@@ -178,7 +189,7 @@ describe("TitleEscrowSignable", async () => {
 
       describe("When registry is paused", () => {
         beforeEach(async () => {
-          fakeRegistryContract.paused.returns(true);
+          await fakeRegistryContract.connect(users.carrier).pause();
         });
 
         it("should revert when calling: transferBeneficiaryWithSig", async () => {
@@ -196,8 +207,9 @@ describe("TitleEscrowSignable", async () => {
 
       describe("When title escrow is inactive", () => {
         beforeEach(async () => {
-          fakeRegistryContract.ownerOf.returns(faker.finance.ethereumAddress());
-          await titleEscrowContract.connect(fakeRegistryContract.wallet as Signer).shred();
+          await titleEscrowContract.connect(users.holder).transferHolder(users.beneficiary.address);
+          await titleEscrowContract.connect(users.beneficiary).surrender();
+          await titleEscrowContract.connect(registrySigner as Signer).shred();
         });
 
         it("should revert when calling: transferBeneficiaryWithSig", async () => {
@@ -215,7 +227,8 @@ describe("TitleEscrowSignable", async () => {
 
       describe("When title escrow is not holding token", () => {
         beforeEach(async () => {
-          fakeRegistryContract.ownerOf.returns(faker.finance.ethereumAddress());
+          await titleEscrowContract.connect(users.holder).transferHolder(users.beneficiary.address);
+          await titleEscrowContract.connect(users.beneficiary).surrender();
         });
 
         it("should revert when calling: transferBeneficiaryWithSig", async () => {

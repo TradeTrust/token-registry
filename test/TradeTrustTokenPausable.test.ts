@@ -1,7 +1,8 @@
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TitleEscrow, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
 import faker from "faker";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from ".";
+import { roleHash } from "../src/constants";
 import { deployTokenFixture, DeployTokenFixtureRunner, mintTokenFixture } from "./fixtures";
 import {
   createDeployFixtureRunner,
@@ -10,7 +11,6 @@ import {
   TestUsers,
   toAccessControlRevertMessage,
 } from "./helpers";
-import { roleHash } from "../src/constants";
 
 describe("TradeTrustToken Pausable Behaviour", async () => {
   let users: TestUsers;

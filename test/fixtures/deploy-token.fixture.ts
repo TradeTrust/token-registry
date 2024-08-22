@@ -2,7 +2,6 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import { Contract, Signer } from "ethers";
 import { TitleEscrowFactory } from "@tradetrust/contracts";
-import { smock } from "@defi-wonderland/smock";
 
 export const deployTokenFixture = async <T extends Contract | unknown>({
   tokenContractName,
@@ -10,7 +9,6 @@ export const deployTokenFixture = async <T extends Contract | unknown>({
   tokenInitials,
   deployer,
   escrowFactoryAddress = undefined,
-  useMock = false,
 }: {
   tokenContractName: string;
   tokenName: string;
@@ -30,17 +28,9 @@ export const deployTokenFixture = async <T extends Contract | unknown>({
   }
 
   const tradeTrustTokenFactory = await ethers.getContractFactory(tokenContractName);
-  let tradeTrustTokenContract: T;
-
-  if (useMock) {
-    tradeTrustTokenContract = (await (
-      await smock.mock(tokenContractName, deployer)
-    ).deploy(tokenName, tokenInitials, escrowFactoryAddress)) as unknown as T;
-  } else {
-    tradeTrustTokenContract = (await tradeTrustTokenFactory
-      .connect(deployer)
-      .deploy(tokenName, tokenInitials, escrowFactoryAddress)) as T;
-  }
+  const tradeTrustTokenContract: T = (await tradeTrustTokenFactory
+    .connect(deployer)
+    .deploy(tokenName, tokenInitials, escrowFactoryAddress)) as T;
 
   return [titleEscrowFactoryContract, tradeTrustTokenContract];
 };

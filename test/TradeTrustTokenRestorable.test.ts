@@ -2,10 +2,10 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
 import { expect } from ".";
-import { getTitleEscrowContract, getTestUsers, TestUsers, createDeployFixtureRunner } from "./helpers";
+import { contractInterfaceId } from "../src/constants";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { deployTokenFixture, DeployTokenFixtureRunner } from "./fixtures";
-import { contractInterfaceId } from "../src/constants";
+import { createDeployFixtureRunner, getTestUsers, getTitleEscrowContract, TestUsers } from "./helpers";
 
 describe("TradeTrustTokenRestorable", async () => {
   let users: TestUsers;
