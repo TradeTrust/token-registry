@@ -201,6 +201,16 @@ describe("End to end", async () => {
           tokenRegistry.connect(beneficiary).mint(beneficiary.address, holder.address, tokenId)
         ).to.be.revertedWith(toAccessControlRevertMessage(beneficiary.address, ethers.utils.id("MINTER_ROLE")));
       });
+      it("should revert when called by an address without the MINTER_ROLE", async function () {
+        const titleEscrow = (await ethers.getContractAt(
+          "TitleEscrow",
+          await escrowFactoryContract.getAddress(tokenRegistry.address, tokenId)
+        )) as TitleEscrow;
+        await expect(tokenRegistry.connect(accepter).burn(tokenId)).to.be.revertedWithCustomError(
+          titleEscrow,
+          "TokenNotSurrendered"
+        );
+      });
     });
   });
   describe("Title Escrow", async () => {
@@ -362,6 +372,38 @@ describe("End to end", async () => {
       });
       it("burn address should be new owner of token", async function () {
         expect(await tokenRegistry.ownerOf(tokenId)).to.equal(defaultAddress.Burn);
+      });
+    });
+    describe("After Burn", function () {
+      it("should not allow nomination", async function () {
+        await expect(titleEscrow.connect(beneficiary).nominate(nominee1.address)).to.be.revertedWithCustomError(
+          titleEscrow,
+          "InactiveTitleEscrow"
+        );
+      });
+      it("should not allow transfer beneficiary", async function () {
+        await expect(titleEscrow.connect(holder).transferBeneficiary(nominee1.address)).to.be.revertedWithCustomError(
+          titleEscrow,
+          "InactiveTitleEscrow"
+        );
+      });
+      it("should not allow transfer holder", async function () {
+        await expect(titleEscrow.connect(holder).transferHolder(nominee1.address)).to.be.revertedWithCustomError(
+          titleEscrow,
+          "InactiveTitleEscrow"
+        );
+      });
+      it("should not allow surrender", async function () {
+        await expect(titleEscrow.connect(holder).surrender()).to.be.revertedWithCustomError(
+          titleEscrow,
+          "InactiveTitleEscrow"
+        );
+      });
+      it("should not allow burn", async function () {
+        await expect(tokenRegistry.connect(accepter).burn(tokenId)).to.be.revertedWithCustomError(
+          titleEscrow,
+          "InactiveTitleEscrow"
+        );
       });
     });
   });
