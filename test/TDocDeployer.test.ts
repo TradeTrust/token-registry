@@ -29,7 +29,7 @@ describe("TDocDeployer", async () => {
     users = await getTestUsers();
     deployer = users.carrier;
 
-    deployFixturesRunner = async () =>
+    deployFixturesRunner = async () => 
       createDeployFixtureRunner(
         deployTradeTrustTokenStandardFixture({ deployer }),
         deployTDocDeployerFixture({ deployer })
