@@ -30,7 +30,7 @@ describe("TitleEscrowFactory", async () => {
   });
 
   describe("Implementation", () => {
-    let implAddr: string;
+    let implAddr: string; 
     let titleEscrowContract: TitleEscrow;
 
     beforeEach(async () => {
