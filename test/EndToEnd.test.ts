@@ -54,7 +54,6 @@ describe("End to end", () => {
         deployTDocDeployerFixture({ deployer })
       );
   });
-  // let minter: SignerWithAddress = users.others[users.others.length - 1];
 
   describe("tDoc deployer", () => {
     describe("Implementation Management", () => {
@@ -534,17 +533,23 @@ describe("End to end", () => {
           toAccessControlRevertMessage(holder.address, ethers.utils.id("ACCEPTER_ROLE"))
         );
       });
-      it("should allow shred after surrender if called is acceptor", async () => {
+      it("should allow burn/shred after surrender if called is acceptor", async () => {
         await expect(tokenRegistry.connect(accepter).burn(tokenId))
           .to.emit(titleEscrow, "Shred")
           .withArgs(tokenRegistry.address, tokenId);
         expect(await titleEscrow.active()).to.be.false;
       });
+    });
+    describe("After Burn", () => {
+      it("beneficiary address should be zero", async () => {
+        expect(await titleEscrow.beneficiary()).to.equal(defaultAddress.Zero);
+      });
+      it("holder address should be zero", async () => {
+        expect(await titleEscrow.active()).to.be.false;
+      });
       it("burn address should be new owner of token", async () => {
         expect(await tokenRegistry.ownerOf(tokenId)).to.equal(defaultAddress.Burn);
       });
-    });
-    describe("After Burn", () => {
       it("should not allow nomination", async () => {
         await expect(titleEscrow.connect(beneficiary).nominate(nominee1.address)).to.be.revertedWithCustomError(
           titleEscrow,
