@@ -53,9 +53,7 @@ describe("End to end", async () => {
     describe("Implementation Management", () => {
       // eslint-disable-next-line no-undef
       before(async () => {
-        // fakeTitleEscrowFactory = ethers.utils.getAddress(faker.finance.ethereumAddress());
         [implRegistryContract, escrowFactoryContract, deployerContract] = await loadFixture(deployFixturesRunner);
-        console.log("this 1", implRegistryContract.address);
       });
       it("should add a new implementation with the correct title escrow factory", async () => {
         await expect(deployerContract.addImplementation(implRegistryContract.address, escrowFactoryContract.address))
