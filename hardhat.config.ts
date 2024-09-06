@@ -99,11 +99,11 @@ const config: HardhatUserConfig = {
     },
     hederamainnet: {
       ...networkConfig,
-      url: "https://mainnet.hashio.io/api",
+      url: "https://hedera-mainnet-json-rpc.krypc.com/",
     },
     hederatestnet: {
       ...networkConfig,
-      url: "https://testnet.hashio.io/api",
+      url: "https://hedera-testnet-json-rpc.krypc.com/",
     },
     stabilitytestnet: {
       ...networkConfig,
