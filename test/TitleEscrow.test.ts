@@ -25,6 +25,7 @@ import {
   getTitleEscrowContract,
   impersonateAccount,
   TestUsers,
+  txnRemarks,
 } from "./helpers";
 
 describe("Title Escrow", async () => {
@@ -321,7 +322,7 @@ describe("Title Escrow", async () => {
       beforeEach(async () => {
         await registryContract
           .connect(users.carrier)
-          .mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+          .mint(users.beneficiary.address, users.beneficiary.address, tokenId, txnRemarks.mintRemark);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
@@ -332,7 +333,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should return false when not holding token", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
         const res = await titleEscrowOwnerContract.isHoldingToken();
 
@@ -403,31 +404,39 @@ describe("Title Escrow", async () => {
         });
 
         it("should revert when calling: nominate", async () => {
-          const tx = mockTitleEscrowContract.connect(users.beneficiary).nominate(fakeAddress);
+          const tx = mockTitleEscrowContract
+            .connect(users.beneficiary)
+            .nominate(fakeAddress, txnRemarks.nominateRemark);
 
           await expect(tx).to.be.revertedWithCustomError(mockTitleEscrowContract, "InactiveTitleEscrow");
         });
 
         it("should revert when calling: transferBeneficiary", async () => {
-          const tx = mockTitleEscrowContract.connect(users.beneficiary).transferBeneficiary(fakeAddress);
+          const tx = mockTitleEscrowContract
+            .connect(users.beneficiary)
+            .transferBeneficiary(fakeAddress, txnRemarks.beneficiaryTransferRemark);
 
           await expect(tx).to.be.revertedWithCustomError(mockTitleEscrowContract, "InactiveTitleEscrow");
         });
 
         it("should revert when calling: transferHolder", async () => {
-          const tx = mockTitleEscrowContract.connect(users.beneficiary).transferHolder(fakeAddress);
+          const tx = mockTitleEscrowContract
+            .connect(users.beneficiary)
+            .transferHolder(fakeAddress, txnRemarks.holderTransferRemark);
 
           await expect(tx).to.be.revertedWithCustomError(mockTitleEscrowContract, "InactiveTitleEscrow");
         });
 
         it("should revert when calling: transferOwners", async () => {
-          const tx = mockTitleEscrowContract.connect(users.beneficiary).transferOwners(fakeAddress, fakeAddress);
+          const tx = mockTitleEscrowContract
+            .connect(users.beneficiary)
+            .transferOwners(fakeAddress, fakeAddress, txnRemarks.transferOwnersRemark);
 
           await expect(tx).to.be.revertedWithCustomError(mockTitleEscrowContract, "InactiveTitleEscrow");
         });
 
         it("should revert when calling: shred", async () => {
-          const tx = mockTitleEscrowContract.connect(users.beneficiary).shred();
+          const tx = mockTitleEscrowContract.connect(users.beneficiary).shred(txnRemarks.burnRemark);
 
           await expect(tx).to.be.revertedWithCustomError(mockTitleEscrowContract, "InactiveTitleEscrow");
         });
@@ -466,7 +475,9 @@ describe("Title Escrow", async () => {
 
     describe("Nomination", () => {
       beforeEach(async () => {
-        await registryContract.connect(users.carrier).mint(users.beneficiary.address, users.holder.address, tokenId);
+        await registryContract
+          .connect(users.carrier)
+          .mint(users.beneficiary.address, users.holder.address, tokenId, txnRemarks.mintRemark);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
@@ -478,16 +489,22 @@ describe("Title Escrow", async () => {
         });
 
         it("should allow beneficiary to nominate a new beneficiary", async () => {
-          await titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
           const res = await titleEscrowOwnerContract.nominee();
 
           expect(res).to.equal(beneficiaryNominee.address);
         });
 
         it("should allow beneficiary to revoke beneficiary nomination", async () => {
-          await titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
           const initialNominee = await titleEscrowOwnerContract.nominee();
-          await titleEscrowOwnerContract.connect(users.beneficiary).nominate(defaultAddress.Zero);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(defaultAddress.Zero, txnRemarks.nominateRemark);
           const revokedNominee = await titleEscrowOwnerContract.nominee();
 
           expect(initialNominee).to.equal(beneficiaryNominee.address);
@@ -495,7 +512,9 @@ describe("Title Escrow", async () => {
         });
 
         it("should not allow a non-beneficiary to nominate beneficiary", async () => {
-          const tx = titleEscrowOwnerContract.connect(users.holder).nominate(beneficiaryNominee.address);
+          const tx = titleEscrowOwnerContract
+            .connect(users.holder)
+            .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotBeneficiary");
         });
@@ -504,24 +523,32 @@ describe("Title Escrow", async () => {
           const newBeneficiary = users.others[0];
           const anotherBeneficiaryNominee = users.others[1];
 
-          await titleEscrowOwnerContract.connect(users.beneficiary).nominate(newBeneficiary.address);
-          await titleEscrowOwnerContract.connect(users.holder).transferBeneficiary(newBeneficiary.address);
-          const tx = titleEscrowOwnerContract.connect(users.beneficiary).nominate(anotherBeneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(newBeneficiary.address, txnRemarks.nominateRemark);
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferBeneficiary(newBeneficiary.address, txnRemarks.beneficiaryTransferRemark);
+          const tx = titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(anotherBeneficiaryNominee.address, txnRemarks.nominateRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotBeneficiary");
         });
 
         it("should not allow nominating an existing beneficiary", async () => {
-          const tx = titleEscrowOwnerContract.connect(users.beneficiary).nominate(users.beneficiary.address);
+          const tx = titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(users.beneficiary.address, txnRemarks.nominateRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "TargetNomineeAlreadyBeneficiary");
         });
 
         it("should not allow nominating an address who is already a beneficiary nominee", async () => {
           const titleEscrowAsBeneficiary = titleEscrowOwnerContract.connect(users.beneficiary);
-          await titleEscrowAsBeneficiary.nominate(beneficiaryNominee.address);
+          await titleEscrowAsBeneficiary.nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
-          const tx = titleEscrowAsBeneficiary.nominate(beneficiaryNominee.address);
+          const tx = titleEscrowAsBeneficiary.nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowAsBeneficiary, "NomineeAlreadyNominated");
         });
@@ -530,19 +557,21 @@ describe("Title Escrow", async () => {
           tokenId = faker.datatype.hexaDecimal(64);
           await registryContract
             .connect(users.carrier)
-            .mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+            .mint(users.beneficiary.address, users.beneficiary.address, tokenId, txnRemarks.mintRemark);
           const titleEscrowAsBeneficiary = (await getTitleEscrowContract(registryContract, tokenId)).connect(
             users.beneficiary
           );
-          await titleEscrowAsBeneficiary.surrender();
+          await titleEscrowAsBeneficiary.surrender(txnRemarks.surrenderRemark);
 
-          const tx = titleEscrowAsBeneficiary.nominate(beneficiaryNominee.address);
+          const tx = titleEscrowAsBeneficiary.nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowAsBeneficiary, "TitleEscrowNotHoldingToken");
         });
 
         it("should emit Nomination event", async () => {
-          const tx = await titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address);
+          const tx = await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
           expect(tx)
             .to.emit(titleEscrowOwnerContract, "Nomination")
@@ -553,7 +582,9 @@ describe("Title Escrow", async () => {
 
     describe("Beneficiary and Holder Transfer", () => {
       beforeEach(async () => {
-        await registryContract.connect(users.carrier).mint(users.beneficiary.address, users.holder.address, tokenId);
+        await registryContract
+          .connect(users.carrier)
+          .mint(users.beneficiary.address, users.holder.address, tokenId, txnRemarks.mintRemark);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
@@ -565,9 +596,13 @@ describe("Title Escrow", async () => {
         });
 
         it("should allow holder to transfer to a nominated beneficiary", async () => {
-          await titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
-          await titleEscrowOwnerContract.connect(users.holder).transferBeneficiary(beneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferBeneficiary(beneficiaryNominee.address, txnRemarks.beneficiaryTransferRemark);
           const res = await titleEscrowOwnerContract.beneficiary();
 
           expect(res).to.equal(beneficiaryNominee.address);
@@ -578,13 +613,13 @@ describe("Title Escrow", async () => {
           const [targetNonBeneficiaryNominee] = users.others;
           await registryContract
             .connect(users.carrier)
-            .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId);
+            .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId, txnRemarks.mintRemark);
           titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, fakeTokenId);
 
           const initialBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
           await titleEscrowOwnerContract
             .connect(users.beneficiary)
-            .transferBeneficiary(targetNonBeneficiaryNominee.address);
+            .transferBeneficiary(targetNonBeneficiaryNominee.address, txnRemarks.beneficiaryTransferRemark);
           const currentBeneficiary = await titleEscrowOwnerContract.beneficiary();
 
           expect(initialBeneficiaryNominee).to.equal(defaultAddress.Zero);
@@ -592,45 +627,59 @@ describe("Title Escrow", async () => {
         });
 
         it("should not allow non-holder to transfer to a nominated beneficiary", async () => {
-          await titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
           const tx = titleEscrowOwnerContract
             .connect(users.beneficiary)
-            .transferBeneficiary(beneficiaryNominee.address);
+            .transferBeneficiary(beneficiaryNominee.address, txnRemarks.beneficiaryTransferRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotHolder");
         });
 
         it("should not allow transferring to zero address", async () => {
-          const tx = titleEscrowOwnerContract.connect(users.holder).transferBeneficiary(defaultAddress.Zero);
+          const tx = titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferBeneficiary(defaultAddress.Zero, txnRemarks.beneficiaryTransferRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "InvalidTransferToZeroAddress");
         });
 
         it("should not allow transferring to a non-nominated beneficiary", async () => {
           const fakeNonNominee = faker.finance.ethereumAddress();
-          await titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
-          const tx = titleEscrowOwnerContract.connect(users.holder).transferBeneficiary(fakeNonNominee);
+          const tx = titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferBeneficiary(fakeNonNominee, txnRemarks.beneficiaryTransferRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "InvalidNominee");
         });
 
         it("should reset nominated beneficiary", async () => {
-          await titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
-          await titleEscrowOwnerContract.connect(users.holder).transferBeneficiary(beneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferBeneficiary(beneficiaryNominee.address, txnRemarks.beneficiaryTransferRemark);
           const res = await titleEscrowOwnerContract.nominee();
 
           await expect(res).to.equal(defaultAddress.Zero);
         });
 
         it("should emit BeneficiaryTransfer event", async () => {
-          await titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
           const tx = await titleEscrowOwnerContract
             .connect(users.holder)
-            .transferBeneficiary(beneficiaryNominee.address);
+            .transferBeneficiary(beneficiaryNominee.address, txnRemarks.beneficiaryTransferRemark);
 
           expect(tx)
             .to.emit(titleEscrowOwnerContract, "BeneficiaryTransfer")
@@ -646,7 +695,9 @@ describe("Title Escrow", async () => {
         });
 
         it("should allow a holder to transfer to another holder", async () => {
-          await titleEscrowOwnerContract.connect(users.holder).transferHolder(targetNewHolder.address);
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferHolder(targetNewHolder.address, txnRemarks.holderTransferRemark);
           const res = await titleEscrowOwnerContract.holder();
 
           expect(res).to.equal(targetNewHolder.address);
@@ -657,11 +708,13 @@ describe("Title Escrow", async () => {
           const [targetNonNominatedHolder] = users.others;
           await registryContract
             .connect(users.carrier)
-            .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId);
+            .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId, txnRemarks.mintRemark);
           titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, fakeTokenId);
 
           const initialBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
-          await titleEscrowOwnerContract.connect(users.beneficiary).transferHolder(targetNonNominatedHolder.address);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .transferHolder(targetNonNominatedHolder.address, txnRemarks.holderTransferRemark);
           const currentHolder = await titleEscrowOwnerContract.holder();
 
           expect(initialBeneficiaryNominee).to.equal(defaultAddress.Zero);
@@ -669,25 +722,33 @@ describe("Title Escrow", async () => {
         });
 
         it("should not allow a non-holder to transfer to a nominated holder", async () => {
-          const tx = titleEscrowOwnerContract.connect(users.beneficiary).transferHolder(targetNewHolder.address);
+          const tx = titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .transferHolder(targetNewHolder.address, txnRemarks.holderTransferRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotHolder");
         });
 
         it("should not allow endorsing zero address", async () => {
-          const tx = titleEscrowOwnerContract.connect(users.holder).transferHolder(defaultAddress.Zero);
+          const tx = titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferHolder(defaultAddress.Zero, txnRemarks.holderTransferRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "InvalidTransferToZeroAddress");
         });
 
         it("should not allow transferring to an existing holder", async () => {
-          const tx = titleEscrowOwnerContract.connect(users.holder).transferHolder(users.holder.address);
+          const tx = titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferHolder(users.holder.address, txnRemarks.holderTransferRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "RecipientAlreadyHolder");
         });
 
         it("should emit HolderTransfer event", async () => {
-          const tx = await titleEscrowOwnerContract.connect(users.holder).transferHolder(targetNewHolder.address);
+          const tx = await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferHolder(targetNewHolder.address, txnRemarks.holderTransferRemark);
 
           expect(tx)
             .to.emit(titleEscrowOwnerContract, "HolderTransfer")
@@ -702,13 +763,15 @@ describe("Title Escrow", async () => {
         beforeEach(async () => {
           [beneficiaryNominee, holderNominee] = users.others;
 
-          await titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address);
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
         });
 
         it("should call transferBeneficiary and transferHolder interally", async () => {
           await titleEscrowOwnerContract
             .connect(users.holder)
-            .transferOwners(beneficiaryNominee.address, holderNominee.address);
+            .transferOwners(beneficiaryNominee.address, holderNominee.address, txnRemarks.holderTransferRemark);
           const [currentBeneficiary, currentHolder] = await Promise.all([
             titleEscrowOwnerContract.beneficiary(),
             titleEscrowOwnerContract.holder(),
@@ -721,7 +784,7 @@ describe("Title Escrow", async () => {
         it("should revert when caller is not holder", async () => {
           const tx = titleEscrowOwnerContract
             .connect(users.beneficiary)
-            .transferOwners(beneficiaryNominee.address, holderNominee.address);
+            .transferOwners(beneficiaryNominee.address, holderNominee.address, txnRemarks.holderTransferRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotHolder");
         });
@@ -729,7 +792,7 @@ describe("Title Escrow", async () => {
         it("should emit BeneficiaryTransfer and HolderTransfer events", async () => {
           const tx = await titleEscrowOwnerContract
             .connect(users.holder)
-            .transferOwners(beneficiaryNominee.address, holderNominee.address);
+            .transferOwners(beneficiaryNominee.address, holderNominee.address, txnRemarks.holderTransferRemark);
 
           expect(tx)
             .to.emit(titleEscrowOwnerContract, "BeneficiaryTransfer")
@@ -748,12 +811,14 @@ describe("Title Escrow", async () => {
       beforeEach(async () => {
         // eslint-disable-next-line no-multi-assign
         beneficiary = holder = users.others[faker.datatype.number(users.others.length - 1)];
-        await registryContract.connect(users.carrier).mint(beneficiary.address, holder.address, tokenId);
+        await registryContract
+          .connect(users.carrier)
+          .mint(beneficiary.address, holder.address, tokenId, txnRemarks.mintRemark);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
       it("should allow a beneficiary who is also a holder to surrender", async () => {
-        await titleEscrowOwnerContract.connect(beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(beneficiary).surrender(txnRemarks.surrenderRemark);
 
         const res = await registryContract.ownerOf(tokenId);
 
@@ -761,28 +826,32 @@ describe("Title Escrow", async () => {
       });
 
       it("should not allow surrendering when title escrow is not holding token", async () => {
-        await titleEscrowOwnerContract.connect(beneficiary).surrender();
-        const tx = titleEscrowOwnerContract.connect(beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(beneficiary).surrender(txnRemarks.surrenderRemark);
+        const tx = titleEscrowOwnerContract.connect(beneficiary).surrender(txnRemarks.surrenderRemark);
 
         await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "TitleEscrowNotHoldingToken");
       });
 
       it("should not allow a beneficiary only to surrender", async () => {
         tokenId = faker.datatype.hexaDecimal(64);
-        await registryContract.connect(users.carrier).mint(users.beneficiary.address, users.holder.address, tokenId);
+        await registryContract
+          .connect(users.carrier)
+          .mint(users.beneficiary.address, users.holder.address, tokenId, txnRemarks.mintRemark);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
 
-        const tx = titleEscrowOwnerContract.connect(users.beneficiary).surrender();
+        const tx = titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
         await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotHolder");
       });
 
       it("should not allow a holder only to surrender", async () => {
         tokenId = faker.datatype.hexaDecimal(64);
-        await registryContract.connect(users.carrier).mint(users.beneficiary.address, users.holder.address, tokenId);
+        await registryContract
+          .connect(users.carrier)
+          .mint(users.beneficiary.address, users.holder.address, tokenId, txnRemarks.mintRemark);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
 
-        const tx = titleEscrowOwnerContract.connect(users.holder).surrender();
+        const tx = titleEscrowOwnerContract.connect(users.holder).surrender(txnRemarks.surrenderRemark);
 
         await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotBeneficiary");
       });
@@ -790,10 +859,10 @@ describe("Title Escrow", async () => {
       it("should reset beneficiary nominee", async () => {
         const beneficiaryNominee = ethers.utils.getAddress(faker.finance.ethereumAddress());
         const titleEscrowAsBeneficiary = titleEscrowOwnerContract.connect(beneficiary);
-        await titleEscrowAsBeneficiary.nominate(beneficiaryNominee);
+        await titleEscrowAsBeneficiary.nominate(beneficiaryNominee, txnRemarks.nominateRemark);
         const initialBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
 
-        await titleEscrowAsBeneficiary.surrender();
+        await titleEscrowAsBeneficiary.surrender(txnRemarks.surrenderRemark);
         const currentBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
 
         expect(initialBeneficiaryNominee).to.deep.equal(beneficiaryNominee);
@@ -803,7 +872,7 @@ describe("Title Escrow", async () => {
       it("should transfer token back to registry", async () => {
         const initialOwner = await registryContract.ownerOf(tokenId);
 
-        await titleEscrowOwnerContract.connect(beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(beneficiary).surrender(txnRemarks.surrenderRemark);
         const currentOwner = await registryContract.ownerOf(tokenId);
 
         expect(initialOwner).to.equal(titleEscrowOwnerContract.address);
@@ -813,7 +882,7 @@ describe("Title Escrow", async () => {
       it("should not hold token after surrendering", async () => {
         const initialHoldingStatus = await titleEscrowOwnerContract.isHoldingToken();
 
-        await titleEscrowOwnerContract.connect(beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(beneficiary).surrender(txnRemarks.surrenderRemark);
         const currentHoldingStatus = await titleEscrowOwnerContract.isHoldingToken();
 
         expect(initialHoldingStatus).to.equal(true);
@@ -821,7 +890,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should emit Surrender event with correct values", async () => {
-        const tx = await titleEscrowOwnerContract.connect(beneficiary).surrender();
+        const tx = await titleEscrowOwnerContract.connect(beneficiary).surrender(txnRemarks.surrenderRemark);
 
         expect(tx)
           .to.emit(titleEscrowOwnerContract, "Surrender")
@@ -839,15 +908,15 @@ describe("Title Escrow", async () => {
         registrySigner = await impersonateAccount({ address: registryContract.address });
         await registryContract
           .connect(users.carrier)
-          .mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+          .mint(users.beneficiary.address, users.beneficiary.address, tokenId, txnRemarks.mintRemark);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
       it("should allow to be called from registry", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
         const holdingStatus = await titleEscrowOwnerContract.isHoldingToken();
 
-        await titleEscrowOwnerContract.connect(registrySigner).shred();
+        await titleEscrowOwnerContract.connect(registrySigner).shred(txnRemarks.burnRemark);
 
         expect(holdingStatus).to.equal(false);
       });
@@ -855,60 +924,60 @@ describe("Title Escrow", async () => {
       it("should not allow to shred when title escrow is holding token", async () => {
         const holdingStatus = await titleEscrowOwnerContract.isHoldingToken();
 
-        const tx = titleEscrowOwnerContract.connect(registrySigner).shred();
+        const tx = titleEscrowOwnerContract.connect(registrySigner).shred(txnRemarks.burnRemark);
 
         expect(holdingStatus).to.equal(true);
         await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "TokenNotSurrendered");
       });
 
       it("should not allow to be called from non-registry", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
-        const tx = titleEscrowOwnerContract.connect(users.beneficiary).shred();
+        const tx = titleEscrowOwnerContract.connect(users.beneficiary).shred(txnRemarks.burnRemark);
 
         await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "InvalidRegistry");
       });
 
       it("should reset nominated beneficiary", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
-        await titleEscrowOwnerContract.connect(registrySigner).shred();
+        await titleEscrowOwnerContract.connect(registrySigner).shred(txnRemarks.burnRemark);
         const res = await titleEscrowOwnerContract.nominee();
 
         expect(res).to.equal(defaultAddress.Zero);
       });
 
       it("should reset beneficiary", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
-        await titleEscrowOwnerContract.connect(registrySigner).shred();
+        await titleEscrowOwnerContract.connect(registrySigner).shred(txnRemarks.burnRemark);
         const res = await titleEscrowOwnerContract.beneficiary();
 
         expect(res).to.equal(defaultAddress.Zero);
       });
 
       it("should reset holder", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
-        await titleEscrowOwnerContract.connect(registrySigner).shred();
+        await titleEscrowOwnerContract.connect(registrySigner).shred(txnRemarks.burnRemark);
         const res = await titleEscrowOwnerContract.holder();
 
         expect(res).to.equal(defaultAddress.Zero);
       });
 
       it("should set active status to false", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
-        await titleEscrowOwnerContract.connect(registrySigner).shred();
+        await titleEscrowOwnerContract.connect(registrySigner).shred(txnRemarks.burnRemark);
         const res = await titleEscrowOwnerContract.active();
 
         expect(res).to.false;
       });
 
       it("should emit Shred event", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender();
+        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
-        const tx = await titleEscrowOwnerContract.connect(registrySigner).shred();
+        const tx = await titleEscrowOwnerContract.connect(registrySigner).shred(txnRemarks.burnRemark);
 
         expect(tx).to.emit(titleEscrowOwnerContract, "Shred").withArgs(registryContract.address, tokenId);
       });

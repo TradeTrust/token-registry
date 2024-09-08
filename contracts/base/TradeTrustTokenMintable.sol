@@ -25,9 +25,10 @@ abstract contract TradeTrustTokenMintable is TradeTrustSBT, RegistryAccess, ITra
   function mint(
     address beneficiary,
     address holder,
-    uint256 tokenId
+    uint256 tokenId,
+    bytes calldata remark
   ) external virtual override whenNotPaused onlyRole(MINTER_ROLE) returns (address) {
-    return _mintTitle(beneficiary, holder, tokenId);
+    return _mintTitle(beneficiary, holder, tokenId, remark);
   }
 
   /**
@@ -37,7 +38,13 @@ abstract contract TradeTrustTokenMintable is TradeTrustSBT, RegistryAccess, ITra
    * @param tokenId The ID of the token to mint.
    * @return The address of the corresponding TitleEscrow.
    */
-  function _mintTitle(address beneficiary, address holder, uint256 tokenId) internal virtual returns (address) {
+  function _mintTitle(
+    address beneficiary,
+    address holder,
+    uint256 tokenId,
+    bytes calldata remark
+  ) internal virtual returns (address) {
+    if (remark.length > 120) revert RemarkLengthExceeded();
     if (_exists(tokenId)) {
       revert TokenExists();
     }

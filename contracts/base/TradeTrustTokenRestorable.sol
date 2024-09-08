@@ -22,7 +22,11 @@ abstract contract TradeTrustTokenRestorable is TradeTrustSBT, RegistryAccess, IT
   /**
    * @dev See {ITradeTrustTokenRestorable-restore}.
    */
-  function restore(uint256 tokenId) external virtual override whenNotPaused onlyRole(RESTORER_ROLE) returns (address) {
+  function restore(
+    uint256 tokenId,
+    bytes calldata remark
+  ) external virtual override whenNotPaused onlyRole(RESTORER_ROLE) returns (address) {
+    if (remark.length > 120) revert RemarkLengthExceeded();
     if (!_exists(tokenId)) {
       revert InvalidTokenId();
     }

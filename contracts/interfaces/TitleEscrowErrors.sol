@@ -31,4 +31,6 @@ interface TitleEscrowErrors {
   error RecipientAlreadyHolder();
 
   error TokenNotSurrendered();
+
+  error RemarkLengthExceeded();
 }

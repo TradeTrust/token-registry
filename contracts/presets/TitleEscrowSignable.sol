@@ -16,8 +16,12 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
   string public constant name = "TradeTrust Title Escrow";
 
   // BeneficiaryTransfer(address beneficiary,address holder,address nominee,address registry,uint256 tokenId,uint256 deadline,uint256 nonce)
+  // bytes32 public constant BENEFICIARY_TRANSFER_TYPEHASH =
+  //   0xdc8ea80c045a9b675c73cb328c225cc3f099d01bd9b7820947ac10cba8661cf1;
   bytes32 public constant BENEFICIARY_TRANSFER_TYPEHASH =
-    0xdc8ea80c045a9b675c73cb328c225cc3f099d01bd9b7820947ac10cba8661cf1;
+    keccak256(
+      "BeneficiaryTransfer(address beneficiary,address holder,address nominee,address registry,uint256 tokenId,uint256 deadline,uint256 nonce)"
+    );
 
   function initialize(address _registry, uint256 _tokenId) public virtual override initializer {
     __TitleEscrowSignable_init(_registry, _tokenId);
@@ -35,15 +39,10 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
   /**
    * @dev See {ITitleEscrowSignable-transferBeneficiaryWithSig}.
    */
-  function transferBeneficiaryWithSig(BeneficiaryTransferEndorsement memory endorsement, Sig memory sig)
-    public
-    virtual
-    override
-    whenNotPaused
-    whenActive
-    onlyBeneficiary
-    whenHoldingToken
-  {
+  function transferBeneficiaryWithSig(
+    BeneficiaryTransferEndorsement memory endorsement,
+    Sig memory sig
+  ) public virtual override whenNotPaused whenActive onlyBeneficiary whenHoldingToken {
     if (endorsement.deadline < block.timestamp) {
       revert SignatureExpired(block.timestamp);
     }
@@ -71,19 +70,15 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     }
 
     ++nonces[holder];
-    _setBeneficiary(endorsement.nominee);
+    _setBeneficiary(endorsement.nominee, "");
   }
 
   /**
    * @dev See {ITitleEscrowSignable-cancelBeneficiaryTransfer}.
    */
-  function cancelBeneficiaryTransfer(BeneficiaryTransferEndorsement memory endorsement)
-    public
-    virtual
-    override
-    whenNotPaused
-    whenActive
-  {
+  function cancelBeneficiaryTransfer(
+    BeneficiaryTransferEndorsement memory endorsement
+  ) public virtual override whenNotPaused whenActive {
     if (msg.sender != endorsement.holder) {
       revert CallerNotEndorser();
     }
@@ -110,8 +105,8 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
       );
   }
 
-  function _setHolder(address newHolder) internal virtual override {
+  function _setHolder(address newHolder, bytes memory remark) internal virtual override {
     ++nonces[holder];
-    super._setHolder(newHolder);
+    super._setHolder(newHolder, remark);
   }
 }

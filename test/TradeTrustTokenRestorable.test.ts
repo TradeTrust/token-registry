@@ -5,7 +5,7 @@ import { expect } from ".";
 import { contractInterfaceId } from "../src/constants";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { deployTokenFixture, DeployTokenFixtureRunner } from "./fixtures";
-import { createDeployFixtureRunner, getTestUsers, getTitleEscrowContract, TestUsers } from "./helpers";
+import { createDeployFixtureRunner, getTestUsers, getTitleEscrowContract, TestUsers, txnRemarks } from "./helpers";
 
 describe("TradeTrustTokenRestorable", async () => {
   let users: TestUsers;
@@ -50,7 +50,12 @@ describe("TradeTrustTokenRestorable", async () => {
     registryContractAsAdmin = registryContract.connect(users.carrier);
     titleEscrowImplAddr = await mockTitleEscrowFactoryContract.implementation();
 
-    await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+    await registryContractAsAdmin.mint(
+      users.beneficiary.address,
+      users.beneficiary.address,
+      tokenId,
+      txnRemarks.mintRemark
+    );
     titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
   });
 
@@ -64,30 +69,30 @@ describe("TradeTrustTokenRestorable", async () => {
 
   it("should revert if Invalid token", async () => {
     const invalidTokenId = faker.datatype.hexaDecimal(64);
-    const tx = registryContractAsAdmin.restore(invalidTokenId);
+    const tx = registryContractAsAdmin.restore(invalidTokenId, txnRemarks.restorerRemark);
 
     await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "InvalidTokenId");
   });
 
   it("should revert if token is not surrendered", async () => {
-    const tx = registryContractAsAdmin.restore(tokenId);
+    const tx = registryContractAsAdmin.restore(tokenId, txnRemarks.restorerRemark);
 
     await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
   });
 
   it("should not allow to restore burnt token", async () => {
-    await titleEscrowContract.connect(users.beneficiary).surrender();
-    await registryContractAsAdmin.burn(tokenId);
+    await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
+    await registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
 
-    const tx = registryContractAsAdmin.restore(tokenId);
+    const tx = registryContractAsAdmin.restore(tokenId, txnRemarks.restorerRemark);
 
     await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
   });
 
   it("should allow to restore after token is surrendered", async () => {
-    await titleEscrowContract.connect(users.beneficiary).surrender();
+    await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
-    const tx = registryContractAsAdmin.restore(tokenId);
+    const tx = registryContractAsAdmin.restore(tokenId, txnRemarks.restorerRemark);
 
     await expect(tx).to.not.be.reverted;
   });
@@ -99,9 +104,9 @@ describe("TradeTrustTokenRestorable", async () => {
       implementationAddress: titleEscrowImplAddr,
       factoryAddress: mockTitleEscrowFactoryContract.address,
     });
-    await titleEscrowContract.connect(users.beneficiary).surrender();
+    await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
-    await registryContractAsAdmin.restore(tokenId);
+    await registryContractAsAdmin.restore(tokenId, txnRemarks.restorerRemark);
     const res = await registryContract.ownerOf(tokenId);
 
     expect(res).to.equal(expectedTitleEscrowAddr);
@@ -114,9 +119,9 @@ describe("TradeTrustTokenRestorable", async () => {
       implementationAddress: titleEscrowImplAddr,
       factoryAddress: mockTitleEscrowFactoryContract.address,
     });
-    await titleEscrowContract.connect(users.beneficiary).surrender();
+    await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
-    const tx = await registryContractAsAdmin.restore(tokenId);
+    const tx = await registryContractAsAdmin.restore(tokenId, txnRemarks.restorerRemark);
 
     expect(tx).to.emit(registryContract, "Transfer").withArgs(registryContract.address, titleEscrowAddress, tokenId);
   });

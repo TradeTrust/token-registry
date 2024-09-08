@@ -9,4 +9,6 @@ interface TradeTrustTokenErrors {
   error TokenExists();
 
   error TransferFailure();
+
+  error RemarkLengthExceeded();
 }
