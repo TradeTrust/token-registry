@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/interfaces/IERC165.sol";
 import "./interfaces/ITitleEscrow.sol";
 import "./interfaces/ITradeTrustToken.sol";
 import "./interfaces/TitleEscrowErrors.sol";
-import "hardhat/console.sol";
 
 /**
  * @title TitleEscrow
