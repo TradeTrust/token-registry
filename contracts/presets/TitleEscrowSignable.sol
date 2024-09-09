@@ -16,12 +16,8 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
   string public constant name = "TradeTrust Title Escrow";
 
   // BeneficiaryTransfer(address beneficiary,address holder,address nominee,address registry,uint256 tokenId,uint256 deadline,uint256 nonce)
-  // bytes32 public constant BENEFICIARY_TRANSFER_TYPEHASH =
-  //   0xdc8ea80c045a9b675c73cb328c225cc3f099d01bd9b7820947ac10cba8661cf1;
   bytes32 public constant BENEFICIARY_TRANSFER_TYPEHASH =
-    keccak256(
-      "BeneficiaryTransfer(address beneficiary,address holder,address nominee,address registry,uint256 tokenId,uint256 deadline,uint256 nonce)"
-    );
+    0xdc8ea80c045a9b675c73cb328c225cc3f099d01bd9b7820947ac10cba8661cf1;
 
   function initialize(address _registry, uint256 _tokenId) public virtual override initializer {
     __TitleEscrowSignable_init(_registry, _tokenId);
