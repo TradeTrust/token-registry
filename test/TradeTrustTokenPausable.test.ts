@@ -10,6 +10,7 @@ import {
   impersonateAccount,
   TestUsers,
   toAccessControlRevertMessage,
+  txnRemarks,
 } from "./helpers";
 
 describe("TradeTrustToken Pausable Behaviour", async () => {
@@ -150,7 +151,6 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
             deployer: users.carrier,
           });
           const registryContractFixtureAsAdmin = registryContractFixture.connect(users.carrier);
-
           const { titleEscrow: titleEscrowFixture } = await mintTokenFixture({
             token: registryContractFixtureAsAdmin,
             beneficiary: users.beneficiary,
@@ -171,7 +171,7 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
 
       describe("Token Registry Behaviour", () => {
         beforeEach(async () => {
-          await titleEscrowContract.connect(users.beneficiary).surrender();
+          await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
           await registryContractAsAdmin.pause();
 
           const paused = await registryContract.paused();
@@ -186,7 +186,7 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
         });
 
         it("should not allow accepting token", async () => {
-          const tx = registryContractAsAdmin.burn(tokenId);
+          const tx = registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
 
           await expect(tx).to.be.revertedWith("Pausable: paused");
         });
@@ -209,37 +209,44 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
         });
 
         it("should not allow surrendering", async () => {
-          const tx = titleEscrowContract.connect(users.beneficiary).surrender();
+          const tx = titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow shredding", async () => {
-          const tx = titleEscrowContract.shred();
+          const tx = titleEscrowContract.shred(txnRemarks.burnRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow nomination of beneficiary", async () => {
-          const tx = titleEscrowContract.nominate(users.beneficiary.address);
+          const tx = titleEscrowContract.nominate(users.beneficiary.address, txnRemarks.nominateRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow transfer of beneficiary", async () => {
-          const tx = titleEscrowContract.transferBeneficiary(users.beneficiary.address);
+          const tx = titleEscrowContract.transferBeneficiary(
+            users.beneficiary.address,
+            txnRemarks.transferOwnersRemark
+          );
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow transfer holder", async () => {
-          const tx = titleEscrowContract.transferHolder(users.holder.address);
+          const tx = titleEscrowContract.transferHolder(users.holder.address, txnRemarks.transferOwnersRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
         it("should not allow endorse beneficiary and transfer holder", async () => {
-          const tx = titleEscrowContract.transferOwners(users.beneficiary.address, users.holder.address);
+          const tx = titleEscrowContract.transferOwners(
+            users.beneficiary.address,
+            users.holder.address,
+            txnRemarks.transferOwnersRemark
+          );
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });

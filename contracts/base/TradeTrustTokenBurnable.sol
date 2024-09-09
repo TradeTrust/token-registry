@@ -27,17 +27,18 @@ abstract contract TradeTrustTokenBurnable is TradeTrustSBT, RegistryAccess, ITra
   /**
    * @dev See {ITradeTrustTokenBurnable-burn}.
    */
-  function burn(uint256 tokenId) external virtual override whenNotPaused onlyRole(ACCEPTER_ROLE) {
-    _burnTitle(tokenId);
+  function burn(uint256 tokenId, bytes memory remark) external virtual override whenNotPaused onlyRole(ACCEPTER_ROLE) {
+    if (remark.length > 120) revert RemarkLengthExceeded();
+    _burnTitle(tokenId, remark);
   }
 
   /**
    * @dev Internal function to burn a token.
    * @param tokenId The ID of the token to burn.
    */
-  function _burnTitle(uint256 tokenId) internal virtual {
+  function _burnTitle(uint256 tokenId, bytes memory remark) internal virtual {
     address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
-    ITitleEscrow(titleEscrow).shred();
+    ITitleEscrow(titleEscrow).shred(remark);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
     _registryTransferTo(BURN_ADDRESS, tokenId);

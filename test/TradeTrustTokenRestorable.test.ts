@@ -5,7 +5,7 @@ import { expect } from ".";
 import { contractInterfaceId } from "../src/constants";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { deployTokenFixture, DeployTokenFixtureRunner } from "./fixtures";
-import { createDeployFixtureRunner, getTestUsers, getTitleEscrowContract, TestUsers } from "./helpers";
+import { createDeployFixtureRunner, getTestUsers, getTitleEscrowContract, TestUsers, txnRemarks } from "./helpers";
 
 describe("TradeTrustTokenRestorable", async () => {
   let users: TestUsers;
@@ -76,8 +76,8 @@ describe("TradeTrustTokenRestorable", async () => {
   });
 
   it("should not allow to restore burnt token", async () => {
-    await titleEscrowContract.connect(users.beneficiary).surrender();
-    await registryContractAsAdmin.burn(tokenId);
+    await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
+    await registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
 
     const tx = registryContractAsAdmin.restore(tokenId);
 
@@ -85,7 +85,7 @@ describe("TradeTrustTokenRestorable", async () => {
   });
 
   it("should allow to restore after token is surrendered", async () => {
-    await titleEscrowContract.connect(users.beneficiary).surrender();
+    await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
     const tx = registryContractAsAdmin.restore(tokenId);
 
@@ -99,7 +99,7 @@ describe("TradeTrustTokenRestorable", async () => {
       implementationAddress: titleEscrowImplAddr,
       factoryAddress: mockTitleEscrowFactoryContract.address,
     });
-    await titleEscrowContract.connect(users.beneficiary).surrender();
+    await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
     await registryContractAsAdmin.restore(tokenId);
     const res = await registryContract.ownerOf(tokenId);
@@ -114,7 +114,7 @@ describe("TradeTrustTokenRestorable", async () => {
       implementationAddress: titleEscrowImplAddr,
       factoryAddress: mockTitleEscrowFactoryContract.address,
     });
-    await titleEscrowContract.connect(users.beneficiary).surrender();
+    await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
     const tx = await registryContractAsAdmin.restore(tokenId);
 

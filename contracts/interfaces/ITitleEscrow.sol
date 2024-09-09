@@ -16,42 +16,55 @@ interface ITitleEscrow is IERC721Receiver {
     address registry,
     uint256 tokenId
   );
-  event Nomination(address indexed prevNominee, address indexed nominee, address registry, uint256 tokenId);
+  event Nomination(
+    address indexed prevNominee,
+    address indexed nominee,
+    address registry,
+    uint256 tokenId,
+    bytes remark
+  );
   event BeneficiaryTransfer(
     address indexed fromBeneficiary,
     address indexed toBeneficiary,
     address registry,
-    uint256 tokenId
+    uint256 tokenId,
+    bytes remark
   );
-  event HolderTransfer(address indexed fromHolder, address indexed toHolder, address registry, uint256 tokenId);
-  event Surrender(address indexed surrenderer, address registry, uint256 tokenId);
-  event Shred(address registry, uint256 tokenId);
+  event HolderTransfer(
+    address indexed fromHolder,
+    address indexed toHolder,
+    address registry,
+    uint256 tokenId,
+    bytes remark
+  );
+  event Surrender(address indexed surrenderer, address registry, uint256 tokenId, bytes remark);
+  event Shred(address registry, uint256 tokenId, bytes remark);
 
   /**
    * @notice Allows the beneficiary to nominate a new beneficiary
    * @dev The nominated beneficiary will need to be transferred by the holder to become the actual beneficiary
    * @param nominee The address of the nominee
    */
-  function nominate(address nominee) external;
+  function nominate(address nominee, bytes memory remark) external;
 
   /**
    * @notice Allows the holder to transfer the beneficiary role to the nominated beneficiary or to themselves
    * @param nominee The address of the new beneficiary
    */
-  function transferBeneficiary(address nominee) external;
+  function transferBeneficiary(address nominee, bytes memory remark) external;
 
   /**
    * @notice Allows the holder to transfer their role to another address
    * @param newHolder The address of the new holder
    */
-  function transferHolder(address newHolder) external;
+  function transferHolder(address newHolder, bytes memory remark) external;
 
   /**
    * @notice Allows for the simultaneous transfer of both beneficiary and holder roles
    * @param nominee The address of the new beneficiary
    * @param newHolder The address of the new holder
    */
-  function transferOwners(address nominee, address newHolder) external;
+  function transferOwners(address nominee, address newHolder, bytes memory remark) external;
 
   function beneficiary() external view returns (address);
 
@@ -74,10 +87,10 @@ interface ITitleEscrow is IERC721Receiver {
   /**
    * @notice Allows the beneficiary and holder to surrender the token back to the registry
    */
-  function surrender() external;
+  function surrender(bytes memory remark) external;
 
   /**
    * @notice Allows the registry to shred the TitleEscrow by marking it as inactive and reset the beneficiary and holder addresses
    */
-  function shred() external;
+  function shred(bytes memory remark) external;
 }

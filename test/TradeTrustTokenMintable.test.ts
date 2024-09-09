@@ -6,7 +6,7 @@ import { expect } from ".";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { deployTokenFixture } from "./fixtures";
-import { getTestUsers, getTitleEscrowContract, TestUsers } from "./helpers";
+import { getTestUsers, getTitleEscrowContract, TestUsers, txnRemarks } from "./helpers";
 
 describe("TradeTrustTokenMintable", async () => {
   let users: TestUsers;
@@ -96,8 +96,8 @@ describe("TradeTrustTokenMintable", async () => {
     });
 
     it("should not allow minting a token that has been burnt", async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender();
-      await registryContractAsAdmin.burn(tokenId);
+      await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
+      await registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
 
       const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 

@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { expect } from ".";
 import { roleHash } from "../src/constants";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
-import { getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
+import { getTestUsers, TestUsers, toAccessControlRevertMessage, txnRemarks } from "./helpers";
 
 describe("TradeTrustToken Access Control Behaviour", async () => {
   let users: TestUsers;
@@ -153,7 +153,7 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
 
   describe("Restorer Role", () => {
     beforeEach(async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender();
+      await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
     });
 
     it("should allow a restorer to restore tokens", async () => {
@@ -173,17 +173,17 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
 
   describe("Accepter Role", () => {
     beforeEach(async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender();
+      await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
     });
 
     it("should allow an accepter to burn tokens", async () => {
-      const tx = registryContractAsAccepter.burn(tokenId);
+      const tx = registryContractAsAccepter.burn(tokenId, txnRemarks.burnRemark);
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow a non-accepter to burn tokens", async () => {
-      const tx = registryContractAsNoRole.burn(tokenId);
+      const tx = registryContractAsNoRole.burn(tokenId, txnRemarks.burnRemark);
 
       await expect(tx).to.be.revertedWith(
         toAccessControlRevertMessage(users.beneficiary.address, roleHash.AccepterRole)

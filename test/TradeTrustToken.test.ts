@@ -11,6 +11,7 @@ import {
   getTitleEscrowContract,
   impersonateAccount,
   TestUsers,
+  txnRemarks,
 } from "./helpers";
 
 describe("TradeTrustToken", async () => {
@@ -190,7 +191,7 @@ describe("TradeTrustToken", async () => {
       });
 
       it("should have registry as owner for a surrendered token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender();
+        await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
 
@@ -198,8 +199,8 @@ describe("TradeTrustToken", async () => {
       });
 
       it("should have burn address as owner for an accepted token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender();
-        await registryContract.burn(tokenId);
+        await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
+        await registryContract.burn(tokenId, txnRemarks.burnRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
 
@@ -207,7 +208,7 @@ describe("TradeTrustToken", async () => {
       });
 
       it("should not have registry and burn address as owner for a restored token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender();
+        await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
         await registryContract.restore(tokenId);
 
         const owner = await registryContract.ownerOf(tokenId);

@@ -10,6 +10,7 @@ import {
   getTitleEscrowContract,
   impersonateAccount,
   TestUsers,
+  txnRemarks,
 } from "./helpers";
 
 describe("TradeTrustTokenBurnable", async () => {
@@ -64,13 +65,13 @@ describe("TradeTrustTokenBurnable", async () => {
 
   describe("When token has been surrendered", () => {
     beforeEach(async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender();
+      await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
     });
 
     it("should shred the correct title escrow", async () => {
       const initialActive = await titleEscrowContract.active();
 
-      await registryContractAsAdmin.burn(tokenId);
+      await registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
       const currentActive = await titleEscrowContract.active();
 
       expect(initialActive).to.be.true;
@@ -78,7 +79,7 @@ describe("TradeTrustTokenBurnable", async () => {
     });
 
     it("should transfer token to burn address", async () => {
-      await registryContractAsAdmin.burn(tokenId);
+      await registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
 
       const res = await registryContract.ownerOf(tokenId);
 
@@ -86,15 +87,15 @@ describe("TradeTrustTokenBurnable", async () => {
     });
 
     it("should not allow burning a burnt token", async () => {
-      await registryContractAsAdmin.burn(tokenId);
+      await registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
 
-      const tx = registryContractAsAdmin.burn(tokenId);
+      const tx = registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
 
       await expect(tx).to.be.reverted;
     });
 
     it("should emit Transfer event with correct values", async () => {
-      const tx = await registryContractAsAdmin.burn(tokenId);
+      const tx = await registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
 
       expect(tx).to.emit(registryContract, "Transfer").withArgs(registryContract.address, defaultAddress.Burn, tokenId);
     });
@@ -102,7 +103,7 @@ describe("TradeTrustTokenBurnable", async () => {
 
   describe("When token has not been surrendered", () => {
     it("should revert when burn token", async () => {
-      const tx = registryContractAsAdmin.burn(tokenId);
+      const tx = registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
 
       await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
     });

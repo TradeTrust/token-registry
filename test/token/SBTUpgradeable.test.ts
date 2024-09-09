@@ -132,7 +132,6 @@ describe("SBTUpgradeable", async () => {
       });
 
       it("should revert with standard reason when onERC721Received reverts without reason", async () => {
-        // erc721ReceiverContract.onERC721Received.reverts();
         await erc721ReceiverContract.setErrorType(2);
 
         const tx = mockSbtContract.safeMintInternal(erc721ReceiverContract.address, tokenId);
