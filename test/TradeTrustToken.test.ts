@@ -130,12 +130,7 @@ describe("TradeTrustToken", async () => {
     let titleEscrowContract: TitleEscrow;
 
     beforeEach(async () => {
-      await registryContractAsAdmin.mint(
-        users.beneficiary.address,
-        users.beneficiary.address,
-        tokenId,
-        txnRemarks.mintRemark
-      );
+      await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
     });
 
@@ -214,7 +209,7 @@ describe("TradeTrustToken", async () => {
 
       it("should not have registry and burn address as owner for a restored token", async () => {
         await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
-        await registryContract.restore(tokenId, txnRemarks.restorerRemark);
+        await registryContract.restore(tokenId);
 
         const owner = await registryContract.ownerOf(tokenId);
 

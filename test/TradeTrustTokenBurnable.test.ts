@@ -51,12 +51,7 @@ describe("TradeTrustTokenBurnable", async () => {
 
     registryContractAsAdmin = registryContract.connect(users.carrier);
 
-    await registryContractAsAdmin.mint(
-      users.beneficiary.address,
-      users.beneficiary.address,
-      tokenId,
-      txnRemarks.mintRemark
-    );
+    await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
     titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
   });
 

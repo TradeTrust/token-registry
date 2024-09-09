@@ -62,12 +62,7 @@ describe("TradeTrustTokenMintable", async () => {
 
   describe("Mint", () => {
     beforeEach(async () => {
-      await registryContractAsAdmin.mint(
-        users.beneficiary.address,
-        users.beneficiary.address,
-        tokenId,
-        txnRemarks.mintRemark
-      );
+      await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
     });
 
@@ -104,23 +99,13 @@ describe("TradeTrustTokenMintable", async () => {
       await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
       await registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
 
-      const tx = registryContractAsAdmin.mint(
-        users.beneficiary.address,
-        users.beneficiary.address,
-        tokenId,
-        txnRemarks.mintRemark
-      );
+      const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 
       await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenExists");
     });
 
     it("should not allow minting an existing token", async () => {
-      const tx = registryContractAsAdmin.mint(
-        users.beneficiary.address,
-        users.beneficiary.address,
-        tokenId,
-        txnRemarks.mintRemark
-      );
+      const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 
       await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenExists");
     });
@@ -163,12 +148,7 @@ describe("TradeTrustTokenMintable", async () => {
 
     it("should emit Transfer event with correct values", async () => {
       tokenId = faker.datatype.hexaDecimal(64);
-      const tx = await registryContractAsAdmin.mint(
-        users.beneficiary.address,
-        users.holder.address,
-        tokenId,
-        txnRemarks.mintRemark
-      );
+      const tx = await registryContractAsAdmin.mint(users.beneficiary.address, users.holder.address, tokenId);
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
 
       expect(tx)
@@ -179,12 +159,7 @@ describe("TradeTrustTokenMintable", async () => {
     describe("Mint with correct beneficiary and holder", () => {
       beforeEach(async () => {
         tokenId = faker.datatype.hexaDecimal(64);
-        await registryContractAsAdmin.mint(
-          users.beneficiary.address,
-          users.holder.address,
-          tokenId,
-          txnRemarks.mintRemark
-        );
+        await registryContractAsAdmin.mint(users.beneficiary.address, users.holder.address, tokenId);
         titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 

@@ -107,12 +107,7 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
       it("should not allow minting of tokens", async () => {
         await registryContractAsAdmin.pause();
 
-        const tx = registryContractAsAdmin.mint(
-          users.beneficiary.address,
-          users.beneficiary.address,
-          tokenId,
-          txnRemarks.mintRemark
-        );
+        const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
 
         await expect(tx).to.be.revertedWith("Pausable: paused");
       });
@@ -161,7 +156,6 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
             beneficiary: users.beneficiary,
             holder: users.beneficiary,
             tokenId,
-            remark: txnRemarks.mintRemark,
           });
 
           return [registryContractFixture, titleEscrowFixture];
@@ -186,7 +180,7 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
         });
 
         it("should not allow restoring token", async () => {
-          const tx = registryContractAsAdmin.restore(tokenId, txnRemarks.restorerRemark);
+          const tx = registryContractAsAdmin.restore(tokenId);
 
           await expect(tx).to.be.revertedWith("Pausable: paused");
         });

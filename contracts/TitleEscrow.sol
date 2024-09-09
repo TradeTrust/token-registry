@@ -116,7 +116,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     address /* operator */,
     address /* from */,
     uint256 _tokenId,
-    bytes memory data
+    bytes calldata data
   ) external virtual override whenNotPaused whenActive returns (bytes4) {
     if (_tokenId != tokenId) {
       revert InvalidTokenId(_tokenId);
@@ -157,7 +157,6 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     }
 
     _setNominee(_nominee, remark);
-    emit Nomination(nominee, _nominee, registry, tokenId, remark);
   }
 
   /**

@@ -61,7 +61,6 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
         beneficiary: users.beneficiary,
         holder: users.beneficiary,
         tokenId,
-        remark: txnRemarks.mintRemark,
       });
 
       return [registryContractFixture, titleEscrowContractFixture];
@@ -137,23 +136,13 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
       it("should allow a minter to mint new tokens", async () => {
         const newTokenId = faker.datatype.hexaDecimal(64);
 
-        const tx = registryContractAsMinter.mint(
-          users.beneficiary.address,
-          users.holder.address,
-          newTokenId,
-          txnRemarks.mintRemark
-        );
+        const tx = registryContractAsMinter.mint(users.beneficiary.address, users.holder.address, newTokenId);
 
         await expect(tx).to.not.be.reverted;
       });
 
       it("should not allow a non-minter to mint new tokens", async () => {
-        const tx = registryContractAsNoRole.mint(
-          users.beneficiary.address,
-          users.holder.address,
-          tokenId,
-          txnRemarks.mintRemark
-        );
+        const tx = registryContractAsNoRole.mint(users.beneficiary.address, users.holder.address, tokenId);
 
         await expect(tx).to.be.revertedWith(
           toAccessControlRevertMessage(users.beneficiary.address, roleHash.MinterRole)
@@ -168,13 +157,13 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
     });
 
     it("should allow a restorer to restore tokens", async () => {
-      const tx = registryContractAsRestorer.restore(tokenId, txnRemarks.restorerRemark);
+      const tx = registryContractAsRestorer.restore(tokenId);
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow a non-restorer to restore tokens", async () => {
-      const tx = registryContractAsNoRole.restore(tokenId, txnRemarks.restorerRemark);
+      const tx = registryContractAsNoRole.restore(tokenId);
 
       await expect(tx).to.be.revertedWith(
         toAccessControlRevertMessage(users.beneficiary.address, roleHash.RestorerRole)

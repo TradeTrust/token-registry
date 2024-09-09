@@ -322,7 +322,7 @@ describe("Title Escrow", async () => {
       beforeEach(async () => {
         await registryContract
           .connect(users.carrier)
-          .mint(users.beneficiary.address, users.beneficiary.address, tokenId, txnRemarks.mintRemark);
+          .mint(users.beneficiary.address, users.beneficiary.address, tokenId);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
@@ -475,9 +475,7 @@ describe("Title Escrow", async () => {
 
     describe("Nomination", () => {
       beforeEach(async () => {
-        await registryContract
-          .connect(users.carrier)
-          .mint(users.beneficiary.address, users.holder.address, tokenId, txnRemarks.mintRemark);
+        await registryContract.connect(users.carrier).mint(users.beneficiary.address, users.holder.address, tokenId);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
@@ -557,7 +555,7 @@ describe("Title Escrow", async () => {
           tokenId = faker.datatype.hexaDecimal(64);
           await registryContract
             .connect(users.carrier)
-            .mint(users.beneficiary.address, users.beneficiary.address, tokenId, txnRemarks.mintRemark);
+            .mint(users.beneficiary.address, users.beneficiary.address, tokenId);
           const titleEscrowAsBeneficiary = (await getTitleEscrowContract(registryContract, tokenId)).connect(
             users.beneficiary
           );
@@ -582,9 +580,7 @@ describe("Title Escrow", async () => {
 
     describe("Beneficiary and Holder Transfer", () => {
       beforeEach(async () => {
-        await registryContract
-          .connect(users.carrier)
-          .mint(users.beneficiary.address, users.holder.address, tokenId, txnRemarks.mintRemark);
+        await registryContract.connect(users.carrier).mint(users.beneficiary.address, users.holder.address, tokenId);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
@@ -613,7 +609,7 @@ describe("Title Escrow", async () => {
           const [targetNonBeneficiaryNominee] = users.others;
           await registryContract
             .connect(users.carrier)
-            .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId, txnRemarks.mintRemark);
+            .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId);
           titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, fakeTokenId);
 
           const initialBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
@@ -708,7 +704,7 @@ describe("Title Escrow", async () => {
           const [targetNonNominatedHolder] = users.others;
           await registryContract
             .connect(users.carrier)
-            .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId, txnRemarks.mintRemark);
+            .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId);
           titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, fakeTokenId);
 
           const initialBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
@@ -811,9 +807,7 @@ describe("Title Escrow", async () => {
       beforeEach(async () => {
         // eslint-disable-next-line no-multi-assign
         beneficiary = holder = users.others[faker.datatype.number(users.others.length - 1)];
-        await registryContract
-          .connect(users.carrier)
-          .mint(beneficiary.address, holder.address, tokenId, txnRemarks.mintRemark);
+        await registryContract.connect(users.carrier).mint(beneficiary.address, holder.address, tokenId);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
@@ -834,9 +828,7 @@ describe("Title Escrow", async () => {
 
       it("should not allow a beneficiary only to surrender", async () => {
         tokenId = faker.datatype.hexaDecimal(64);
-        await registryContract
-          .connect(users.carrier)
-          .mint(users.beneficiary.address, users.holder.address, tokenId, txnRemarks.mintRemark);
+        await registryContract.connect(users.carrier).mint(users.beneficiary.address, users.holder.address, tokenId);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
 
         const tx = titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
@@ -846,9 +838,7 @@ describe("Title Escrow", async () => {
 
       it("should not allow a holder only to surrender", async () => {
         tokenId = faker.datatype.hexaDecimal(64);
-        await registryContract
-          .connect(users.carrier)
-          .mint(users.beneficiary.address, users.holder.address, tokenId, txnRemarks.mintRemark);
+        await registryContract.connect(users.carrier).mint(users.beneficiary.address, users.holder.address, tokenId);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
 
         const tx = titleEscrowOwnerContract.connect(users.holder).surrender(txnRemarks.surrenderRemark);
@@ -908,7 +898,7 @@ describe("Title Escrow", async () => {
         registrySigner = await impersonateAccount({ address: registryContract.address });
         await registryContract
           .connect(users.carrier)
-          .mint(users.beneficiary.address, users.beneficiary.address, tokenId, txnRemarks.mintRemark);
+          .mint(users.beneficiary.address, users.beneficiary.address, tokenId);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 

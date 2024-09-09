@@ -9,5 +9,5 @@ interface ITradeTrustTokenMintable {
    * @param tokenId The ID of the token to mint.
    * @return The address of the corresponding TitleEscrow.
    */
-  function mint(address beneficiary, address holder, uint256 tokenId, bytes calldata remark) external returns (address);
+  function mint(address beneficiary, address holder, uint256 tokenId) external returns (address);
 }

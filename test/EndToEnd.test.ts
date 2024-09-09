@@ -179,11 +179,7 @@ describe("End to end", () => {
     describe("Minting", () => {
       it("should mint a token Id", async () => {
         // const escrowAddress = await escrowFactoryContract.getAddress(tokenRegistry.address, tokenId);
-        await expect(
-          tokenRegistry
-            .connect(minter)
-            .mint(beneficiary.address, holder.address, tokenId, ethers.utils.hexlify(txnRemarks.mintRemark))
-        )
+        await expect(tokenRegistry.connect(minter).mint(beneficiary.address, holder.address, tokenId))
           .to.emit(tokenRegistry, "Transfer")
           .withArgs(defaultAddress.Zero, titleEscrow.address, tokenId)
           .and.to.emit(escrowFactoryContract, "TitleEscrowCreated")
@@ -195,12 +191,12 @@ describe("End to end", () => {
       });
       it("should not allow mint when called by restorer", async () => {
         await expect(
-          tokenRegistry.connect(restorer).mint(beneficiary.address, holder.address, tokenId, txnRemarks.mintRemark)
+          tokenRegistry.connect(restorer).mint(beneficiary.address, holder.address, tokenId)
         ).to.be.revertedWith(toAccessControlRevertMessage(restorer.address, ethers.utils.id("MINTER_ROLE")));
       });
       it("should not allow mint when called by accepter", async () => {
         await expect(
-          tokenRegistry.connect(accepter).mint(beneficiary.address, holder.address, tokenId, txnRemarks.mintRemark)
+          tokenRegistry.connect(accepter).mint(beneficiary.address, holder.address, tokenId)
         ).to.be.revertedWith(toAccessControlRevertMessage(accepter.address, ethers.utils.id("MINTER_ROLE")));
       });
     });
@@ -211,7 +207,7 @@ describe("End to end", () => {
       });
       it("should revert when trying to mint with an existing tokenId", async () => {
         await expect(
-          tokenRegistry.connect(minter).mint(beneficiary.address, holder.address, tokenId, txnRemarks.mintRemark)
+          tokenRegistry.connect(minter).mint(beneficiary.address, holder.address, tokenId)
         ).to.be.revertedWithCustomError(tokenRegistry, "TokenExists");
       });
       it("should not allow burn without surrendering.", async () => {
@@ -238,7 +234,7 @@ describe("End to end", () => {
       });
       it("should not allow minting when paused", async () => {
         await expect(
-          tokenRegistry.connect(minter).mint(beneficiary.address, holder.address, tokenId, txnRemarks.mintRemark)
+          tokenRegistry.connect(minter).mint(beneficiary.address, holder.address, tokenId)
         ).to.be.rejectedWith("Pausable: paused");
       });
 
@@ -249,9 +245,7 @@ describe("End to end", () => {
       });
 
       it("should not allow restoring when paused", async () => {
-        await expect(tokenRegistry.connect(restorer).restore(tokenId, txnRemarks.restorerRemark)).to.be.rejectedWith(
-          "Pausable: paused"
-        );
+        await expect(tokenRegistry.connect(restorer).restore(tokenId)).to.be.rejectedWith("Pausable: paused");
       });
       it("should not allow un-pause when called by non-admin", async () => {
         await expect(tokenRegistry.connect(minter).unpause()).to.be.revertedWith(
@@ -552,25 +546,22 @@ describe("End to end", () => {
     });
     describe("Restore", () => {
       it("should not allow restore if the caller is holder", async () => {
-        await expect(tokenRegistry.connect(holder).restore(tokenId, txnRemarks.restorerRemark)).to.be.revertedWith(
+        await expect(tokenRegistry.connect(holder).restore(tokenId)).to.be.revertedWith(
           toAccessControlRevertMessage(holder.address, ethers.utils.id("RESTORER_ROLE"))
         );
       });
       it("should not allow restore if the caller is holder", async () => {
-        await expect(tokenRegistry.connect(minter).restore(tokenId, txnRemarks.restorerRemark)).to.be.revertedWith(
+        await expect(tokenRegistry.connect(minter).restore(tokenId)).to.be.revertedWith(
           toAccessControlRevertMessage(minter.address, ethers.utils.id("RESTORER_ROLE"))
         );
       });
       it("should not allow restore if the caller is holder", async () => {
-        await expect(tokenRegistry.connect(accepter).restore(tokenId, txnRemarks.restorerRemark)).to.be.revertedWith(
+        await expect(tokenRegistry.connect(accepter).restore(tokenId)).to.be.revertedWith(
           toAccessControlRevertMessage(accepter.address, ethers.utils.id("RESTORER_ROLE"))
         );
       });
       it("should allow restore after surrender", async () => {
-        expect(tokenRegistry.connect(restorer).restore(tokenId, txnRemarks.restorerRemark)).to.emit(
-          titleEscrow,
-          "Restore"
-        );
+        expect(tokenRegistry.connect(restorer).restore(tokenId)).to.emit(titleEscrow, "Restore");
       });
     });
     describe("After Restore", () => {

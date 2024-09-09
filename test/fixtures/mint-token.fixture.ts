@@ -9,15 +9,13 @@ export const mintTokenFixture = async ({
   beneficiary,
   holder,
   tokenId,
-  remark,
 }: {
   token: TradeTrustToken | TradeTrustTokenMock;
   beneficiary: SignerWithAddress;
   holder: SignerWithAddress;
   tokenId: string;
-  remark: Uint8Array;
 }) => {
-  const tx = await token.mint(beneficiary.address, holder.address, tokenId, remark);
+  const tx = await token.mint(beneficiary.address, holder.address, tokenId);
   const receipt = await tx.wait();
 
   const titleEscrowFactoryInterface = (await ethers.getContractFactory("TitleEscrowFactory")).interface;
