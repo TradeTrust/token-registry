@@ -485,6 +485,13 @@ describe("Title Escrow", async () => {
         beforeEach(async () => {
           [beneficiaryNominee] = users.others;
         });
+        it("should not allow beneficiary to nominate when remark length exceeds", async () => {
+          const remark = ethers.utils.hexlify(ethers.utils.randomBytes(121)); // Create a bytes array of length 120
+
+          let tx = titleEscrowOwnerContract.connect(users.beneficiary).nominate(beneficiaryNominee.address, remark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "RemarkLengthExceeded");
+        });
 
         it("should allow beneficiary to nominate a new beneficiary", async () => {
           await titleEscrowOwnerContract
@@ -689,6 +696,13 @@ describe("Title Escrow", async () => {
         beforeEach(async () => {
           [targetNewHolder] = users.others;
         });
+        it("should not allow transfer holder when remark length exceeds", async () => {
+          const remark = ethers.utils.hexlify(ethers.utils.randomBytes(121)); // Create a bytes array of length 120
+
+          let tx = titleEscrowOwnerContract.connect(users.holder).transferHolder(targetNewHolder.address, remark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "RemarkLengthExceeded");
+        });
 
         it("should allow a holder to transfer to another holder", async () => {
           await titleEscrowOwnerContract
@@ -811,6 +825,14 @@ describe("Title Escrow", async () => {
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
+      it("should not allow surrendering when remark length exceeds", async () => {
+        const remark = ethers.utils.hexlify(ethers.utils.randomBytes(121)); // Create a bytes array of length 120
+
+        let tx = titleEscrowOwnerContract.connect(beneficiary).surrender(remark);
+
+        await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "RemarkLengthExceeded");
+      });
+
       it("should allow a beneficiary who is also a holder to surrender", async () => {
         await titleEscrowOwnerContract.connect(beneficiary).surrender(txnRemarks.surrenderRemark);
 
@@ -900,6 +922,15 @@ describe("Title Escrow", async () => {
           .connect(users.carrier)
           .mint(users.beneficiary.address, users.beneficiary.address, tokenId);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
+      });
+
+      it("should not allow shredding when remark length exceeds", async () => {
+        const remark = ethers.utils.hexlify(ethers.utils.randomBytes(121)); // Create a bytes array of length 120
+
+        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
+        let tx = titleEscrowOwnerContract.connect(registrySigner).shred(remark);
+
+        await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "RemarkLengthExceeded");
       });
 
       it("should allow to be called from registry", async () => {

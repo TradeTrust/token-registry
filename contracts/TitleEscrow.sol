@@ -164,7 +164,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   function transferBeneficiary(
     address _nominee,
     bytes memory remark
-  ) public virtual override whenNotPaused whenActive onlyHolder whenHoldingToken {
+  ) public virtual override whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(remark) {
     if (_nominee == address(0)) {
       revert InvalidTransferToZeroAddress();
     }
@@ -181,7 +181,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   function transferHolder(
     address newHolder,
     bytes memory remark
-  ) public virtual override whenNotPaused whenActive onlyHolder whenHoldingToken {
+  ) public virtual override whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(remark) {
     if (newHolder == address(0)) {
       revert InvalidTransferToZeroAddress();
     }
@@ -205,7 +205,17 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    */
   function surrender(
     bytes memory remark
-  ) external virtual override whenNotPaused whenActive onlyBeneficiary onlyHolder whenHoldingToken {
+  )
+    external
+    virtual
+    override
+    whenNotPaused
+    whenActive
+    onlyBeneficiary
+    onlyHolder
+    whenHoldingToken
+    remarkLengthLimit(remark)
+  {
     _setNominee(address(0), "");
     ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId);
 
@@ -215,7 +225,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   /**
    * @dev See {ITitleEscrow-shred}.
    */
-  function shred(bytes memory remark) external virtual override whenNotPaused whenActive {
+  function shred(bytes memory remark) external virtual override whenNotPaused whenActive remarkLengthLimit(remark) {
     if (_isHoldingToken()) {
       revert TokenNotSurrendered();
     }

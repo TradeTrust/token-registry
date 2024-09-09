@@ -6,5 +6,5 @@ interface ITradeTrustTokenBurnable {
    * @dev Burn a token.
    * @param tokenId The ID of the token to burn.
    */
-  function burn(uint256 tokenId, bytes calldata remark) external;
+  function burn(uint256 tokenId, bytes memory remark) external;
 }
