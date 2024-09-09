@@ -97,7 +97,9 @@ const config: HardhatUserConfig = {
       ...networkConfig,
       url: "https://erpc.apothem.network",
     },
-    /* hedera */
+    /**
+     * Hedera
+     */
     hederamainnet: {
       ...networkConfig,
       url: "https://hedera-mainnet-json-rpc.krypc.com/",
