@@ -284,9 +284,9 @@ describe("End to end", () => {
     describe("Transfer Beneficiary", () => {
       describe("When Holder and Beneficiary are different", () => {
         it("1: should allow Beneficiary to nominate ", async () => {
-          expect(titleEscrow.connect(beneficiary).nominate(nominee1.address, txnRemarks.nominateRemark))
+          await expect(titleEscrow.connect(beneficiary).nominate(nominee1.address, txnRemarks.nominateRemark))
             .to.emit(titleEscrow, "Nomination")
-            .withArgs(nominee, nominee1, tokenRegistry, tokenId);
+            .withArgs(nominee, nominee1.address, tokenRegistry.address, tokenId, txnRemarks.nominateRemark);
         });
         it("2: should allow holder to transfer beneficiary", async () => {
           const newBeneficiary = nominee1;
@@ -509,7 +509,9 @@ describe("End to end", () => {
           await titleEscrow.connect(holder1).transferHolder(holder.address, txnRemarks.holderTransferRemark);
         });
         it("should allow surrendering if the contract holds the token", async () => {
-          expect(titleEscrow.connect(holder).surrender(txnRemarks.surrenderRemark)).to.emit(titleEscrow, "Surrender");
+          await expect(titleEscrow.connect(holder).surrender(txnRemarks.surrenderRemark))
+            .to.emit(titleEscrow, "Surrender")
+            .withArgs(holder.address, tokenRegistry.address, tokenId, txnRemarks.surrenderRemark);
           // token id owner to be token registry after surrender
           expect(await tokenRegistry.ownerOf(tokenId)).to.equal(tokenRegistry.address);
         });
@@ -579,7 +581,9 @@ describe("End to end", () => {
       //  eslint-disable-next-line no-undef
       before(async () => {
         // re-surrender as the token was restore in above test case
-        expect(titleEscrow.connect(holder).surrender(txnRemarks.surrenderRemark)).to.emit(titleEscrow, "Surrender");
+        await expect(titleEscrow.connect(holder).surrender(txnRemarks.surrenderRemark))
+          .to.emit(titleEscrow, "Surrender")
+          .withArgs(holder.address, tokenRegistry.address, tokenId, txnRemarks.surrenderRemark);
       });
       it("should not allow burn if the caller is minter", async () => {
         await expect(tokenRegistry.connect(minter).burn(tokenId, txnRemarks.burnRemark)).to.be.revertedWith(

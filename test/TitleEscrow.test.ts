@@ -200,11 +200,11 @@ describe("Title Escrow", async () => {
           });
 
           it("should emit TokenReceived event with correct values", async () => {
-            const tx = await titleEscrowContract
+            const tx = titleEscrowContract
               .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
 
-            expect(tx)
+            await expect(tx)
               .to.emit(titleEscrowContract, "TokenReceived")
               .withArgs(users.beneficiary.address, users.holder.address, true, fakeRegistry.address, tokenId);
           });
@@ -282,11 +282,11 @@ describe("Title Escrow", async () => {
             await titleEscrowContract
               .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
-            const tx = await titleEscrowContract
+            const tx = titleEscrowContract
               .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x");
 
-            expect(tx)
+            await expect(tx)
               .to.emit(titleEscrowContract, "TokenReceived")
               .withArgs(users.beneficiary.address, users.holder.address, false, fakeRegistry.address, tokenId);
           });
@@ -294,23 +294,23 @@ describe("Title Escrow", async () => {
 
         describe("Beneficiary and Holder Transfer Events", () => {
           it("should emit BeneficiaryTransfer event", async () => {
-            const tx = await titleEscrowContract
+            const tx = titleEscrowContract
               .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
 
-            expect(tx)
+            await expect(tx)
               .to.emit(titleEscrowContract, "BeneficiaryTransfer")
-              .withArgs(defaultAddress.Zero, users.beneficiary.address, fakeRegistry.address, tokenId);
+              .withArgs(defaultAddress.Zero, users.beneficiary.address, fakeRegistry.address, tokenId, "0x");
           });
 
           it("should emit HolderTransfer event", async () => {
-            const tx = await titleEscrowContract
+            const tx = titleEscrowContract
               .connect(fakeRegistry.wallet as Signer)
               .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
 
-            expect(tx)
+            await expect(tx)
               .to.emit(titleEscrowContract, "HolderTransfer")
-              .withArgs(defaultAddress.Zero, users.holder.address, fakeRegistry.address, tokenId);
+              .withArgs(defaultAddress.Zero, users.holder.address, fakeRegistry.address, tokenId, "0x");
           });
         });
       });
@@ -574,13 +574,19 @@ describe("Title Escrow", async () => {
         });
 
         it("should emit Nomination event", async () => {
-          const tx = await titleEscrowOwnerContract
+          const tx = titleEscrowOwnerContract
             .connect(users.beneficiary)
             .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
-          expect(tx)
+          await expect(tx)
             .to.emit(titleEscrowOwnerContract, "Nomination")
-            .withArgs(defaultAddress.Zero, beneficiaryNominee.address, registryContract.address, tokenId);
+            .withArgs(
+              defaultAddress.Zero,
+              beneficiaryNominee.address,
+              registryContract.address,
+              tokenId,
+              txnRemarks.nominateRemark
+            );
         });
       });
     });
@@ -680,13 +686,19 @@ describe("Title Escrow", async () => {
             .connect(users.beneficiary)
             .nominate(beneficiaryNominee.address, txnRemarks.nominateRemark);
 
-          const tx = await titleEscrowOwnerContract
+          const tx = titleEscrowOwnerContract
             .connect(users.holder)
             .transferBeneficiary(beneficiaryNominee.address, txnRemarks.beneficiaryTransferRemark);
 
-          expect(tx)
+          await expect(tx)
             .to.emit(titleEscrowOwnerContract, "BeneficiaryTransfer")
-            .withArgs(users.beneficiary.address, beneficiaryNominee.address, registryContract.address, tokenId);
+            .withArgs(
+              users.beneficiary.address,
+              beneficiaryNominee.address,
+              registryContract.address,
+              tokenId,
+              txnRemarks.beneficiaryTransferRemark
+            );
         });
       });
 
@@ -756,13 +768,19 @@ describe("Title Escrow", async () => {
         });
 
         it("should emit HolderTransfer event", async () => {
-          const tx = await titleEscrowOwnerContract
+          const tx = titleEscrowOwnerContract
             .connect(users.holder)
             .transferHolder(targetNewHolder.address, txnRemarks.holderTransferRemark);
 
-          expect(tx)
+          await expect(tx)
             .to.emit(titleEscrowOwnerContract, "HolderTransfer")
-            .withArgs(users.holder.address, targetNewHolder.address, registryContract.address, tokenId);
+            .withArgs(
+              users.holder.address,
+              targetNewHolder.address,
+              registryContract.address,
+              tokenId,
+              txnRemarks.holderTransferRemark
+            );
         });
       });
 
@@ -800,16 +818,28 @@ describe("Title Escrow", async () => {
         });
 
         it("should emit BeneficiaryTransfer and HolderTransfer events", async () => {
-          const tx = await titleEscrowOwnerContract
+          const tx = titleEscrowOwnerContract
             .connect(users.holder)
-            .transferOwners(beneficiaryNominee.address, holderNominee.address, txnRemarks.holderTransferRemark);
+            .transferOwners(beneficiaryNominee.address, holderNominee.address, txnRemarks.transferOwnersRemark);
 
-          expect(tx)
+          await expect(tx)
             .to.emit(titleEscrowOwnerContract, "BeneficiaryTransfer")
-            .withArgs(users.beneficiary.address, beneficiaryNominee.address, registryContract.address, tokenId);
-          expect(tx)
+            .withArgs(
+              users.beneficiary.address,
+              beneficiaryNominee.address,
+              registryContract.address,
+              tokenId,
+              txnRemarks.transferOwnersRemark
+            );
+          await expect(tx)
             .to.emit(titleEscrowOwnerContract, "HolderTransfer")
-            .withArgs(users.holder.address, holderNominee.address, registryContract.address, tokenId);
+            .withArgs(
+              users.holder.address,
+              holderNominee.address,
+              registryContract.address,
+              tokenId,
+              txnRemarks.transferOwnersRemark
+            );
         });
       });
     });
@@ -902,14 +932,11 @@ describe("Title Escrow", async () => {
       });
 
       it("should emit Surrender event with correct values", async () => {
-        const tx = await titleEscrowOwnerContract.connect(beneficiary).surrender(txnRemarks.surrenderRemark);
+        const tx = titleEscrowOwnerContract.connect(beneficiary).surrender(txnRemarks.surrenderRemark);
 
-        expect(tx)
+        await expect(tx)
           .to.emit(titleEscrowOwnerContract, "Surrender")
-          .withArgs(beneficiary.address, registryContract.address, tokenId);
-        expect(tx)
-          .to.emit(titleEscrowOwnerContract, "Surrender")
-          .withArgs(holder.address, registryContract.address, tokenId);
+          .withArgs(beneficiary.address, registryContract.address, tokenId, txnRemarks.surrenderRemark);
       });
     });
 
@@ -998,9 +1025,11 @@ describe("Title Escrow", async () => {
       it("should emit Shred event", async () => {
         await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
 
-        const tx = await titleEscrowOwnerContract.connect(registrySigner).shred(txnRemarks.burnRemark);
+        const tx = titleEscrowOwnerContract.connect(registrySigner).shred(txnRemarks.burnRemark);
 
-        expect(tx).to.emit(titleEscrowOwnerContract, "Shred").withArgs(registryContract.address, tokenId);
+        await expect(tx)
+          .to.emit(titleEscrowOwnerContract, "Shred")
+          .withArgs(registryContract.address, tokenId, txnRemarks.burnRemark);
       });
     });
   });
