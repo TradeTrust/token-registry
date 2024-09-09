@@ -178,7 +178,6 @@ describe("End to end", () => {
     });
     describe("Minting", () => {
       it("should mint a token Id", async () => {
-        // const escrowAddress = await escrowFactoryContract.getAddress(tokenRegistry.address, tokenId);
         await expect(tokenRegistry.connect(minter).mint(beneficiary.address, holder.address, tokenId))
           .to.emit(tokenRegistry, "Transfer")
           .withArgs(defaultAddress.Zero, titleEscrow.address, tokenId)
