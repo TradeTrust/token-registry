@@ -7,5 +7,5 @@ interface ITradeTrustTokenRestorable {
    * @param tokenId The ID of the token to restore.
    * @return The address of the TitleEscrow contract.
    */
-  function restore(uint256 tokenId) external returns (address);
+  function restore(uint256 tokenId, bytes memory remark) external returns (address);
 }

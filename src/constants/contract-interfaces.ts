@@ -1,8 +1,8 @@
 export const contractInterfaces = {
   TradeTrustSBT: ["genesis()", "titleEscrowFactory()"],
-  TradeTrustTokenMintable: ["mint(address,address,uint256)"],
+  TradeTrustTokenMintable: ["mint(address,address,uint256,bytes)"],
   TradeTrustTokenBurnable: ["burn(uint256,bytes)"],
-  TradeTrustTokenRestorable: ["restore(uint256)"],
+  TradeTrustTokenRestorable: ["restore(uint256,bytes)"],
   TitleEscrow: [
     "nominate(address,bytes)",
     "transferBeneficiary(address,bytes)",
@@ -30,5 +30,5 @@ export const contractInterfaces = {
     "revokeRole(bytes32,address)",
     "renounceRole(bytes32,address)",
   ],
-  SBT: ["balanceOf(address)", "ownerOf(uint256)", "transferFrom(address,address,uint256)"],
+  SBT: ["balanceOf(address)", "ownerOf(uint256)", "transferFrom(address,address,uint256,bytes)"],
 };

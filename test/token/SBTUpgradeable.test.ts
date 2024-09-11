@@ -5,7 +5,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers, network } from "hardhat";
 import { ContractTransaction } from "ethers";
 import { assert, expect } from "../index";
-import { getTestUsers, TestUsers } from "../helpers";
+import { getTestUsers, TestUsers, txnHexRemarks } from "../helpers";
 
 describe("SBTUpgradeable", async () => {
   let users: TestUsers;
@@ -116,14 +116,21 @@ describe("SBTUpgradeable", async () => {
       it("should call onERC721Received with data", async () => {
         // Prepare the data to be passed along with the minting.
         const data = new ethers.utils.AbiCoder().encode(
-          ["address", "address"],
-          [users.beneficiary.address, users.holder.address]
+          ["address", "address", "bytes"],
+          [users.beneficiary.address, users.holder.address, txnHexRemarks.mintRemark]
         );
 
         // Expect the safeMintWithDataInternal function to emit a TokenReceived event with the specified arguments.
         await expect(mockSbtContract.safeMintWithDataInternal(erc721ReceiverContract.address, tokenId, data))
           .to.emit(erc721ReceiverContract, "TokenReceived")
-          .withArgs(users.beneficiary.address, users.holder.address, true, mockSbtContract.address, tokenId);
+          .withArgs(
+            users.beneficiary.address,
+            users.holder.address,
+            true,
+            mockSbtContract.address,
+            tokenId,
+            txnHexRemarks.mintRemark
+          );
       });
 
       it("should call onERC721Received without data", async () => {
@@ -267,7 +274,9 @@ describe("SBTUpgradeable", async () => {
       });
 
       it("should transfer with correct owner", async () => {
-        await mockSbtContract.connect(recipient).transferFrom(recipient.address, deployer.address, tokenId);
+        await mockSbtContract
+          .connect(recipient)
+          .transferFrom(recipient.address, deployer.address, tokenId, txnHexRemarks.restorerRemark);
 
         const owner = await mockSbtContract.ownerOf(tokenId);
 
@@ -275,7 +284,9 @@ describe("SBTUpgradeable", async () => {
       });
 
       it("should revert if owner is incorrect", async () => {
-        const tx = mockSbtContract.connect(recipient).transferFrom(users.others[1].address, deployer.address, tokenId);
+        const tx = mockSbtContract
+          .connect(recipient)
+          .transferFrom(users.others[1].address, deployer.address, tokenId, txnHexRemarks.restorerRemark);
 
         await expect(tx).to.be.revertedWith("ERC721: transfer from incorrect owner");
       });
@@ -283,19 +294,26 @@ describe("SBTUpgradeable", async () => {
       it("should revert if transfer to zero address", async () => {
         const tx = mockSbtContract
           .connect(recipient)
-          .transferFrom(recipient.address, ethers.constants.AddressZero, tokenId);
+          .transferFrom(recipient.address, ethers.constants.AddressZero, tokenId, txnHexRemarks.restorerRemark);
 
         await expect(tx).to.be.revertedWith("ERC721: transfer to the zero address");
       });
 
       it("should revert when caller is not owner", async () => {
-        const tx = mockSbtContract.connect(users.others[1]).transferFrom(recipient.address, deployer.address, tokenId);
+        const tx = mockSbtContract
+          .connect(users.others[1])
+          .transferFrom(recipient.address, deployer.address, tokenId, txnHexRemarks.restorerRemark);
 
         await expect(tx).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
       });
 
       it("should revert if token does not exist", async () => {
-        const tx = mockSbtContract.transferFrom(deployer.address, deployer.address, faker.datatype.hexaDecimal(64));
+        const tx = mockSbtContract.transferFrom(
+          deployer.address,
+          deployer.address,
+          faker.datatype.hexaDecimal(64),
+          txnHexRemarks.restorerRemark
+        );
 
         await expect(tx).to.be.revertedWith("ERC721: operator query for nonexistent token");
       });
@@ -308,7 +326,9 @@ describe("SBTUpgradeable", async () => {
         // Set the fake code at the fake address
         await network.provider.send("hardhat_setCode", [fakeAddress, fakeCode]);
 
-        const tx = mockSbtContract.connect(recipient).transferFrom(recipient.address, fakeAddress, tokenId);
+        const tx = mockSbtContract
+          .connect(recipient)
+          .transferFrom(recipient.address, fakeAddress, tokenId, txnHexRemarks.restorerRemark);
 
         await expect(tx).to.be.reverted;
       });

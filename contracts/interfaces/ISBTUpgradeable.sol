@@ -42,9 +42,5 @@ interface ISBTUpgradeable is IERC165Upgradeable {
    *
    * Emits a {Transfer} event.
    */
-  function transferFrom(
-    address from,
-    address to,
-    uint256 tokenId
-  ) external;
+  function transferFrom(address from, address to, uint256 tokenId, bytes memory remark) external;
 }

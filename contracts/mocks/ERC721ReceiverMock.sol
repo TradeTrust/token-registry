@@ -16,7 +16,8 @@ contract ERC721ReceiverMock is IERC721Receiver {
     address indexed holder,
     bool indexed isMinting,
     address registry,
-    uint256 tokenId
+    uint256 tokenId,
+    bytes remark
   );
 
   Error private _error;
@@ -41,8 +42,8 @@ contract ERC721ReceiverMock is IERC721Receiver {
     } else if (_error == Error.ReturnsUnexpectedValue) {
       return bytes4(0x12345678);
     }
-    (address _beneficiary, address _holder) = abi.decode(data, (address, address));
-    emit TokenReceived(_beneficiary, _holder, true, msg.sender, tokenId);
+    (address _beneficiary, address _holder, bytes memory _remark) = abi.decode(data, (address, address, bytes));
+    emit TokenReceived(_beneficiary, _holder, true, msg.sender, tokenId, _remark);
     return IERC721Receiver.onERC721Received.selector;
   }
 }

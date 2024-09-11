@@ -23,6 +23,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   bool public override active;
 
+  bytes public remark;
+
   constructor() initializer {}
 
   /**
@@ -76,10 +78,10 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _;
   }
   /**
-   * @dev Modifier to check if the bytes array length is within the limit
+   * @dev Modifier to check if the bytes length is within the limit
    */
-  modifier remarkLengthLimit(bytes memory remark) {
-    if (remark.length > 120) revert RemarkLengthExceeded();
+  modifier remarkLengthLimit(bytes calldata _remark) {
+    if (_remark.length > 120) revert RemarkLengthExceeded();
     _;
   }
 
@@ -128,16 +130,17 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
       if (data.length == 0) {
         revert EmptyReceivingData();
       }
-      (address _beneficiary, address _holder) = abi.decode(data, (address, address));
+      (address _beneficiary, address _holder, bytes memory _remark) = abi.decode(data, (address, address, bytes));
       if (_beneficiary == address(0) || _holder == address(0)) {
         revert InvalidTokenTransferToZeroAddressOwners(_beneficiary, _holder);
       }
       _setBeneficiary(_beneficiary, "");
       _setHolder(_holder, "");
+      remark = _remark;
       isMinting = true;
-    }
+    } else remark = data;
 
-    emit TokenReceived(beneficiary, holder, isMinting, registry, tokenId);
+    emit TokenReceived(beneficiary, holder, isMinting, registry, tokenId, remark);
     return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
   }
 
@@ -146,16 +149,17 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    */
   function nominate(
     address _nominee,
-    bytes memory remark
-  ) public virtual override whenNotPaused whenActive onlyBeneficiary whenHoldingToken remarkLengthLimit(remark) {
+    bytes calldata _remark
+  ) public virtual override whenNotPaused whenActive onlyBeneficiary whenHoldingToken remarkLengthLimit(_remark) {
     if (beneficiary == _nominee) {
       revert TargetNomineeAlreadyBeneficiary();
     }
     if (nominee == _nominee) {
       revert NomineeAlreadyNominated();
     }
+    remark = _remark;
 
-    _setNominee(_nominee, remark);
+    _setNominee(_nominee, _remark);
   }
 
   /**
@@ -163,16 +167,17 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    */
   function transferBeneficiary(
     address _nominee,
-    bytes memory remark
-  ) public virtual override whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(remark) {
+    bytes calldata _remark
+  ) public virtual override whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(_remark) {
     if (_nominee == address(0)) {
       revert InvalidTransferToZeroAddress();
     }
     if (!(beneficiary == holder || nominee == _nominee)) {
       revert InvalidNominee();
     }
+    remark = _remark;
 
-    _setBeneficiary(_nominee, remark);
+    _setBeneficiary(_nominee, _remark);
   }
 
   /**
@@ -180,31 +185,32 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    */
   function transferHolder(
     address newHolder,
-    bytes memory remark
-  ) public virtual override whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(remark) {
+    bytes calldata _remark
+  ) public virtual override whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(_remark) {
     if (newHolder == address(0)) {
       revert InvalidTransferToZeroAddress();
     }
     if (holder == newHolder) {
       revert RecipientAlreadyHolder();
     }
+    remark = _remark;
 
-    _setHolder(newHolder, remark);
+    _setHolder(newHolder, _remark);
   }
 
   /**
    * @dev See {ITitleEscrow-transferOwners}.
    */
-  function transferOwners(address _nominee, address newHolder, bytes memory remark) external virtual override {
-    transferBeneficiary(_nominee, remark);
-    transferHolder(newHolder, remark);
+  function transferOwners(address _nominee, address newHolder, bytes calldata _remark) external virtual override {
+    transferBeneficiary(_nominee, _remark);
+    transferHolder(newHolder, _remark);
   }
 
   /**
    * @dev See {ITitleEscrow-surrender}.
    */
   function surrender(
-    bytes memory remark
+    bytes calldata _remark
   )
     external
     virtual
@@ -214,18 +220,19 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     onlyBeneficiary
     onlyHolder
     whenHoldingToken
-    remarkLengthLimit(remark)
+    remarkLengthLimit(_remark)
   {
     _setNominee(address(0), "");
-    ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId);
+    ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId, "");
+    remark = _remark;
 
-    emit Surrender(msg.sender, registry, tokenId, remark);
+    emit Surrender(msg.sender, registry, tokenId, _remark);
   }
 
   /**
    * @dev See {ITitleEscrow-shred}.
    */
-  function shred(bytes memory remark) external virtual override whenNotPaused whenActive remarkLengthLimit(remark) {
+  function shred(bytes calldata _remark) external virtual override whenNotPaused whenActive remarkLengthLimit(_remark) {
     if (_isHoldingToken()) {
       revert TokenNotSurrendered();
     }
@@ -236,8 +243,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _setBeneficiary(address(0), "");
     _setHolder(address(0), "");
     active = false;
+    remark = _remark;
 
-    emit Shred(registry, tokenId, remark);
+    emit Shred(registry, tokenId, _remark);
   }
 
   /**
@@ -259,8 +267,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    * @notice Sets the nominee
    * @param newNominee The address of the new nominee
    */
-  function _setNominee(address newNominee, bytes memory remark) internal virtual {
-    emit Nomination(nominee, newNominee, registry, tokenId, remark);
+  function _setNominee(address newNominee, bytes memory _remark) internal virtual {
+    emit Nomination(nominee, newNominee, registry, tokenId, _remark);
     nominee = newNominee;
   }
 
@@ -268,9 +276,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    * @notice Sets the beneficiary
    * @param newBeneficiary The address of the new beneficiary
    */
-  function _setBeneficiary(address newBeneficiary, bytes memory remark) internal virtual {
-    emit BeneficiaryTransfer(beneficiary, newBeneficiary, registry, tokenId, remark);
-    if (nominee != address(0)) _setNominee(address(0), "");
+  function _setBeneficiary(address newBeneficiary, bytes memory _remark) internal virtual {
+    emit BeneficiaryTransfer(beneficiary, newBeneficiary, registry, tokenId, _remark);
+    if (nominee != address(0)) _setNominee(address(0), "0x");
     beneficiary = newBeneficiary;
   }
 
@@ -278,8 +286,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    * @notice Sets the holder
    * @param newHolder The address of the new holder
    */
-  function _setHolder(address newHolder, bytes memory remark) internal virtual {
-    emit HolderTransfer(holder, newHolder, registry, tokenId, remark);
+  function _setHolder(address newHolder, bytes memory _remark) internal virtual {
+    emit HolderTransfer(holder, newHolder, registry, tokenId, _remark);
     holder = newHolder;
   }
 }

@@ -3,6 +3,7 @@ import { TitleEscrowCreatedEvent } from "@tradetrust/contracts/contracts/TitleEs
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import { getEventFromReceipt } from "../../src/utils";
+import { txnHexRemarks } from "../helpers";
 
 export const mintTokenFixture = async ({
   token,
@@ -15,7 +16,7 @@ export const mintTokenFixture = async ({
   holder: SignerWithAddress;
   tokenId: string;
 }) => {
-  const tx = await token.mint(beneficiary.address, holder.address, tokenId);
+  const tx = await token.mint(beneficiary.address, holder.address, tokenId, txnHexRemarks.mintRemark);
   const receipt = await tx.wait();
 
   const titleEscrowFactoryInterface = (await ethers.getContractFactory("TitleEscrowFactory")).interface;

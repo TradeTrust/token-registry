@@ -9,7 +9,7 @@ import { assert, expect } from ".";
 import { contractInterfaceId } from "../src/constants";
 import { deployTokenFixture } from "./fixtures";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
-import { getTestUsers, impersonateAccount, TestUsers, txnRemarks } from "./helpers";
+import { getTestUsers, impersonateAccount, TestUsers, txnHexRemarks } from "./helpers";
 
 type BeneficiaryTransferData = {
   beneficiary: string;
@@ -159,8 +159,8 @@ describe("TitleEscrowSignable", async () => {
       await titleEscrowContract.initialize(fakeRegistryContract.address, fakeTokenId);
 
       const data = new ethers.utils.AbiCoder().encode(
-        ["address", "address"],
-        [users.beneficiary.address, users.holder.address]
+        ["address", "address", "bytes"],
+        [users.beneficiary.address, users.holder.address, txnHexRemarks.mintRemark]
       );
       await titleEscrowContract
         .connect(registrySigner as Signer)
@@ -186,10 +186,10 @@ describe("TitleEscrowSignable", async () => {
 
       describe("When registry is paused", () => {
         beforeEach(async () => {
-          await fakeRegistryContract.connect(users.carrier).pause();
+          await fakeRegistryContract.connect(users.carrier).pause(txnHexRemarks.pauseRemark);
         });
 
-        it("should revert when calling: transferBeneficiaryWithSig", async () => {
+        it("1 should revert when calling: transferBeneficiaryWithSig", async () => {
           const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(fakeEndorsement, fakeSig);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "RegistryContractPaused");
@@ -206,12 +206,12 @@ describe("TitleEscrowSignable", async () => {
         beforeEach(async () => {
           await titleEscrowContract
             .connect(users.holder)
-            .transferHolder(users.beneficiary.address, txnRemarks.holderTransferRemark);
-          await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
-          await titleEscrowContract.connect(registrySigner as Signer).shred(txnRemarks.burnRemark);
+            .transferHolder(users.beneficiary.address, txnHexRemarks.holderTransferRemark);
+          await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+          await titleEscrowContract.connect(registrySigner as Signer).shred(txnHexRemarks.burnRemark);
         });
 
-        it("should revert when calling: transferBeneficiaryWithSig", async () => {
+        it("2 should revert when calling: transferBeneficiaryWithSig", async () => {
           const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(fakeEndorsement, fakeSig);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InactiveTitleEscrow");
@@ -228,11 +228,11 @@ describe("TitleEscrowSignable", async () => {
         beforeEach(async () => {
           await titleEscrowContract
             .connect(users.holder)
-            .transferHolder(users.beneficiary.address, txnRemarks.holderTransferRemark);
-          await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
+            .transferHolder(users.beneficiary.address, txnHexRemarks.holderTransferRemark);
+          await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
         });
 
-        it("should revert when calling: transferBeneficiaryWithSig", async () => {
+        it("3 should revert when calling: transferBeneficiaryWithSig", async () => {
           const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(fakeEndorsement, fakeSig);
 
           await expect(tx).to.be.revertedWithCustomError(
@@ -351,7 +351,7 @@ describe("TitleEscrowSignable", async () => {
 
           it("should revert when on-chain nominee is different from endorsed nominee", async () => {
             const [, invalidNominee] = users.others;
-            await titleEscrowContractAsBeneficiary.nominate(invalidNominee.address, txnRemarks.nominateRemark);
+            await titleEscrowContractAsBeneficiary.nominate(invalidNominee.address, txnHexRemarks.nominateRemark);
             const onChainNominee = await titleEscrowContract.nominee();
             assert.isOk(onChainNominee === invalidNominee.address, "Wrong on-chain nominee");
 
@@ -408,7 +408,7 @@ describe("TitleEscrowSignable", async () => {
           });
 
           it("should transfer beneficiary successfully if on-chain nominee is same as endorsed nominee", async () => {
-            await titleEscrowContractAsBeneficiary.nominate(nominee.address, txnRemarks.nominateRemark);
+            await titleEscrowContractAsBeneficiary.nominate(nominee.address, txnHexRemarks.nominateRemark);
             const onChainNominee = await titleEscrowContract.nominee();
             assert.isOk(onChainNominee === nominee.address, "On-chain nominee is different from endorsed nominee");
 
@@ -489,7 +489,7 @@ describe("TitleEscrowSignable", async () => {
 
           await titleEscrowContract
             .connect(users.holder)
-            .transferHolder(newHolder.address, txnRemarks.holderTransferRemark);
+            .transferHolder(newHolder.address, txnHexRemarks.holderTransferRemark);
           const currentNonce = await titleEscrowContract.nonces(users.holder.address);
 
           expect(Number(currentNonce)).to.be.greaterThan(Number(initNonce));
@@ -500,7 +500,7 @@ describe("TitleEscrowSignable", async () => {
 
           await titleEscrowContract
             .connect(users.holder)
-            .transferHolder(newHolder.address, txnRemarks.holderTransferRemark);
+            .transferHolder(newHolder.address, txnHexRemarks.holderTransferRemark);
           const currentNonce = await titleEscrowContract.nonces(newHolder.address);
 
           expect(initNonce).to.equal(currentNonce);
@@ -512,7 +512,7 @@ describe("TitleEscrowSignable", async () => {
           sig = ethers.utils.splitSignature(sigHash);
           await titleEscrowContract
             .connect(users.holder)
-            .transferHolder(newHolder.address, txnRemarks.holderTransferRemark);
+            .transferHolder(newHolder.address, txnHexRemarks.holderTransferRemark);
 
           const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 

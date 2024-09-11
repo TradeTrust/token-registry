@@ -22,7 +22,10 @@ abstract contract TradeTrustTokenRestorable is TradeTrustSBT, RegistryAccess, IT
   /**
    * @dev See {ITradeTrustTokenRestorable-restore}.
    */
-  function restore(uint256 tokenId) external virtual override whenNotPaused onlyRole(RESTORER_ROLE) returns (address) {
+  function restore(
+    uint256 tokenId,
+    bytes calldata _remark
+  ) external virtual override whenNotPaused onlyRole(RESTORER_ROLE) remarkLengthLimit(_remark) returns (address) {
     if (!_exists(tokenId)) {
       revert InvalidTokenId();
     }
@@ -31,7 +34,7 @@ abstract contract TradeTrustTokenRestorable is TradeTrustSBT, RegistryAccess, IT
     }
 
     address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
-    _registryTransferTo(titleEscrow, tokenId);
+    _registryTransferTo(titleEscrow, tokenId, _remark);
 
     return titleEscrow;
   }

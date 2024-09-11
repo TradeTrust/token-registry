@@ -7,7 +7,7 @@ contract SimpleCaller {
    * @param target The address of the target contract.
    * @param data The calldata (including function selector and encoded parameters).
    */
-  function callFunction(address target, bytes memory data) public payable returns (bytes memory) {
+  function callFunction(address target, bytes calldata data) public payable returns (bytes memory) {
     require(target != address(0), "Invalid target address");
 
     // Call the function
