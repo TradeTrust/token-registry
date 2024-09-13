@@ -123,6 +123,8 @@ describe("TradeTrustTokenRestorable", async () => {
 
     const tx = await registryContractAsAdmin.restore(tokenId, txnHexRemarks.restorerRemark);
 
-    expect(tx).to.emit(registryContract, "Transfer").withArgs(registryContract.address, titleEscrowAddress, tokenId);
+    await expect(tx)
+      .to.emit(registryContract, "Transfer")
+      .withArgs(registryContract.address, titleEscrowAddress, tokenId);
   });
 });

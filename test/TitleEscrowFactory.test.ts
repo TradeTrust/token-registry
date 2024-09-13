@@ -145,7 +145,7 @@ describe("TitleEscrowFactory", async () => {
       it("should emit TitleEscrowCreated event", async () => {
         const createCallerAddress = titleEscrowFactoryCallerMock.address;
 
-        expect(titleEscrowFactoryCreateTx)
+        await expect(titleEscrowFactoryCreateTx)
           .to.emit(titleEscrowFactory, "TitleEscrowCreated")
           .withArgs(titleEscrowContract.address, createCallerAddress, tokenId);
       });

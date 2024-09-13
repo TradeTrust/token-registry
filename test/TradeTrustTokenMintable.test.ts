@@ -171,7 +171,7 @@ describe("TradeTrustTokenMintable", async () => {
       );
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
 
-      expect(tx)
+      await expect(tx)
         .to.emit(registryContract, "Transfer")
         .withArgs(defaultAddress.Zero, titleEscrowContract.address, tokenId);
     });

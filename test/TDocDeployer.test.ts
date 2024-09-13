@@ -95,8 +95,12 @@ describe("TDocDeployer", async () => {
     });
 
     describe("Adding Implementation", () => {
+      let addImplementationTx: ContractTransaction;
       beforeEach(async () => {
-        await deployerContractAsOwner.addImplementation(implContract.address, fakeTitleEscrowFactory);
+        addImplementationTx = await deployerContractAsOwner.addImplementation(
+          implContract.address,
+          fakeTitleEscrowFactory
+        );
       });
 
       it("should add implementation correctly", async () => {
@@ -106,9 +110,7 @@ describe("TDocDeployer", async () => {
       });
 
       it("should emit AddImplementation when add implementation", async () => {
-        const tx = await deployerContractAsNonOwner.implementations(implContract.address);
-
-        expect(tx)
+        await expect(addImplementationTx)
           .to.emit(deployerContract, "AddImplementation")
           .withArgs(implContract.address, fakeTitleEscrowFactory);
       });
@@ -250,7 +252,7 @@ describe("TDocDeployer", async () => {
       });
 
       it("should emit Deployment event", async () => {
-        expect(createTx)
+        await expect(createTx)
           .to.emit(deployerContract, "Deployment")
           .withArgs(
             clonedRegistryContract.address,

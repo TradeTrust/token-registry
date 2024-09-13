@@ -470,7 +470,7 @@ describe("TitleEscrowSignable", async () => {
           it("should emit CancelBeneficiaryTransferEndorsement event", async () => {
             const tx = await titleEscrowContractAsEndorsingHolder.cancelBeneficiaryTransfer(endorsement);
 
-            expect(tx)
+            await expect(tx)
               .to.emit(titleEscrowContractAsBeneficiary, "CancelBeneficiaryTransferEndorsement")
               .withArgs(hashStruct, users.holder.address, fakeTokenId);
           });

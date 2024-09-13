@@ -632,7 +632,7 @@ describe("End to end", () => {
       it("should allow restore after surrender", async () => {
         expect(tokenRegistry.connect(restorer).restore(tokenId, txnHexRemarks.restorerRemark)).to.emit(
           titleEscrow,
-          "Restore"
+          "Restor"
         );
         expect(await tokenRegistry.ownerOf(tokenId)).to.equal(titleEscrow.address);
         const remark = await titleEscrow.remark();
