@@ -60,16 +60,20 @@ abstract contract TradeTrustTokenBase is
    * @dev Pauses all token transfers.
    * @notice Requires the caller to be admin.
    */
-  function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function pause(bytes calldata _remark) external onlyRole(DEFAULT_ADMIN_ROLE) remarkLengthLimit(_remark) {
     _pause();
+    remark = _remark;
+    emit PauseWithRemark(msg.sender, _remark);
   }
 
   /**
    * @dev Unpauses all token transfers.
    * @notice Requires the caller to be admin.
    */
-  function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function unpause(bytes calldata _remark) external onlyRole(DEFAULT_ADMIN_ROLE) remarkLengthLimit(_remark) {
     _unpause();
+    remark = _remark;
+    emit UnpauseWithRemark(msg.sender, _remark);
   }
 
   /**

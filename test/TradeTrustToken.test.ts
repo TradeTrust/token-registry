@@ -11,7 +11,7 @@ import {
   getTitleEscrowContract,
   impersonateAccount,
   TestUsers,
-  txnRemarks,
+  txnHexRemarks,
 } from "./helpers";
 
 describe("TradeTrustToken", async () => {
@@ -130,7 +130,12 @@ describe("TradeTrustToken", async () => {
     let titleEscrowContract: TitleEscrow;
 
     beforeEach(async () => {
-      await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+      await registryContractAsAdmin.mint(
+        users.beneficiary.address,
+        users.beneficiary.address,
+        tokenId,
+        txnHexRemarks.mintRemark
+      );
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
     });
 
@@ -149,7 +154,12 @@ describe("TradeTrustToken", async () => {
 
         const tx = registryContract
           .connect(titleEscrowContractSigner)
-          .transferFrom(titleEscrowContract.address, nonDesignatedTitleEscrowAddress, tokenId);
+          .transferFrom(
+            titleEscrowContract.address,
+            nonDesignatedTitleEscrowAddress,
+            tokenId,
+            txnHexRemarks.restorerRemark
+          );
 
         await expect(tx).to.be.revertedWithCustomError(registryContract, "TransferFailure");
       });
@@ -157,7 +167,7 @@ describe("TradeTrustToken", async () => {
       it("should revert with TransferFailure when transfer to an EOA", async () => {
         const tx = registryContract
           .connect(titleEscrowContractSigner)
-          .transferFrom(titleEscrowContract.address, users.beneficiary.address, tokenId);
+          .transferFrom(titleEscrowContract.address, users.beneficiary.address, tokenId, txnHexRemarks.restorerRemark);
 
         await expect(tx).to.be.revertedWithCustomError(registryContract, "TransferFailure");
       });
@@ -165,7 +175,7 @@ describe("TradeTrustToken", async () => {
       it("should transfer successfully to registry token contract", async () => {
         await registryContract
           .connect(titleEscrowContractSigner)
-          .transferFrom(titleEscrowContract.address, registryContract.address, tokenId);
+          .transferFrom(titleEscrowContract.address, registryContract.address, tokenId, txnHexRemarks.restorerRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
 
@@ -175,7 +185,12 @@ describe("TradeTrustToken", async () => {
       it("should transfer successfully to designated title escrow contract", async () => {
         const tx = registryContract
           .connect(titleEscrowContractSigner)
-          .transferFrom(titleEscrowContract.address, titleEscrowContract.address, tokenId);
+          .transferFrom(
+            titleEscrowContract.address,
+            titleEscrowContract.address,
+            tokenId,
+            txnHexRemarks.restorerRemark
+          );
 
         await expect(tx).to.not.be.reverted;
       });
@@ -191,7 +206,7 @@ describe("TradeTrustToken", async () => {
       });
 
       it("should have registry as owner for a surrendered token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
+        await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
 
@@ -199,8 +214,8 @@ describe("TradeTrustToken", async () => {
       });
 
       it("should have burn address as owner for an accepted token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
-        await registryContract.burn(tokenId, txnRemarks.burnRemark);
+        await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await registryContract.burn(tokenId, txnHexRemarks.burnRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
 
@@ -208,8 +223,8 @@ describe("TradeTrustToken", async () => {
       });
 
       it("should not have registry and burn address as owner for a restored token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
-        await registryContract.restore(tokenId);
+        await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await registryContract.restore(tokenId, txnHexRemarks.restorerRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
 

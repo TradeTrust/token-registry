@@ -4,7 +4,13 @@ import faker from "faker";
 import { expect } from ".";
 import { roleHash } from "../src/constants";
 import { deployTokenFixture, DeployTokenFixtureRunner } from "./fixtures";
-import { createDeployFixtureRunner, getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
+import {
+  createDeployFixtureRunner,
+  getTestUsers,
+  TestUsers,
+  toAccessControlRevertMessage,
+  txnHexRemarks,
+} from "./helpers";
 
 describe("TradeTrustTokenBaseURI", async () => {
   let users: TestUsers;
@@ -63,7 +69,12 @@ describe("TradeTrustTokenBaseURI", async () => {
 
     beforeEach(async () => {
       tokenId = faker.datatype.number();
-      await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+      await registryContractAsAdmin.mint(
+        users.beneficiary.address,
+        users.beneficiary.address,
+        tokenId,
+        txnHexRemarks.mintRemark
+      );
     });
 
     it("should return the correct tokenURI when baseURI is set", async () => {

@@ -14,7 +14,8 @@ interface ITitleEscrow is IERC721Receiver {
     address indexed holder,
     bool indexed isMinting,
     address registry,
-    uint256 tokenId
+    uint256 tokenId,
+    bytes remark
   );
   event Nomination(
     address indexed prevNominee,
@@ -45,26 +46,26 @@ interface ITitleEscrow is IERC721Receiver {
    * @dev The nominated beneficiary will need to be transferred by the holder to become the actual beneficiary
    * @param nominee The address of the nominee
    */
-  function nominate(address nominee, bytes memory remark) external;
+  function nominate(address nominee, bytes calldata remark) external;
 
   /**
    * @notice Allows the holder to transfer the beneficiary role to the nominated beneficiary or to themselves
    * @param nominee The address of the new beneficiary
    */
-  function transferBeneficiary(address nominee, bytes memory remark) external;
+  function transferBeneficiary(address nominee, bytes calldata remark) external;
 
   /**
    * @notice Allows the holder to transfer their role to another address
    * @param newHolder The address of the new holder
    */
-  function transferHolder(address newHolder, bytes memory remark) external;
+  function transferHolder(address newHolder, bytes calldata remark) external;
 
   /**
    * @notice Allows for the simultaneous transfer of both beneficiary and holder roles
    * @param nominee The address of the new beneficiary
    * @param newHolder The address of the new holder
    */
-  function transferOwners(address nominee, address newHolder, bytes memory remark) external;
+  function transferOwners(address nominee, address newHolder, bytes calldata remark) external;
 
   function beneficiary() external view returns (address);
 
@@ -87,10 +88,10 @@ interface ITitleEscrow is IERC721Receiver {
   /**
    * @notice Allows the beneficiary and holder to surrender the token back to the registry
    */
-  function surrender(bytes memory remark) external;
+  function surrender(bytes calldata remark) external;
 
   /**
    * @notice Allows the registry to shred the TitleEscrow by marking it as inactive and reset the beneficiary and holder addresses
    */
-  function shred(bytes memory remark) external;
+  function shred(bytes calldata remark) external;
 }

@@ -8,7 +8,7 @@ import { expect } from ".";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 import { computeTitleEscrowAddress, getEventFromReceipt } from "../src/utils";
 import { deployEscrowFactoryFixture } from "./fixtures";
-import { createDeployFixtureRunner, getTestUsers, TestUsers, txnRemarks } from "./helpers";
+import { createDeployFixtureRunner, getTestUsers, TestUsers, txnHexRemarks } from "./helpers";
 
 describe("TitleEscrowFactory", async () => {
   let users: TestUsers;
@@ -77,7 +77,7 @@ describe("TitleEscrowFactory", async () => {
     it("should not allow calling shred on implementation", async () => {
       const punk = users.others[faker.datatype.number(users.others.length - 1)];
 
-      const tx = titleEscrowContract.connect(punk).shred(txnRemarks.burnRemark);
+      const tx = titleEscrowContract.connect(punk).shred(txnHexRemarks.burnRemark);
 
       await expect(tx).to.be.reverted;
     });
@@ -145,7 +145,7 @@ describe("TitleEscrowFactory", async () => {
       it("should emit TitleEscrowCreated event", async () => {
         const createCallerAddress = titleEscrowFactoryCallerMock.address;
 
-        expect(titleEscrowFactoryCreateTx)
+        await expect(titleEscrowFactoryCreateTx)
           .to.emit(titleEscrowFactory, "TitleEscrowCreated")
           .withArgs(titleEscrowContract.address, createCallerAddress, tokenId);
       });

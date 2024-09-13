@@ -13,6 +13,13 @@ import "../interfaces/ITradeTrustSBT.sol";
  */
 abstract contract TradeTrustSBT is SBTUpgradeable, PausableUpgradeable, TradeTrustTokenErrors, ITradeTrustSBT {
   /**
+   * @dev Modifier to check if the bytes length is within the limit
+   */
+  modifier remarkLengthLimit(bytes calldata _remark) {
+    if (_remark.length > 120) revert RemarkLengthExceeded();
+    _;
+  }
+  /**
    * @dev Initialise the contract.
    * @param name The name of the token.
    * @param symbol The symbol of the token.
@@ -25,13 +32,9 @@ abstract contract TradeTrustSBT is SBTUpgradeable, PausableUpgradeable, TradeTru
   /**
    * @dev See {ERC165Upgradeable-supportsInterface}.
    */
-  function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    virtual
-    override(SBTUpgradeable, IERC165Upgradeable)
-    returns (bool)
-  {
+  function supportsInterface(
+    bytes4 interfaceId
+  ) public view virtual override(SBTUpgradeable, IERC165Upgradeable) returns (bool) {
     return interfaceId == type(ITradeTrustSBT).interfaceId || SBTUpgradeable.supportsInterface(interfaceId);
   }
 
@@ -39,9 +42,9 @@ abstract contract TradeTrustSBT is SBTUpgradeable, PausableUpgradeable, TradeTru
    * @dev See {IERC721ReceiverUpgradeable-onERC721Received}.
    */
   function onERC721Received(
-    address, /* _operator */
-    address, /* _from */
-    uint256, /* _tokenId */
+    address /* _operator */,
+    address /* _from */,
+    uint256 /* _tokenId */,
     bytes memory /* _data */
   ) public pure override returns (bytes4) {
     return IERC721Receiver.onERC721Received.selector;
@@ -52,18 +55,14 @@ abstract contract TradeTrustSBT is SBTUpgradeable, PausableUpgradeable, TradeTru
    * @param to The address of the registry.
    * @param tokenId The ID of the token to transfer.
    */
-  function _registryTransferTo(address to, uint256 tokenId) internal {
-    this.transferFrom(address(this), to, tokenId);
+  function _registryTransferTo(address to, uint256 tokenId, bytes memory _remark) internal {
+    this.transferFrom(address(this), to, tokenId, _remark);
   }
 
   /**
    * @dev See {SBTUpgradeable-_beforeTokenTransfer}.
    */
-  function _beforeTokenTransfer(
-    address from,
-    address to,
-    uint256 tokenId
-  ) internal virtual override whenNotPaused {
+  function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override whenNotPaused {
     super._beforeTokenTransfer(from, to, tokenId);
   }
 

@@ -6,7 +6,7 @@ import { expect } from ".";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 import { computeTitleEscrowAddress } from "../src/utils";
 import { deployTokenFixture } from "./fixtures";
-import { getTestUsers, getTitleEscrowContract, TestUsers, txnRemarks } from "./helpers";
+import { getTestUsers, getTitleEscrowContract, remarkString, TestUsers, txnHexRemarks } from "./helpers";
 
 describe("TradeTrustTokenMintable", async () => {
   let users: TestUsers;
@@ -62,7 +62,12 @@ describe("TradeTrustTokenMintable", async () => {
 
   describe("Mint", () => {
     beforeEach(async () => {
-      await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+      await registryContractAsAdmin.mint(
+        users.beneficiary.address,
+        users.beneficiary.address,
+        tokenId,
+        txnHexRemarks.mintRemark
+      );
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
     });
 
@@ -96,16 +101,26 @@ describe("TradeTrustTokenMintable", async () => {
     });
 
     it("should not allow minting a token that has been burnt", async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender(txnRemarks.surrenderRemark);
-      await registryContractAsAdmin.burn(tokenId, txnRemarks.burnRemark);
+      await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+      await registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
-      const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+      const tx = registryContractAsAdmin.mint(
+        users.beneficiary.address,
+        users.beneficiary.address,
+        tokenId,
+        txnHexRemarks.mintRemark
+      );
 
       await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenExists");
     });
 
     it("should not allow minting an existing token", async () => {
-      const tx = registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+      const tx = registryContractAsAdmin.mint(
+        users.beneficiary.address,
+        users.beneficiary.address,
+        tokenId,
+        txnHexRemarks.mintRemark
+      );
 
       await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenExists");
     });
@@ -148,18 +163,28 @@ describe("TradeTrustTokenMintable", async () => {
 
     it("should emit Transfer event with correct values", async () => {
       tokenId = faker.datatype.hexaDecimal(64);
-      const tx = await registryContractAsAdmin.mint(users.beneficiary.address, users.holder.address, tokenId);
+      const tx = await registryContractAsAdmin.mint(
+        users.beneficiary.address,
+        users.holder.address,
+        tokenId,
+        txnHexRemarks.mintRemark
+      );
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
 
-      expect(tx)
+      await expect(tx)
         .to.emit(registryContract, "Transfer")
         .withArgs(defaultAddress.Zero, titleEscrowContract.address, tokenId);
     });
 
-    describe("Mint with correct beneficiary and holder", () => {
+    describe("Mint with correct beneficiary , holder and remark", () => {
       beforeEach(async () => {
         tokenId = faker.datatype.hexaDecimal(64);
-        await registryContractAsAdmin.mint(users.beneficiary.address, users.holder.address, tokenId);
+        await registryContractAsAdmin.mint(
+          users.beneficiary.address,
+          users.holder.address,
+          tokenId,
+          txnHexRemarks.mintRemark
+        );
         titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
@@ -173,6 +198,14 @@ describe("TradeTrustTokenMintable", async () => {
         const holder = await titleEscrowContract.holder();
 
         expect(holder).to.equal(users.holder.address);
+      });
+      it("should create title escrow with the correct remark", async () => {
+        const remark = await titleEscrowContract.remark();
+
+        expect(remark).to.equal(txnHexRemarks.mintRemark);
+
+        // convert the hex string to utf8 and compare
+        expect(ethers.utils.toUtf8String(remark)).to.equal(remarkString.mintRemark);
       });
     });
   });

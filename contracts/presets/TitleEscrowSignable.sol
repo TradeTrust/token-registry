@@ -66,7 +66,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     }
 
     ++nonces[holder];
-    _setBeneficiary(endorsement.nominee, "");
+    _setBeneficiary(endorsement.nominee, "0x0");
   }
 
   /**
@@ -101,8 +101,8 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
       );
   }
 
-  function _setHolder(address newHolder, bytes memory remark) internal virtual override {
+  function _setHolder(address newHolder, bytes memory _remark) internal virtual override {
     ++nonces[holder];
-    super._setHolder(newHolder, remark);
+    super._setHolder(newHolder, _remark);
   }
 }
