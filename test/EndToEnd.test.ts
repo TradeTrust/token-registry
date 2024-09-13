@@ -630,10 +630,16 @@ describe("End to end", () => {
         );
       });
       it("should allow restore after surrender", async () => {
-        await expect(tokenRegistry.connect(restorer).restore(tokenId, txnHexRemarks.restorerRemark)).to.emit(
-          titleEscrow,
-          "Restore"
-        );
+        await expect(tokenRegistry.connect(restorer).restore(tokenId, txnHexRemarks.restorerRemark))
+          .to.emit(titleEscrow, "TokenReceived")
+          .withArgs(
+            holder.address,
+            holder.address,
+            false,
+            tokenRegistry.address,
+            tokenId,
+            txnHexRemarks.restorerRemark
+          );
         expect(await tokenRegistry.ownerOf(tokenId)).to.equal(titleEscrow.address);
         const remark = await titleEscrow.remark();
         expect(remark).to.equal(txnHexRemarks.restorerRemark);
