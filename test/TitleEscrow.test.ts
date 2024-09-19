@@ -1346,7 +1346,7 @@ describe("Title Escrow", async () => {
 
       beforeEach(async () => {
         // eslint-disable-next-line no-multi-assign
-        beneficiary = holder = users.others[faker.datatype.number(users.others.length - 1)];
+        beneficiary = holder = users.others[users.others.length - 1];
         await registryContract
           .connect(users.carrier)
           .mint(beneficiary.address, holder.address, tokenId, txnHexRemarks.mintRemark);

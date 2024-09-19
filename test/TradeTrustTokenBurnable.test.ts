@@ -102,7 +102,9 @@ describe("TradeTrustTokenBurnable", async () => {
     it("should emit Transfer event with correct values", async () => {
       const tx = await registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
-      expect(tx).to.emit(registryContract, "Transfer").withArgs(registryContract.address, defaultAddress.Burn, tokenId);
+      await expect(tx)
+        .to.emit(registryContract, "Transfer")
+        .withArgs(registryContract.address, defaultAddress.Burn, tokenId);
     });
   });
 
