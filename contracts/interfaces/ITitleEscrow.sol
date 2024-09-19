@@ -40,6 +40,29 @@ interface ITitleEscrow is IERC721Receiver {
   );
   event Surrender(address indexed surrenderer, address registry, uint256 tokenId, bytes remark);
   event Shred(address registry, uint256 tokenId, bytes remark);
+  event RejectTransferOwners(
+    address indexed fromBeneficiary,
+    address indexed toBeneficiary,
+    address indexed fromHolder,
+    address toHolder,
+    address registry,
+    uint256 tokenId,
+    bytes remark
+  );
+  event RejectTransferBeneficiary(
+    address indexed fromBeneficiary,
+    address indexed toBeneficiary,
+    address registry,
+    uint256 tokenId,
+    bytes remark
+  );
+  event RejectTransferHolder(
+    address indexed fromHolder,
+    address indexed toHolder,
+    address registry,
+    uint256 tokenId,
+    bytes remark
+  );
 
   /**
    * @notice Allows the beneficiary to nominate a new beneficiary
@@ -67,9 +90,31 @@ interface ITitleEscrow is IERC721Receiver {
    */
   function transferOwners(address nominee, address newHolder, bytes calldata remark) external;
 
+  /**
+   * @notice Allows the new beneficiary to reject the nomination
+   * @param _remark The remark for the rejection
+   */
+  function rejectTransferBeneficiary(bytes calldata _remark) external;
+
+  /**
+   * @notice Allows the new holder to reject the transfer of the holder role
+   * @param _remark The remark for the rejection
+   */
+  function rejectTransferHolder(bytes calldata _remark) external;
+
+  /**
+   * @notice Allows the new beneficiary and holder to reject the transfer of both roles
+   * @param _remark The remark for the rejection
+   */
+  function rejectTransferOwners(bytes calldata _remark) external;
+
   function beneficiary() external view returns (address);
 
   function holder() external view returns (address);
+
+  function prevBeneficiary() external view returns (address);
+
+  function prevHolder() external view returns (address);
 
   function active() external view returns (bool);
 
