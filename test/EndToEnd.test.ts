@@ -55,7 +55,7 @@ describe("End to end", () => {
   let restorer: SignerWithAddress;
   let accepter: SignerWithAddress;
 
-  let testNominee1: SignerWithAddress;
+  let testNominee: SignerWithAddress;
 
   let testHolder1: SignerWithAddress;
   let testHolder2: SignerWithAddress;
@@ -85,7 +85,7 @@ describe("End to end", () => {
       testBeneficiary1,
       testBeneficiary2,
       testBeneficiary3,
-      testNominee1,
+      testNominee,
     ] = users.others;
     tokenId = faker.datatype.hexaDecimal(64);
     fakeTokenName = "The Great Shipping Co.";
@@ -365,7 +365,7 @@ describe("End to end", () => {
     describe("Transfer Beneficiary", () => {
       // eslint-disable-next-line no-undef
       before(async () => {
-        nominee = testNominee1;
+        nominee = testNominee;
       });
       describe("When Holder and Beneficiary are different", () => {
         it("1: should allow Beneficiary to nominate ", async () => {
