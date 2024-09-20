@@ -255,7 +255,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _setHolder(to, _remark);
     prevHolder = address(0);
 
-    emit RejectTransferHolder(from, to, registry, tokenId, remark);
+    emit RejectTransferHolder(from, to, registry, tokenId, _remark);
   }
 
   /**

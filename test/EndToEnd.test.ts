@@ -637,6 +637,16 @@ describe("End to end", () => {
           titleEscrow.connect(prevHolder).rejectTransferOwners(txnHexRemarks.rejectTransferRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "CallerNotBeneficiary");
       });
+      it("should not allow holder to reject only holder transfer", async () => {
+        const tx = titleEscrow.connect(holder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+
+        await expect(tx).to.be.revertedWithCustomError(titleEscrow, "DualRoleRejectionRequired");
+      });
+      it("should not allow beneficiary to reject only beneficiary transfer", async () => {
+        const tx = titleEscrow.connect(holder).rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark);
+
+        await expect(tx).to.be.revertedWithCustomError(titleEscrow, "DualRoleRejectionRequired");
+      });
       it("should allow holder to reject transfer owners", async () => {
         await expect(titleEscrow.connect(holder).rejectTransferOwners(txnHexRemarks.rejectTransferRemark))
           .to.emit(titleEscrow, "RejectTransferOwners")
@@ -831,10 +841,16 @@ describe("End to end", () => {
         );
       });
       it("should allow restore after surrender", async () => {
-        expect(tokenRegistry.connect(restorer).restore(tokenId, txnHexRemarks.restorerRemark)).to.emit(
-          titleEscrow,
-          "Restore"
-        );
+        await expect(tokenRegistry.connect(restorer).restore(tokenId, txnHexRemarks.restorerRemark))
+          .to.emit(titleEscrow, "TokenReceived")
+          .withArgs(
+            beneficiary.address,
+            holder.address,
+            false,
+            tokenRegistry.address,
+            tokenId,
+            txnHexRemarks.restorerRemark
+          );
         expect(await tokenRegistry.ownerOf(tokenId)).to.equal(titleEscrow.address);
         const remark = await titleEscrow.remark();
         expect(remark).to.equal(txnHexRemarks.restorerRemark);
