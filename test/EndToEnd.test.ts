@@ -38,17 +38,34 @@ describe("End to end", () => {
   let fakeTokenSymbol: string;
   let tokenRegistry: TradeTrustToken;
   let titleEscrow: TitleEscrow;
+
+  let prevBeneficiary: SignerWithAddress;
   let beneficiary: SignerWithAddress;
+  let newBeneficiary: SignerWithAddress;
+
+  let prevHolder: SignerWithAddress;
   let holder: SignerWithAddress;
-  let holder1: SignerWithAddress;
-  let nominee: string;
-  let nominee1: SignerWithAddress;
-  let nominee2: SignerWithAddress;
+  let newHolder: SignerWithAddress;
+
+  let nominee: SignerWithAddress;
+
   let tokenId: string;
   let registryAdmin: SignerWithAddress;
   let minter: SignerWithAddress;
   let restorer: SignerWithAddress;
   let accepter: SignerWithAddress;
+
+  let testNominee: SignerWithAddress;
+
+  let testHolder1: SignerWithAddress;
+  let testHolder2: SignerWithAddress;
+  let testHolder3: SignerWithAddress;
+  let testHolder4: SignerWithAddress;
+
+  let testBeneficiary1: SignerWithAddress;
+  let testBeneficiary2: SignerWithAddress;
+  let testBeneficiary3: SignerWithAddress;
+
   const exceededLengthRemark = ethers.utils.hexlify(ethers.utils.randomBytes(121));
 
   let deployFixturesRunner: () => Promise<[TradeTrustTokenStandard, TitleEscrowFactory, TDocDeployer]>;
@@ -56,8 +73,20 @@ describe("End to end", () => {
   before(async () => {
     users = await getTestUsers();
     deployer = users.carrier;
-    nominee = defaultAddress.Zero;
-    [, , , , nominee1, nominee2, holder1] = users.others;
+    [
+      ,
+      ,
+      ,
+      ,
+      testHolder1,
+      testHolder2,
+      testHolder3,
+      testHolder4,
+      testBeneficiary1,
+      testBeneficiary2,
+      testBeneficiary3,
+      testNominee,
+    ] = users.others;
     tokenId = faker.datatype.hexaDecimal(64);
     fakeTokenName = "The Great Shipping Co.";
     fakeTokenSymbol = "GSC";
@@ -231,6 +260,16 @@ describe("End to end", () => {
           tokenRegistry.connect(accepter).burn(tokenId, txnHexRemarks.burnRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "TokenNotSurrendered");
       });
+      it("should revert when trying rejectTranferBeneficiary", async () => {
+        await expect(
+          titleEscrow.connect(beneficiary).rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "InvalidTransferToZeroAddress");
+      });
+      it("should revert when trying rejectTranferHolder", async () => {
+        await expect(
+          titleEscrow.connect(holder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "InvalidTransferToZeroAddress");
+      });
     });
     describe("Paused", () => {
       it("should not allow pause when called by non-admin", async () => {
@@ -320,17 +359,66 @@ describe("End to end", () => {
       expect(await titleEscrow.holder()).to.equal(holder.address);
       expect(await titleEscrow.nominee()).to.equal(ethers.constants.AddressZero);
       expect(await titleEscrow.active()).to.be.true;
+      expect(await titleEscrow.prevBeneficiary()).to.equal(defaultAddress.Zero);
+      expect(await titleEscrow.prevHolder()).to.equal(defaultAddress.Zero);
     });
     describe("Transfer Beneficiary", () => {
+      // eslint-disable-next-line no-undef
+      before(async () => {
+        nominee = testNominee;
+      });
       describe("When Holder and Beneficiary are different", () => {
         it("1: should allow Beneficiary to nominate ", async () => {
-          await expect(titleEscrow.connect(beneficiary).nominate(nominee1.address, txnHexRemarks.nominateRemark))
+          await expect(titleEscrow.connect(beneficiary).nominate(nominee.address, txnHexRemarks.nominateRemark))
             .to.emit(titleEscrow, "Nomination")
-            .withArgs(nominee, nominee1.address, tokenRegistry.address, tokenId, txnHexRemarks.nominateRemark);
+            .withArgs(
+              defaultAddress.Zero,
+              nominee.address,
+              tokenRegistry.address,
+              tokenId,
+              txnHexRemarks.nominateRemark
+            );
           expect(await titleEscrow.remark()).to.equal(txnHexRemarks.nominateRemark);
         });
         it("2: should allow holder to transfer beneficiary", async () => {
-          const newBeneficiary = nominee1;
+          newBeneficiary = nominee;
+          prevBeneficiary = beneficiary;
+          await expect(
+            titleEscrow.connect(holder).transferBeneficiary(nominee.address, txnHexRemarks.beneficiaryTransferRemark)
+          )
+            .to.emit(titleEscrow, "BeneficiaryTransfer")
+            .withArgs(
+              beneficiary.address,
+              nominee.address,
+              tokenRegistry.address,
+              tokenId,
+              txnHexRemarks.beneficiaryTransferRemark
+            );
+          expect(await titleEscrow.beneficiary()).to.equal(newBeneficiary.address);
+          expect(await titleEscrow.prevBeneficiary()).to.equal(prevBeneficiary.address);
+          const remark = await titleEscrow.remark();
+          expect(remark).to.equal(txnHexRemarks.beneficiaryTransferRemark);
+          expect(hexToString(remark)).to.equal(remarkString.beneficiaryTransferRemark);
+        });
+      });
+      describe("When Holder and Beneficiary are same", () => {
+        // eslint-disable-next-line no-undef
+        before(async () => {
+          // current beneficiary is nominee1
+          // current holder is holder
+          // transfer beneficiary to holder
+          prevBeneficiary = beneficiary;
+          beneficiary = nominee;
+          newBeneficiary = testBeneficiary1;
+
+          // transaction to make beneficiary and holder same
+          await titleEscrow.connect(beneficiary).nominate(holder.address, txnHexRemarks.nominateRemark);
+          await titleEscrow
+            .connect(holder)
+            .transferBeneficiary(holder.address, txnHexRemarks.beneficiaryTransferRemark);
+          beneficiary = holder;
+        });
+        it("should allow holder to transfer beneficiary", async () => {
           await expect(
             titleEscrow
               .connect(holder)
@@ -339,38 +427,6 @@ describe("End to end", () => {
             .to.emit(titleEscrow, "BeneficiaryTransfer")
             .withArgs(
               beneficiary.address,
-              newBeneficiary.address,
-              tokenRegistry.address,
-              tokenId,
-              txnHexRemarks.beneficiaryTransferRemark
-            );
-          expect(await titleEscrow.beneficiary()).to.equal(newBeneficiary.address);
-          const remark = await titleEscrow.remark();
-          expect(remark).to.equal(txnHexRemarks.beneficiaryTransferRemark);
-          expect(hexToString(remark)).to.equal(remarkString.beneficiaryTransferRemark);
-        });
-      });
-      describe("When Holder and Beneficiary are same", () => {
-        //  eslint-disable-next-line no-undef
-        before(async () => {
-          // current beneficiary is nominee1
-          // current holder is holder
-          // transfer beneficiary to holder
-          await titleEscrow.connect(nominee1).nominate(holder.address, txnHexRemarks.nominateRemark);
-          await titleEscrow
-            .connect(holder)
-            .transferBeneficiary(holder.address, txnHexRemarks.beneficiaryTransferRemark);
-        });
-        it("should allow holder to transfer beneficiary", async () => {
-          const newBeneficiary = nominee2;
-          await expect(
-            titleEscrow
-              .connect(holder)
-              .transferBeneficiary(newBeneficiary.address, txnHexRemarks.beneficiaryTransferRemark)
-          )
-            .to.emit(titleEscrow, "BeneficiaryTransfer")
-            .withArgs(
-              holder.address,
               newBeneficiary.address,
               tokenRegistry.address,
               tokenId,
@@ -396,7 +452,7 @@ describe("End to end", () => {
       });
 
       it("should allow transfer to the new holder", async () => {
-        const newHolder = holder1;
+        newHolder = testHolder1;
         await expect(titleEscrow.connect(holder).transferHolder(newHolder.address, txnHexRemarks.holderTransferRemark))
           .to.emit(titleEscrow, "HolderTransfer")
           .withArgs(
@@ -407,37 +463,35 @@ describe("End to end", () => {
             txnHexRemarks.holderTransferRemark
           );
         expect(await titleEscrow.holder()).to.equal(newHolder.address);
+        expect(await titleEscrow.prevHolder()).to.equal(holder.address);
         const remark = await titleEscrow.remark();
         expect(remark).to.equal(txnHexRemarks.holderTransferRemark);
         expect(hexToString(remark)).to.equal(remarkString.holderTransferRemark);
       });
     });
     describe("Transfer Owners", () => {
-      let currHolder: SignerWithAddress;
-      let newHolder: SignerWithAddress;
-      let newBeneficiary: SignerWithAddress;
       //  eslint-disable-next-line no-undef
       before(async () => {
-        currHolder = holder1;
-        newHolder = holder;
-        newBeneficiary = holder;
-        const prevBeneficiary = nominee2;
-        await titleEscrow.connect(prevBeneficiary).nominate(currHolder.address, txnHexRemarks.nominateRemark);
-        await titleEscrow
-          .connect(currHolder)
-          .transferBeneficiary(currHolder.address, txnHexRemarks.beneficiaryTransferRemark);
+        holder = newHolder;
+        newHolder = testHolder2;
+        beneficiary = newBeneficiary;
+        newBeneficiary = newHolder;
+        await titleEscrow.connect(beneficiary).nominate(holder.address, txnHexRemarks.nominateRemark);
+        await titleEscrow.connect(holder).transferBeneficiary(holder.address, txnHexRemarks.beneficiaryTransferRemark);
+        prevBeneficiary = beneficiary;
+        beneficiary = holder;
       });
       it("should not allow beneficiary transfer to zero address", async () => {
         await expect(
           titleEscrow
-            .connect(currHolder)
+            .connect(holder)
             .transferOwners(defaultAddress.Zero, newHolder.address, txnHexRemarks.transferOwnersRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "InvalidTransferToZeroAddress");
       });
       it("should not allow holder transfer to zero address", async () => {
         await expect(
           titleEscrow
-            .connect(currHolder)
+            .connect(holder)
             .transferOwners(newBeneficiary.address, defaultAddress.Zero, txnHexRemarks.transferOwnersRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "InvalidTransferToZeroAddress");
       });
@@ -445,12 +499,12 @@ describe("End to end", () => {
         // new holder and new beneficiary are same
         await expect(
           titleEscrow
-            .connect(currHolder)
+            .connect(holder)
             .transferOwners(newBeneficiary.address, newHolder.address, txnHexRemarks.transferOwnersRemark)
         )
           .to.emit(titleEscrow, "BeneficiaryTransfer")
           .withArgs(
-            currHolder.address,
+            holder.address,
             newBeneficiary.address,
             tokenRegistry.address,
             tokenId,
@@ -458,7 +512,7 @@ describe("End to end", () => {
           )
           .and.to.emit(titleEscrow, "HolderTransfer")
           .withArgs(
-            currHolder.address,
+            holder.address,
             newHolder.address,
             tokenRegistry.address,
             tokenId,
@@ -467,39 +521,158 @@ describe("End to end", () => {
 
         expect(await titleEscrow.holder()).to.equal(newHolder.address);
         expect(await titleEscrow.beneficiary()).to.equal(newBeneficiary.address);
+        expect(await titleEscrow.prevHolder()).to.equal(holder.address);
+        expect(await titleEscrow.prevBeneficiary()).to.equal(holder.address);
         const remark = await titleEscrow.remark();
         expect(remark).to.equal(txnHexRemarks.transferOwnersRemark);
         expect(hexToString(remark)).to.equal(remarkString.transferOwnersRemark);
       });
       it("should allow transfer to different new holder and beneficiary", async () => {
+        prevHolder = holder;
+        holder = newHolder;
+        newHolder = testHolder3;
+        prevBeneficiary = holder;
+        beneficiary = newBeneficiary;
+        newBeneficiary = testBeneficiary2;
         // new holder and new beneficiary are different
         await expect(
           titleEscrow
-            .connect(newHolder)
-            .transferOwners(nominee2.address, holder1.address, txnHexRemarks.transferOwnersRemark)
+            .connect(holder)
+            .transferOwners(newBeneficiary.address, newHolder.address, txnHexRemarks.transferOwnersRemark)
         )
           .to.emit(titleEscrow, "BeneficiaryTransfer")
           .withArgs(
-            newHolder.address,
-            nominee2.address,
+            beneficiary.address,
+            newBeneficiary.address,
             tokenRegistry.address,
             tokenId,
             txnHexRemarks.transferOwnersRemark
           )
           .and.to.emit(titleEscrow, "HolderTransfer")
           .withArgs(
+            holder.address,
             newHolder.address,
-            holder1.address,
             tokenRegistry.address,
             tokenId,
             txnHexRemarks.transferOwnersRemark
           );
 
-        expect(await titleEscrow.beneficiary()).to.equal(nominee2.address);
-        expect(await titleEscrow.holder()).to.equal(holder1.address);
+        expect(await titleEscrow.beneficiary()).to.equal(newBeneficiary.address);
+        expect(await titleEscrow.holder()).to.equal(newHolder.address);
+        expect(await titleEscrow.prevHolder()).to.equal(holder.address);
+        expect(await titleEscrow.prevBeneficiary()).to.equal(beneficiary.address);
       });
     });
+    describe("Reject Transfer Beneficiary", () => {
+      // eslint-disable-next-line no-undef
+      before(async () => {
+        prevBeneficiary = beneficiary;
+        beneficiary = newBeneficiary;
+      });
+      it("should not allow reject transfer beneficiary if the caller is not beneficiary", async () => {
+        await expect(
+          titleEscrow.connect(holder).rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "CallerNotBeneficiary");
+      });
+      it("should allow beneficiary to reject transfer beneficiary", async () => {
+        await expect(titleEscrow.connect(beneficiary).rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark))
+          .to.emit(titleEscrow, "RejectTransferBeneficiary")
+          .withArgs(
+            beneficiary.address,
+            prevBeneficiary.address,
+            tokenRegistry.address,
+            tokenId,
+            txnHexRemarks.rejectTransferRemark
+          );
+        expect(await titleEscrow.beneficiary()).to.equal(prevBeneficiary.address);
+        expect(await titleEscrow.prevBeneficiary()).to.equal(defaultAddress.Zero);
+        expect(await titleEscrow.remark()).to.equal(txnHexRemarks.rejectTransferRemark);
+      });
+    });
+    describe("Reject Transfer Holder", () => {
+      // eslint-disable-next-line no-undef
+      before(async () => {
+        prevHolder = holder;
+        holder = newHolder;
+      });
+      it("should not allow reject transfer holder if the caller is not holder", async () => {
+        await expect(
+          titleEscrow.connect(beneficiary).rejectTransferHolder(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "CallerNotHolder");
+      });
+      it("should allow holder to reject transfer holder", async () => {
+        await expect(titleEscrow.connect(holder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark))
+          .to.emit(titleEscrow, "RejectTransferHolder")
+          .withArgs(
+            holder.address,
+            prevHolder.address,
+            tokenRegistry.address,
+            tokenId,
+            txnHexRemarks.rejectTransferRemark
+          );
+        expect(await titleEscrow.holder()).to.equal(prevHolder.address);
+        expect(await titleEscrow.prevHolder()).to.equal(defaultAddress.Zero);
+        expect(await titleEscrow.remark()).to.equal(txnHexRemarks.rejectTransferRemark);
+      });
+    });
+
+    describe("Reject Transfer Owners", () => {
+      // eslint-disable-next-line no-undef
+      before(async () => {
+        holder = prevHolder;
+        beneficiary = prevBeneficiary;
+        newHolder = testHolder3;
+        newBeneficiary = newHolder; // transfer to same holder and beneficiary
+        await titleEscrow
+          .connect(holder)
+          .transferOwners(newBeneficiary.address, newHolder.address, txnHexRemarks.transferOwnersRemark);
+        prevBeneficiary = beneficiary;
+        beneficiary = newBeneficiary;
+        prevHolder = holder;
+        holder = newHolder;
+      });
+
+      it("should not allow reject transfer owners if the caller is not holder", async () => {
+        await expect(
+          titleEscrow.connect(prevHolder).rejectTransferOwners(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "CallerNotBeneficiary");
+      });
+      it("should not allow holder to reject only holder transfer", async () => {
+        const tx = titleEscrow.connect(holder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+
+        await expect(tx).to.be.revertedWithCustomError(titleEscrow, "DualRoleRejectionRequired");
+      });
+      it("should not allow beneficiary to reject only beneficiary transfer", async () => {
+        const tx = titleEscrow.connect(holder).rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark);
+
+        await expect(tx).to.be.revertedWithCustomError(titleEscrow, "DualRoleRejectionRequired");
+      });
+      it("should allow holder to reject transfer owners", async () => {
+        await expect(titleEscrow.connect(holder).rejectTransferOwners(txnHexRemarks.rejectTransferRemark))
+          .to.emit(titleEscrow, "RejectTransferOwners")
+          .withArgs(
+            beneficiary.address,
+            prevBeneficiary.address,
+            holder.address,
+            prevHolder.address,
+            tokenRegistry.address,
+            tokenId,
+            txnHexRemarks.rejectTransferRemark
+          );
+        expect(await titleEscrow.holder()).to.equal(prevHolder.address);
+        expect(await titleEscrow.beneficiary()).to.equal(prevBeneficiary.address);
+        expect(await titleEscrow.prevHolder()).to.equal(defaultAddress.Zero);
+        expect(await titleEscrow.prevBeneficiary()).to.equal(defaultAddress.Zero);
+        expect(await titleEscrow.remark()).to.equal(txnHexRemarks.rejectTransferRemark);
+      });
+    });
+
     describe("Paused", () => {
+      // eslint-disable-next-line no-undef
+      before(async () => {
+        newBeneficiary = testBeneficiary3;
+        newHolder = testHolder4;
+      });
       it("Paused: should emit correct event with args when paused", async () => {
         const tx = tokenRegistry.connect(registryAdmin).pause(txnHexRemarks.pauseRemark);
 
@@ -511,19 +684,21 @@ describe("End to end", () => {
       it("should not allow nomination when paused", async () => {
         //  eslint-disable-next-line no-undef
         await expect(
-          titleEscrow.connect(beneficiary).nominate(nominee1.address, txnHexRemarks.nominateRemark)
+          titleEscrow.connect(beneficiary).nominate(newBeneficiary.address, txnHexRemarks.nominateRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "RegistryContractPaused");
       });
 
       it("should not allow transfer beneficiary when paused", async () => {
         await expect(
-          titleEscrow.connect(holder).transferBeneficiary(nominee1.address, txnHexRemarks.beneficiaryTransferRemark)
+          titleEscrow
+            .connect(holder)
+            .transferBeneficiary(newBeneficiary.address, txnHexRemarks.beneficiaryTransferRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "RegistryContractPaused");
       });
 
       it("should not allow transfer holder when paused", async () => {
         await expect(
-          titleEscrow.connect(holder).transferHolder(nominee1.address, txnHexRemarks.holderTransferRemark)
+          titleEscrow.connect(holder).transferHolder(newHolder.address, txnHexRemarks.holderTransferRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "RegistryContractPaused");
       });
 
@@ -531,12 +706,27 @@ describe("End to end", () => {
         await expect(
           titleEscrow
             .connect(holder)
-            .transferOwners(nominee1.address, holder1.address, txnHexRemarks.transferOwnersRemark)
+            .transferOwners(newBeneficiary.address, newHolder.address, txnHexRemarks.transferOwnersRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "RegistryContractPaused");
       });
       it("should not allow surrender when paused", async () => {
         await expect(
           titleEscrow.connect(holder).surrender(txnHexRemarks.surrenderRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "RegistryContractPaused");
+      });
+      it("should not allow reject transfer beneficiary when paused", async () => {
+        await expect(
+          titleEscrow.connect(beneficiary).rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "RegistryContractPaused");
+      });
+      it("should not allow reject transfer holder when paused", async () => {
+        await expect(
+          titleEscrow.connect(holder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "RegistryContractPaused");
+      });
+      it("should not allow reject owner transfer when paused", async () => {
+        await expect(
+          titleEscrow.connect(holder).rejectTransferOwners(txnHexRemarks.rejectTransferRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "RegistryContractPaused");
       });
       it("UnPaused: should  emit correct event with args when unpaused", async () => {
@@ -547,16 +737,23 @@ describe("End to end", () => {
       });
     });
     describe("Surrender", () => {
+      // eslint-disable-next-line no-undef
+      before(async () => {
+        holder = prevHolder;
+        beneficiary = prevBeneficiary;
+        await titleEscrow.connect(holder).transferHolder(testHolder4.address, txnHexRemarks.holderTransferRemark);
+        holder = testHolder4;
+      });
       describe("When Holder and Beneficiary are not same", () => {
         it("should revert surrender if caller is not beneficiary", async () => {
           await expect(
-            titleEscrow.connect(holder1).surrender(txnHexRemarks.surrenderRemark)
+            titleEscrow.connect(holder).surrender(txnHexRemarks.surrenderRemark)
           ).to.be.revertedWithCustomError(titleEscrow, "CallerNotBeneficiary");
         });
         // current beneficiary is nominee2
         it("should revert surrender if the caller is not holder", async () => {
           await expect(
-            titleEscrow.connect(nominee2).surrender(txnHexRemarks.surrenderRemark)
+            titleEscrow.connect(beneficiary).surrender(txnHexRemarks.surrenderRemark)
           ).to.be.revertedWithCustomError(titleEscrow, "CallerNotHolder");
         });
       });
@@ -564,13 +761,10 @@ describe("End to end", () => {
         //  eslint-disable-next-line no-undef
         before(async () => {
           //  setting both holder and beneficiary to the same address
-          const currBeneficiary = nominee2;
-          const newBeneficiary = holder;
-          await titleEscrow.connect(currBeneficiary).nominate(newBeneficiary.address, txnHexRemarks.nominateRemark);
           await titleEscrow
-            .connect(holder1)
-            .transferBeneficiary(newBeneficiary.address, txnHexRemarks.beneficiaryTransferRemark);
-          await titleEscrow.connect(holder1).transferHolder(holder.address, txnHexRemarks.holderTransferRemark);
+            .connect(holder)
+            .transferHolder(beneficiary.address, txnHexRemarks.beneficiaryTransferRemark);
+          holder = beneficiary;
         });
         it("should allow surrendering if the contract holds the token", async () => {
           await expect(titleEscrow.connect(holder).surrender(txnHexRemarks.surrenderRemark))
@@ -578,6 +772,8 @@ describe("End to end", () => {
             .withArgs(holder.address, tokenRegistry.address, tokenId, txnHexRemarks.surrenderRemark);
           // token id owner to be token registry after surrender
           expect(await tokenRegistry.ownerOf(tokenId)).to.equal(tokenRegistry.address);
+          expect(await titleEscrow.prevHolder()).to.equal(defaultAddress.Zero);
+          expect(await titleEscrow.prevBeneficiary()).to.equal(defaultAddress.Zero);
           const remark = await titleEscrow.remark();
           expect(remark).to.equal(txnHexRemarks.surrenderRemark);
           expect(hexToString(remark)).to.equal(remarkString.surrenderRemark);
@@ -587,29 +783,44 @@ describe("End to end", () => {
     describe("After Surrender", () => {
       it("should not allow nomination", async () => {
         await expect(
-          titleEscrow.connect(holder).nominate(nominee1.address, txnHexRemarks.nominateRemark)
+          titleEscrow.connect(holder).nominate(nominee.address, txnHexRemarks.nominateRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "TitleEscrowNotHoldingToken");
       });
       it("should not allow transfer beneficiary", async () => {
         await expect(
-          titleEscrow.connect(holder).transferBeneficiary(nominee1.address, txnHexRemarks.beneficiaryTransferRemark)
+          titleEscrow.connect(holder).transferBeneficiary(nominee.address, txnHexRemarks.beneficiaryTransferRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "TitleEscrowNotHoldingToken");
       });
       it("should not allow transfer holder", async () => {
         await expect(
-          titleEscrow.connect(holder).transferHolder(nominee1.address, txnHexRemarks.holderTransferRemark)
+          titleEscrow.connect(holder).transferHolder(testHolder4.address, txnHexRemarks.holderTransferRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "TitleEscrowNotHoldingToken");
       });
       it("should not allow transfer owners", async () => {
         await expect(
           titleEscrow
             .connect(holder)
-            .transferOwners(nominee1.address, holder1.address, txnHexRemarks.transferOwnersRemark)
+            .transferOwners(nominee.address, testHolder4.address, txnHexRemarks.transferOwnersRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "TitleEscrowNotHoldingToken");
       });
       it("should not allow surrender", async () => {
         await expect(
           titleEscrow.connect(holder).surrender(txnHexRemarks.surrenderRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "TitleEscrowNotHoldingToken");
+      });
+      it("should not allow reject transfer beneficiary", async () => {
+        await expect(
+          titleEscrow.connect(beneficiary).rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "TitleEscrowNotHoldingToken");
+      });
+      it("should not allow reject transfer holder", async () => {
+        await expect(
+          titleEscrow.connect(holder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "TitleEscrowNotHoldingToken");
+      });
+      it("should not allow reject owner transfer", async () => {
+        await expect(
+          titleEscrow.connect(holder).rejectTransferOwners(txnHexRemarks.rejectTransferRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "TitleEscrowNotHoldingToken");
       });
     });
@@ -633,7 +844,7 @@ describe("End to end", () => {
         await expect(tokenRegistry.connect(restorer).restore(tokenId, txnHexRemarks.restorerRemark))
           .to.emit(titleEscrow, "TokenReceived")
           .withArgs(
-            holder.address,
+            beneficiary.address,
             holder.address,
             false,
             tokenRegistry.address,
@@ -656,6 +867,10 @@ describe("End to end", () => {
       });
       it("owner should be set back to titleEscrow", async () => {
         expect(await tokenRegistry.ownerOf(tokenId)).to.equal(titleEscrow.address);
+      });
+      it("should have zero address as prevBeneficiary and prevHolder", async () => {
+        expect(await titleEscrow.prevBeneficiary()).to.equal(defaultAddress.Zero);
+        expect(await titleEscrow.prevHolder()).to.equal(defaultAddress.Zero);
       });
     });
     describe("Burn", () => {
@@ -703,24 +918,39 @@ describe("End to end", () => {
       });
       it("should not allow nomination", async () => {
         await expect(
-          titleEscrow.connect(beneficiary).nominate(nominee1.address, txnHexRemarks.nominateRemark)
+          titleEscrow.connect(beneficiary).nominate(nominee.address, txnHexRemarks.nominateRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "InactiveTitleEscrow");
       });
       it("should not allow transfer beneficiary", async () => {
         await expect(
-          titleEscrow.connect(holder).transferBeneficiary(nominee1.address, txnHexRemarks.beneficiaryTransferRemark)
+          titleEscrow.connect(holder).transferBeneficiary(nominee.address, txnHexRemarks.beneficiaryTransferRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "InactiveTitleEscrow");
       });
       it("should not allow transfer holder", async () => {
         await expect(
-          titleEscrow.connect(holder).transferHolder(nominee1.address, txnHexRemarks.holderTransferRemark)
+          titleEscrow.connect(holder).transferHolder(testHolder4.address, txnHexRemarks.holderTransferRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "InactiveTitleEscrow");
       });
       it("should not allow transfer owners", async () => {
         await expect(
           titleEscrow
             .connect(holder)
-            .transferOwners(nominee1.address, holder1.address, txnHexRemarks.transferOwnersRemark)
+            .transferOwners(nominee.address, testHolder4.address, txnHexRemarks.transferOwnersRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "InactiveTitleEscrow");
+      });
+      it("should not allow reject transfer beneficiary", async () => {
+        await expect(
+          titleEscrow.connect(beneficiary).rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "InactiveTitleEscrow");
+      });
+      it("should not allow reject transfer holder", async () => {
+        await expect(
+          titleEscrow.connect(holder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark)
+        ).to.be.revertedWithCustomError(titleEscrow, "InactiveTitleEscrow");
+      });
+      it("should not allow reject owner transfer", async () => {
+        await expect(
+          titleEscrow.connect(holder).rejectTransferOwners(txnHexRemarks.rejectTransferRemark)
         ).to.be.revertedWithCustomError(titleEscrow, "InactiveTitleEscrow");
       });
       it("should not allow surrender", async () => {

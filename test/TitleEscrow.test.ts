@@ -458,7 +458,7 @@ describe("Title Escrow", async () => {
     });
   });
 
-  describe("Operational Behaviours", () => {
+  describe("Operational Behaviors", () => {
     let registryContract: TradeTrustToken;
     let titleEscrowOwnerContract: TitleEscrow;
 
@@ -583,6 +583,30 @@ describe("Title Escrow", async () => {
           await expect(tx).to.be.revertedWithCustomError(titleEscrowAsBeneficiary, "TitleEscrowNotHoldingToken");
         });
 
+        it("should set prevBeneficiary to zero address upon nomination", async () => {
+          const [owner, newBeneficiary] = users.others;
+          // setting holder and beneficiary to same address
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferHolder(users.beneficiary.address, txnHexRemarks.transferOwnersRemark);
+
+          // to set valid prev owners
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .transferOwners(owner.address, owner.address, txnHexRemarks.transferOwnersRemark);
+
+          await titleEscrowOwnerContract
+            .connect(owner)
+            .transferBeneficiary(newBeneficiary.address, txnHexRemarks.beneficiaryTransferRemark);
+
+          expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(owner.address);
+
+          await titleEscrowOwnerContract
+            .connect(newBeneficiary)
+            .nominate(beneficiaryNominee.address, txnHexRemarks.nominateRemark);
+          expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(defaultAddress.Zero);
+        });
+
         it("should emit Nomination event", async () => {
           const tx = titleEscrowOwnerContract
             .connect(users.beneficiary)
@@ -631,20 +655,28 @@ describe("Title Escrow", async () => {
 
         it("should allow a beneficiary who is also a holder to transfer to a non-nominated beneficiary", async () => {
           const fakeTokenId = faker.datatype.hexaDecimal(64);
-          const [targetNonBeneficiaryNominee] = users.others;
+          const [targetNewOwner, targetNonBeneficiaryNominee] = users.others;
           await registryContract
             .connect(users.carrier)
             .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId, txnHexRemarks.mintRemark);
           titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, fakeTokenId);
 
           const initialBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
+
+          // to set valid prevBeneficiary and prevHolder
           await titleEscrowOwnerContract
             .connect(users.beneficiary)
+            .transferOwners(targetNewOwner.address, targetNewOwner.address, txnHexRemarks.transferOwnersRemark);
+
+          await titleEscrowOwnerContract
+            .connect(targetNewOwner)
             .transferBeneficiary(targetNonBeneficiaryNominee.address, txnHexRemarks.beneficiaryTransferRemark);
-          const currentBeneficiary = await titleEscrowOwnerContract.beneficiary();
 
           expect(initialBeneficiaryNominee).to.equal(defaultAddress.Zero);
-          expect(currentBeneficiary).to.equal(targetNonBeneficiaryNominee.address);
+          expect(await titleEscrowOwnerContract.beneficiary()).to.equal(targetNonBeneficiaryNominee.address);
+          expect(await titleEscrowOwnerContract.holder()).to.equal(targetNewOwner.address);
+          expect(await titleEscrowOwnerContract.prevHolder()).to.equal(defaultAddress.Zero);
+          expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(targetNewOwner.address);
         });
 
         it("should not allow non-holder to transfer to a nominated beneficiary", async () => {
@@ -735,24 +767,31 @@ describe("Title Escrow", async () => {
           const res = await titleEscrowOwnerContract.holder();
 
           expect(res).to.equal(targetNewHolder.address);
+          expect(await titleEscrowOwnerContract.prevHolder()).to.equal(users.holder.address);
         });
 
         it("should allow a holder who is also a beneficiary to transfer holder", async () => {
           const fakeTokenId = faker.datatype.hexaDecimal(64);
-          const [targetNonNominatedHolder] = users.others;
+          const [targetNewOwner, targetNonNominatedHolder] = users.others;
           await registryContract
             .connect(users.carrier)
             .mint(users.beneficiary.address, users.beneficiary.address, fakeTokenId, txnHexRemarks.mintRemark);
           titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, fakeTokenId);
 
-          const initialBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
+          // to set valid prevBeneficiary and prevHolder
           await titleEscrowOwnerContract
             .connect(users.beneficiary)
-            .transferHolder(targetNonNominatedHolder.address, txnHexRemarks.holderTransferRemark);
-          const currentHolder = await titleEscrowOwnerContract.holder();
+            .transferOwners(targetNewOwner.address, targetNewOwner.address, txnHexRemarks.transferOwnersRemark);
 
+          await titleEscrowOwnerContract
+            .connect(targetNewOwner)
+            .transferHolder(targetNonNominatedHolder.address, txnHexRemarks.holderTransferRemark);
+          const initialBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
           expect(initialBeneficiaryNominee).to.equal(defaultAddress.Zero);
-          expect(currentHolder).to.equal(targetNonNominatedHolder.address);
+          expect(await titleEscrowOwnerContract.beneficiary()).to.equal(targetNewOwner.address);
+          expect(await titleEscrowOwnerContract.holder()).to.equal(targetNonNominatedHolder.address);
+          expect(await titleEscrowOwnerContract.prevHolder()).to.equal(targetNewOwner.address);
+          expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(defaultAddress.Zero);
         });
 
         it("should not allow a non-holder to transfer to a nominated holder", async () => {
@@ -808,17 +847,22 @@ describe("Title Escrow", async () => {
             .nominate(beneficiaryNominee.address, txnHexRemarks.nominateRemark);
         });
 
-        it("should call transferBeneficiary and transferHolder interally", async () => {
+        it("should call transferBeneficiary and transferHolder internally", async () => {
           await titleEscrowOwnerContract
             .connect(users.holder)
-            .transferOwners(beneficiaryNominee.address, holderNominee.address, txnHexRemarks.holderTransferRemark);
-          const [currentBeneficiary, currentHolder] = await Promise.all([
+            .transferOwners(beneficiaryNominee.address, holderNominee.address, txnHexRemarks.transferOwnersRemark);
+          const [currentBeneficiary, currentHolder, prevBeneficiary, prevHolder] = await Promise.all([
             titleEscrowOwnerContract.beneficiary(),
             titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
           ]);
 
           expect(currentBeneficiary).to.equal(beneficiaryNominee.address);
           expect(currentHolder).to.equal(holderNominee.address);
+          expect(prevBeneficiary).to.equal(users.beneficiary.address);
+          expect(prevHolder).to.equal(users.holder.address);
+          expect(await titleEscrowOwnerContract.remark()).to.equal(txnHexRemarks.transferOwnersRemark);
         });
 
         it("should revert when caller is not holder", async () => {
@@ -856,13 +900,453 @@ describe("Title Escrow", async () => {
       });
     });
 
+    describe("Beneficiary and Holder Rejection", () => {
+      beforeEach(async () => {
+        await registryContract
+          .connect(users.carrier)
+          .mint(users.beneficiary.address, users.holder.address, tokenId, txnHexRemarks.mintRemark);
+        titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
+      });
+      describe("Reject Transfer Beneficiary", () => {
+        let newBeneficiary: SignerWithAddress;
+        let prevBeneficiary: SignerWithAddress;
+
+        beforeEach(async () => {
+          [newBeneficiary] = users.others;
+
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(newBeneficiary.address, txnHexRemarks.nominateRemark);
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferBeneficiary(newBeneficiary.address, txnHexRemarks.beneficiaryTransferRemark);
+          prevBeneficiary = users.beneficiary;
+        });
+        it("should have valid previous and new beneficiary", async () => {
+          const previousBeneficiary = await titleEscrowOwnerContract.prevBeneficiary();
+          expect(previousBeneficiary).to.equal(users.beneficiary.address);
+          expect(await titleEscrowOwnerContract.beneficiary()).to.equal(newBeneficiary.address);
+        });
+
+        it("should not allow non-beneficiary to reject beneficiary transfer", async () => {
+          const tx = titleEscrowOwnerContract
+            .connect(users.holder)
+            .rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotBeneficiary");
+        });
+
+        it("should not allow rejecting beneficiary transfer when there is no pending transfer", async () => {
+          await titleEscrowOwnerContract
+            .connect(newBeneficiary)
+            .rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark);
+          const tx = titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "InvalidTransferToZeroAddress");
+        });
+
+        it("should allow beneficiary to reject transfer beneficiary ", async () => {
+          const tx = titleEscrowOwnerContract
+            .connect(newBeneficiary)
+            .rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx)
+            .to.emit(titleEscrowOwnerContract, "RejectTransferBeneficiary")
+            .withArgs(
+              newBeneficiary.address,
+              prevBeneficiary.address,
+              registryContract.address,
+              tokenId,
+              txnHexRemarks.rejectTransferRemark
+            );
+          expect(await titleEscrowOwnerContract.beneficiary()).to.equal(prevBeneficiary.address);
+          expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(defaultAddress.Zero);
+          expect(await titleEscrowOwnerContract.remark()).to.equal(txnHexRemarks.rejectTransferRemark);
+        });
+      });
+      describe("Reject Transfer Holder", () => {
+        let newHolder: SignerWithAddress;
+        let prevHolder: SignerWithAddress;
+        beforeEach(async () => {
+          [newHolder] = users.others;
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferHolder(newHolder.address, txnHexRemarks.holderTransferRemark);
+          titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
+          prevHolder = users.holder;
+        });
+        it("should have a valid previous holder", async () => {
+          expect(await titleEscrowOwnerContract.prevHolder()).to.equal(prevHolder.address);
+          expect(await titleEscrowOwnerContract.holder()).to.equal(newHolder.address);
+        });
+        it("should not allow non-holder to reject holder transfer", async () => {
+          const tx = titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotHolder");
+        });
+        it("should not allow holder to reject holder transfer when there is no pending transfer", async () => {
+          await titleEscrowOwnerContract.connect(newHolder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+          const tx = titleEscrowOwnerContract
+            .connect(users.holder)
+            .rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "InvalidTransferToZeroAddress");
+        });
+        it("should allow holder to reject holder transfer", async () => {
+          await titleEscrowOwnerContract.connect(newHolder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+          expect(await titleEscrowOwnerContract.holder()).to.equal(users.holder.address);
+          expect(await titleEscrowOwnerContract.prevHolder()).to.equal(defaultAddress.Zero);
+          expect(await titleEscrowOwnerContract.remark()).to.equal(txnHexRemarks.rejectTransferRemark);
+        });
+      });
+      describe("1: Reject Transfer Owners when previous holder and owner are different", () => {
+        let newBeneficiary: SignerWithAddress;
+        let newHolder: SignerWithAddress;
+        let previousHolder: SignerWithAddress;
+        let previousBeneficiary: SignerWithAddress;
+        let nonOwner: SignerWithAddress;
+        beforeEach(async () => {
+          [newBeneficiary, newHolder, nonOwner] = users.others;
+          newHolder = newBeneficiary;
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(newBeneficiary.address, txnHexRemarks.nominateRemark);
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferBeneficiary(newBeneficiary.address, txnHexRemarks.beneficiaryTransferRemark);
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferHolder(newHolder.address, txnHexRemarks.holderTransferRemark);
+          previousHolder = users.holder;
+          previousBeneficiary = users.beneficiary;
+        });
+        it("should have correct prev and new holder/beneficiary", async () => {
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(newBeneficiary.address);
+          expect(currentHolder).to.equal(newHolder.address);
+          expect(_prevBeneficiary).to.equal(users.beneficiary.address);
+          expect(_prevHolder).to.equal(users.holder.address);
+        });
+        it("should not allow  non-owner to reject transfer owners", async () => {
+          const tx = titleEscrowOwnerContract
+            .connect(nonOwner)
+            .rejectTransferOwners(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotBeneficiary");
+        });
+        it("should not allow holder to reject only holder transfer", async () => {
+          const tx = titleEscrowOwnerContract
+            .connect(newHolder)
+            .rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "DualRoleRejectionRequired");
+        });
+        it("should not allow beneficiary to reject only beneficiary transfer", async () => {
+          const tx = titleEscrowOwnerContract
+            .connect(newBeneficiary)
+            .rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "DualRoleRejectionRequired");
+        });
+        it("should allow owner to reject transfer owners", async () => {
+          expect(
+            await titleEscrowOwnerContract.connect(newHolder).rejectTransferOwners(txnHexRemarks.rejectTransferRemark)
+          )
+            .to.emit(titleEscrowOwnerContract, "RejectTransferOwners")
+            .withArgs(
+              newBeneficiary.address,
+              previousBeneficiary.address,
+              newHolder.address,
+              previousHolder.address,
+              registryContract.address,
+              tokenId,
+              txnHexRemarks.rejectTransferRemark
+            );
+          expect(await titleEscrowOwnerContract.holder()).to.equal(previousHolder.address);
+          expect(await titleEscrowOwnerContract.beneficiary()).to.equal(previousBeneficiary.address);
+          expect(await titleEscrowOwnerContract.prevHolder()).to.equal(defaultAddress.Zero);
+          expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(defaultAddress.Zero);
+        });
+      });
+      describe("2: Reject Transfer Owners when previous holder and owner are same", () => {
+        let prevOwner: SignerWithAddress;
+        let newOwner: SignerWithAddress;
+        let nonOwner: SignerWithAddress;
+        beforeEach(async () => {
+          [newOwner, nonOwner] = users.others;
+
+          // setting up the title escrow with same holder and beneficiary
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .nominate(users.holder.address, txnHexRemarks.nominateRemark);
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferBeneficiary(users.holder.address, txnHexRemarks.beneficiaryTransferRemark);
+
+          // setting up the new holder and beneficiary
+          await titleEscrowOwnerContract
+            .connect(users.holder)
+            .transferOwners(newOwner.address, newOwner.address, txnHexRemarks.transferOwnersRemark);
+
+          prevOwner = users.holder;
+        });
+        it("should have correct prev and new holder/beneficiary", async () => {
+          const previousHolder = await titleEscrowOwnerContract.prevHolder();
+          const previousBeneficiary = await titleEscrowOwnerContract.prevBeneficiary();
+          const holder = await titleEscrowOwnerContract.holder();
+          const beneficiary = await titleEscrowOwnerContract.beneficiary();
+          expect(previousHolder).to.equal(prevOwner.address);
+          expect(previousBeneficiary).to.equal(prevOwner.address);
+          expect(holder).to.equal(newOwner.address);
+          expect(beneficiary).to.equal(newOwner.address);
+        });
+        it("should not allow  non-owner to reject transfer owners", async () => {
+          const tx = titleEscrowOwnerContract
+            .connect(nonOwner)
+            .rejectTransferOwners(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotBeneficiary");
+        });
+        it("should not allow new Owner to reject only holder transfer", async () => {
+          const tx = titleEscrowOwnerContract
+            .connect(newOwner)
+            .rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "DualRoleRejectionRequired");
+        });
+        it("should not allow new Owner to reject only beneficiary transfer", async () => {
+          const tx = titleEscrowOwnerContract
+            .connect(newOwner)
+            .rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark);
+
+          await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "DualRoleRejectionRequired");
+        });
+        it("should allow new owner to reject transfer owners", async () => {
+          expect(
+            await titleEscrowOwnerContract.connect(newOwner).rejectTransferOwners(txnHexRemarks.rejectTransferRemark)
+          )
+            .to.emit(titleEscrowOwnerContract, "RejectTransferOwners")
+            .withArgs(
+              newOwner.address,
+              prevOwner.address,
+              newOwner.address,
+              prevOwner.address,
+              registryContract.address,
+              tokenId,
+              txnHexRemarks.rejectTransferRemark
+            );
+          expect(await titleEscrowOwnerContract.holder()).to.equal(prevOwner.address);
+          expect(await titleEscrowOwnerContract.beneficiary()).to.equal(prevOwner.address);
+          expect(await titleEscrowOwnerContract.prevHolder()).to.equal(defaultAddress.Zero);
+          expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(defaultAddress.Zero);
+          expect(await titleEscrowOwnerContract.remark()).to.equal(txnHexRemarks.rejectTransferRemark);
+        });
+      });
+    });
+
+    describe("Revert Rejection after any transaction", () => {
+      beforeEach(async () => {
+        await registryContract
+          .connect(users.carrier)
+          .mint(users.beneficiary.address, users.beneficiary.address, tokenId, txnHexRemarks.mintRemark);
+        titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
+      });
+      describe("when holder and beneficiary are different", () => {
+        let beneficiary: SignerWithAddress;
+        let holder: SignerWithAddress;
+        let prevBeneficiary: SignerWithAddress;
+        let prevHolder: SignerWithAddress;
+        let newBeneficiary: SignerWithAddress;
+        let newHolder: SignerWithAddress;
+        beforeEach(async () => {
+          [holder, beneficiary, newBeneficiary, newHolder] = users.others;
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .transferOwners(beneficiary.address, holder.address, txnHexRemarks.transferOwnersRemark);
+          prevBeneficiary = users.beneficiary;
+          prevHolder = users.beneficiary;
+        });
+        it("should have correct initial values", async () => {
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(beneficiary.address);
+          expect(currentHolder).to.equal(holder.address);
+          expect(_prevBeneficiary).to.equal(prevBeneficiary.address);
+          expect(_prevHolder).to.equal(prevHolder.address);
+        });
+        it("should reset prevBeneficiary upon nomination", async () => {
+          await titleEscrowOwnerContract
+            .connect(beneficiary)
+            .nominate(newBeneficiary.address, txnHexRemarks.nominateRemark);
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(beneficiary.address);
+          expect(currentHolder).to.equal(holder.address);
+          expect(_prevBeneficiary).to.equal(defaultAddress.Zero);
+          expect(_prevHolder).to.equal(prevHolder.address);
+        });
+        it("should set prevBeneficiary and reset prevHolder upon endorsing nominee", async () => {
+          await titleEscrowOwnerContract
+            .connect(beneficiary)
+            .nominate(newBeneficiary.address, txnHexRemarks.nominateRemark);
+          expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(defaultAddress.Zero);
+          await titleEscrowOwnerContract
+            .connect(holder)
+            .transferBeneficiary(newBeneficiary.address, txnHexRemarks.beneficiaryTransferRemark);
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(newBeneficiary.address);
+          expect(currentHolder).to.equal(holder.address);
+          expect(_prevBeneficiary).to.equal(beneficiary.address);
+          expect(_prevHolder).to.equal(defaultAddress.Zero);
+        });
+        it("should set prevHolder upon holder transfer", async () => {
+          await titleEscrowOwnerContract
+            .connect(holder)
+            .transferHolder(newHolder.address, txnHexRemarks.holderTransferRemark);
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(beneficiary.address);
+          expect(currentHolder).to.equal(newHolder.address);
+          expect(_prevBeneficiary).to.equal(prevBeneficiary.address);
+          expect(_prevHolder).to.equal(holder.address);
+        });
+        it("should have correct values upon owners transfer", async () => {
+          await titleEscrowOwnerContract
+            .connect(beneficiary)
+            .nominate(newBeneficiary.address, txnHexRemarks.nominateRemark);
+          await titleEscrowOwnerContract
+            .connect(holder)
+            .transferOwners(newBeneficiary.address, newHolder.address, txnHexRemarks.transferOwnersRemark);
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(newBeneficiary.address);
+          expect(currentHolder).to.equal(newHolder.address);
+          expect(_prevBeneficiary).to.equal(beneficiary.address);
+          expect(_prevHolder).to.equal(holder.address);
+        });
+      });
+      describe("when holder and beneficiary are same", () => {
+        let owner: SignerWithAddress; // is both beneficiary and holder
+        let newHolder: SignerWithAddress;
+        let newBeneficiary: SignerWithAddress;
+        let prevBeneficiary: SignerWithAddress;
+        let prevHolder: SignerWithAddress;
+        beforeEach(async () => {
+          [owner, newBeneficiary, newHolder] = users.others;
+          await titleEscrowOwnerContract
+            .connect(users.beneficiary)
+            .transferOwners(owner.address, owner.address, txnHexRemarks.transferOwnersRemark);
+          prevBeneficiary = users.beneficiary;
+          prevHolder = users.beneficiary;
+        });
+        it("should have correct initial values", async () => {
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(owner.address);
+          expect(currentHolder).to.equal(owner.address);
+          expect(_prevBeneficiary).to.equal(prevBeneficiary.address);
+          expect(_prevHolder).to.equal(prevHolder.address);
+        });
+        it("should reset both prevBeneficiary and prevHolder upon nomination", async () => {
+          await titleEscrowOwnerContract.connect(owner).nominate(newBeneficiary.address, txnHexRemarks.nominateRemark);
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(owner.address);
+          expect(currentHolder).to.equal(owner.address);
+          expect(_prevBeneficiary).to.equal(defaultAddress.Zero);
+          expect(_prevHolder).to.equal(defaultAddress.Zero);
+        });
+        it("should reset prevBeneficiary upon holder transfer", async () => {
+          await titleEscrowOwnerContract
+            .connect(owner)
+            .transferHolder(newHolder.address, txnHexRemarks.holderTransferRemark);
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(owner.address);
+          expect(currentHolder).to.equal(newHolder.address);
+          expect(_prevBeneficiary).to.equal(defaultAddress.Zero);
+          expect(_prevHolder).to.equal(owner.address);
+        });
+        it("should reset prevHolder upon beneficiary transfer", async () => {
+          await titleEscrowOwnerContract
+            .connect(owner)
+            .transferBeneficiary(newBeneficiary.address, txnHexRemarks.beneficiaryTransferRemark);
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(newBeneficiary.address);
+          expect(currentHolder).to.equal(owner.address);
+          expect(_prevBeneficiary).to.equal(owner.address);
+          expect(_prevHolder).to.equal(defaultAddress.Zero);
+        });
+        it("should reset both prevBeneficiary and prevHolder upon surrender", async () => {
+          await titleEscrowOwnerContract.connect(owner).surrender(txnHexRemarks.surrenderRemark);
+          const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
+            titleEscrowOwnerContract.beneficiary(),
+            titleEscrowOwnerContract.holder(),
+            titleEscrowOwnerContract.prevBeneficiary(),
+            titleEscrowOwnerContract.prevHolder(),
+          ]);
+          expect(currentBeneficiary).to.equal(owner.address);
+          expect(currentHolder).to.equal(owner.address);
+          expect(_prevBeneficiary).to.equal(defaultAddress.Zero);
+          expect(_prevHolder).to.equal(defaultAddress.Zero);
+        });
+      });
+    });
+
     describe("Surrendering", () => {
       let beneficiary: SignerWithAddress;
       let holder: SignerWithAddress;
 
       beforeEach(async () => {
         // eslint-disable-next-line no-multi-assign
-        beneficiary = holder = users.others[faker.datatype.number(users.others.length - 1)];
+        beneficiary = holder = users.others[users.others.length - 1];
         await registryContract
           .connect(users.carrier)
           .mint(beneficiary.address, holder.address, tokenId, txnHexRemarks.mintRemark);
@@ -953,6 +1437,21 @@ describe("Title Escrow", async () => {
         await expect(tx)
           .to.emit(titleEscrowOwnerContract, "Surrender")
           .withArgs(beneficiary.address, registryContract.address, tokenId, txnHexRemarks.surrenderRemark);
+      });
+      it("should reset previous beneficiary and holder", async () => {
+        const [newOwner] = users.others;
+        // holder == beneficiary
+        await titleEscrowOwnerContract
+          .connect(beneficiary)
+          .transferOwners(newOwner.address, newOwner.address, txnHexRemarks.transferOwnersRemark);
+
+        expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(beneficiary.address);
+        expect(await titleEscrowOwnerContract.prevHolder()).to.equal(holder.address);
+
+        await titleEscrowOwnerContract.connect(newOwner).surrender(txnHexRemarks.surrenderRemark);
+
+        expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(defaultAddress.Zero);
+        expect(await titleEscrowOwnerContract.prevHolder()).to.equal(defaultAddress.Zero);
       });
     });
 

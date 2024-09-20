@@ -19,6 +19,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   address public override beneficiary;
   address public override holder;
 
+  address public override prevBeneficiary;
+  address public override prevHolder;
+
   address public override nominee;
 
   bool public override active;
@@ -157,6 +160,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     if (nominee == _nominee) {
       revert NomineeAlreadyNominated();
     }
+    prevBeneficiary = address(0);
+    if (beneficiary == holder) prevHolder = address(0);
     remark = _remark;
 
     _setNominee(_nominee, _remark);
@@ -175,6 +180,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     if (!(beneficiary == holder || nominee == _nominee)) {
       revert InvalidNominee();
     }
+    prevHolder = address(0);
+    prevBeneficiary = beneficiary;
     remark = _remark;
 
     _setBeneficiary(_nominee, _remark);
@@ -193,6 +200,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     if (holder == newHolder) {
       revert RecipientAlreadyHolder();
     }
+    if (beneficiary == holder) prevBeneficiary = address(0);
+    prevHolder = holder;
     remark = _remark;
 
     _setHolder(newHolder, _remark);
@@ -204,6 +213,80 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   function transferOwners(address _nominee, address newHolder, bytes calldata _remark) external virtual override {
     transferBeneficiary(_nominee, _remark);
     transferHolder(newHolder, _remark);
+  }
+
+  /**
+   * @dev See {ITitleEscrow-rejectTransferBeneficiary}.
+   */
+  function rejectTransferBeneficiary(
+    bytes calldata _remark
+  ) public virtual override whenNotPaused whenActive onlyBeneficiary whenHoldingToken remarkLengthLimit(_remark) {
+    if (prevBeneficiary == address(0)) {
+      revert InvalidTransferToZeroAddress();
+    }
+    if (beneficiary == holder) {
+      revert DualRoleRejectionRequired();
+    }
+    remark = _remark;
+    address from = beneficiary;
+    address to = prevBeneficiary;
+
+    _setBeneficiary(to, _remark);
+    prevBeneficiary = address(0);
+    emit RejectTransferBeneficiary(from, to, registry, tokenId, _remark);
+  }
+
+  /**
+   * @dev See {ITitleEscrow-rejectTransferHolder}.
+   */
+  function rejectTransferHolder(
+    bytes calldata _remark
+  ) public virtual override whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(_remark) {
+    if (prevHolder == address(0)) {
+      revert InvalidTransferToZeroAddress();
+    }
+    if (holder == beneficiary) {
+      revert DualRoleRejectionRequired();
+    }
+    remark = _remark;
+    address from = holder;
+    address to = prevHolder;
+
+    _setHolder(to, _remark);
+    prevHolder = address(0);
+
+    emit RejectTransferHolder(from, to, registry, tokenId, _remark);
+  }
+
+  /**
+   * @dev See {ITitleEscrow-rejectTransferOwners}.
+   */
+  function rejectTransferOwners(
+    bytes calldata _remark
+  )
+    external
+    virtual
+    override
+    whenNotPaused
+    whenActive
+    whenHoldingToken
+    onlyBeneficiary
+    onlyHolder
+    remarkLengthLimit(_remark)
+  {
+    if (prevBeneficiary == address(0) || prevHolder == address(0)) {
+      revert InvalidTransferToZeroAddress();
+    }
+    remark = _remark;
+    address fromHolder = holder;
+    address toHolder = prevHolder;
+    address fromBeneficiary = beneficiary;
+    address toBeneficiary = prevBeneficiary;
+    _setBeneficiary(toBeneficiary, _remark);
+    _setHolder(toHolder, _remark);
+    prevBeneficiary = address(0);
+    prevHolder = address(0);
+    emit RejectTransferOwners(fromBeneficiary, toBeneficiary, fromHolder, toHolder, registry, tokenId, _remark);
   }
 
   /**
@@ -225,6 +308,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     _setNominee(address(0), "");
     ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId, "");
     remark = _remark;
+    prevBeneficiary = address(0);
+    prevHolder = address(0);
 
     emit Surrender(msg.sender, registry, tokenId, _remark);
   }

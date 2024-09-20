@@ -33,4 +33,6 @@ interface TitleEscrowErrors {
   error TokenNotSurrendered();
 
   error RemarkLengthExceeded();
+
+  error DualRoleRejectionRequired();
 }
