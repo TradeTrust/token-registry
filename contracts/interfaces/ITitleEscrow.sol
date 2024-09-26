@@ -40,6 +40,7 @@ interface ITitleEscrow is IERC721Receiver {
   );
   event Surrender(address indexed surrenderer, address registry, uint256 tokenId, bytes remark);
   event Shred(address registry, uint256 tokenId, bytes remark);
+  event Revoke(address registry, uint256 tokenId, bytes remark);
   event RejectTransferOwners(
     address indexed fromBeneficiary,
     address indexed toBeneficiary,
@@ -116,6 +117,8 @@ interface ITitleEscrow is IERC721Receiver {
 
   function prevHolder() external view returns (address);
 
+  function isRevocable() external view returns (bool);
+
   function active() external view returns (bool);
 
   function nominee() external view returns (address);
@@ -139,4 +142,9 @@ interface ITitleEscrow is IERC721Receiver {
    * @notice Allows the registry to shred the TitleEscrow by marking it as inactive and reset the beneficiary and holder addresses
    */
   function shred(bytes calldata remark) external;
+
+  /**
+   * @notice Allows the registry to immediate shred the TitleEscrow before any transaction by marking it as inactive and reset the beneficiary and holder addresses
+   */
+  function revoke(bytes calldata remark) external;
 }

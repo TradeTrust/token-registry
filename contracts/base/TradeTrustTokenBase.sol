@@ -5,6 +5,7 @@ import "./RegistryAccess.sol";
 import "./TradeTrustTokenBurnable.sol";
 import "./TradeTrustTokenMintable.sol";
 import "./TradeTrustTokenRestorable.sol";
+import "./TradeTrustTokenRevocable.sol";
 import "../interfaces/ITradeTrustToken.sol";
 import "./TradeTrustTokenBaseURI.sol";
 
@@ -18,7 +19,8 @@ abstract contract TradeTrustTokenBase is
   TradeTrustTokenBaseURI,
   TradeTrustTokenBurnable,
   TradeTrustTokenMintable,
-  TradeTrustTokenRestorable
+  TradeTrustTokenRestorable,
+  TradeTrustTokenRevocable
 {
   /**
    * @dev Initializss the contract by setting a `name` and a `symbol` to the token contract.
@@ -49,7 +51,8 @@ abstract contract TradeTrustTokenBase is
       TradeTrustTokenBaseURI,
       TradeTrustTokenRestorable,
       TradeTrustTokenMintable,
-      TradeTrustTokenBurnable
+      TradeTrustTokenBurnable,
+      TradeTrustTokenRevocable
     )
     returns (bool)
   {

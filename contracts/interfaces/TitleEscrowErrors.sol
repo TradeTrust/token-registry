@@ -35,4 +35,6 @@ interface TitleEscrowErrors {
   error RemarkLengthExceeded();
 
   error DualRoleRejectionRequired();
+
+  error RevocationExpired();
 }

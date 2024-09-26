@@ -3,6 +3,7 @@ export const contractInterfaces = {
   TradeTrustTokenMintable: ["mint(address,address,uint256,bytes)"],
   TradeTrustTokenBurnable: ["burn(uint256,bytes)"],
   TradeTrustTokenRestorable: ["restore(uint256,bytes)"],
+  TradeTrustTokenRevocable: ["revoke(uint256,bytes)"],
   TitleEscrow: [
     "nominate(address,bytes)",
     "transferBeneficiary(address,bytes)",

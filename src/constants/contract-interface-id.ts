@@ -5,6 +5,7 @@ export const contractInterfaceId = {
   TradeTrustTokenMintable: computeInterfaceId(contractInterfaces.TradeTrustTokenMintable),
   TradeTrustTokenBurnable: computeInterfaceId(contractInterfaces.TradeTrustTokenBurnable),
   TradeTrustTokenRestorable: computeInterfaceId(contractInterfaces.TradeTrustTokenRestorable),
+  TradeTrustTokenRevocable: computeInterfaceId(contractInterfaces.TradeTrustTokenRevocable),
   TitleEscrow: computeInterfaceId(contractInterfaces.TitleEscrow),
   TitleEscrowSignable: computeInterfaceId(contractInterfaces.TitleEscrowSignable),
   TitleEscrowFactory: computeInterfaceId(contractInterfaces.TitleEscrowFactory),

@@ -40,6 +40,7 @@ export const remarkString = {
   pauseRemark: "Remark: Registry paused till further processing or corrections.",
   unPauseRemark: "Remark: Registry unpaused to resume transactions.",
   rejectTransferRemark: "Remark: Transfer of the document rejected due to discrepancies or errors in the request.",
+  revokerRemark: "Remark: Document revoked to invalidate it due to errors or discrepancies in the document.",
 };
 
 // Define the type for remarkString keys

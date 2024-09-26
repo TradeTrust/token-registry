@@ -26,6 +26,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   bool public override active;
 
+  bool public override isRevocable;
+
   bytes public remark;
 
   constructor() initializer {}
@@ -141,8 +143,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
       _setHolder(_holder, "");
       remark = _remark;
       isMinting = true;
+      isRevocable = true;
     } else remark = data;
-
     emit TokenReceived(beneficiary, holder, isMinting, registry, tokenId, remark);
     return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
   }
@@ -160,6 +162,8 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     if (nominee == _nominee) {
       revert NomineeAlreadyNominated();
     }
+    if (isRevocable) isRevocable = false;
+
     prevBeneficiary = address(0);
     if (beneficiary == holder) prevHolder = address(0);
     remark = _remark;
@@ -180,6 +184,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     if (!(beneficiary == holder || nominee == _nominee)) {
       revert InvalidNominee();
     }
+    if (isRevocable) isRevocable = false;
     prevHolder = address(0);
     prevBeneficiary = beneficiary;
     remark = _remark;
@@ -200,6 +205,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     if (holder == newHolder) {
       revert RecipientAlreadyHolder();
     }
+    if (isRevocable) isRevocable = false;
     if (beneficiary == holder) prevBeneficiary = address(0);
     prevHolder = holder;
     remark = _remark;
@@ -305,6 +311,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     whenHoldingToken
     remarkLengthLimit(_remark)
   {
+    if (isRevocable) isRevocable = false;
     _setNominee(address(0), "");
     ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId, "");
     remark = _remark;
@@ -331,6 +338,26 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     remark = _remark;
 
     emit Shred(registry, tokenId, _remark);
+  }
+
+  /**
+   * @dev See {ITitleEscrow-revoke}.
+   */
+  function revoke(
+    bytes calldata _remark
+  ) external virtual override whenNotPaused whenHoldingToken whenActive remarkLengthLimit(_remark) {
+    if (!isRevocable) revert RevocationExpired();
+    if (msg.sender != registry) {
+      revert InvalidRegistry(msg.sender);
+    }
+    ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId, "");
+    _setBeneficiary(address(0), "");
+    _setHolder(address(0), "");
+    active = false;
+    remark = _remark;
+    isRevocable = false;
+
+    emit Revoke(registry, tokenId, _remark);
   }
 
   /**
