@@ -14,7 +14,7 @@ const ChainId = {
 export const contractAddress = {
   TitleEscrowFactory: {
     [ChainId.Ethereum]: "0xA38CC56c9291B9C1f52F862dd92326d352e710b8",
-    [ChainId.Sepolia]: "0x5aA71Cc9559bC5e54E9504a81496d9F8454721F5",
+    [ChainId.Sepolia]: "0x548E7Fa9704bB0aEA8F91cA4EC658dc50D6EDaEd",
     [ChainId.Polygon]: "0x5B5F8d94782be18E22420f3276D5ef5a1bc65C53",
     [ChainId.PolygonAmoy]: "0x812A0E71c61A42C8d3d449BdfF51834f85686C73",
     [ChainId.XDC]: "0x50BfCc1b699fD2308B978B7a6A26e3C3Bbad16DC",
@@ -36,7 +36,7 @@ export const contractAddress = {
   },
   TokenImplementation: {
     [ChainId.Ethereum]: "0xd3F09dD800525Ecf7e452C3c167C7c716632d016",
-    [ChainId.Sepolia]: "0xC78BA1a49663Ef8b920F36B036E91Ab40D8F26D6",
+    [ChainId.Sepolia]: "0x4B1706483C1Db1163c4682cEa0c7AB8fC136Fe3D",
     [ChainId.Polygon]: "0xd3F09dD800525Ecf7e452C3c167C7c716632d016",
     [ChainId.PolygonAmoy]: "0xbA351CF5EC041EF661699ab5cfF605850b6Dcd91",
     [ChainId.StabilityTestnet]: "0x6cDc8cD1d9c3f28DC59F5021401687E98bd18740",
