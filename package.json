@@ -1,14 +1,16 @@
 {
   "name": "@tradetrust-tt/token-registry",
-  "version": "5.0.0",
+  "version": "5.0.0-alpha.0.1",
   "release": {
     "branches": [
       "master",
+      "beta",
       {
         "name": "feat/remarks-and-rejection",
-        "prerelease": true
+        "prerelease": "alpha"
       }
-    ]
+    ],
+    "tagFormat": "v${version}"
   },
   "files": [
     "dist",
