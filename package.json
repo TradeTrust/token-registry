@@ -7,7 +7,7 @@
       "beta",
       {
         "name": "feat/remarks-and-rejection",
-        "prerelease": true
+        "prerelease": "alpha"
       }
     ],
     "tagFormat": "v${version}"
