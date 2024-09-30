@@ -3,11 +3,15 @@
   "version": "5.0.0",
   "release": {
     "branches": [
-      "master",
-      "beta",
+      {
+        "name": "master",
+        "range": ">=5.0.0",
+        "channel": "stable"
+      },
       {
         "name": "feat/remarks-and-rejection",
-        "prerelease": "alpha"
+        "range": ">=0.5.0-alpha",
+        "channel": "alpha"
       }
     ]
   },
