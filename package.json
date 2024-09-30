@@ -10,7 +10,7 @@
       },
       {
         "name": "feat/remarks-and-rejection",
-        "range": ">=0.5.0-alpha",
+        "range": ">=5.0-alpha",
         "channel": "alpha"
       }
     ]
