@@ -5,9 +5,10 @@
     "branches": [
       "master",
       {
-        "name": "Remarks",
+        "name": "feat/remarks-and-rejection",
         "range": ">=5.0.0-alpha",
-        "channel": "alpha"
+        "channel": "alpha",
+        "prerelease": true
       }
     ]
   },
