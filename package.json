@@ -9,8 +9,7 @@
         "name": "feat/remarks-and-rejection",
         "prerelease": "alpha"
       }
-    ],
-    "tagFormat": "v${version}-test"
+    ]
   },
   "files": [
     "dist",
