@@ -5,7 +5,7 @@ import "@nomicfoundation/hardhat-chai-matchers";
 import "hardhat-watcher";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
-import "@nomiclabs/hardhat-etherscan";
+import "@nomicfoundation/hardhat-verify";
 import dotenv from "dotenv";
 import { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
 import "./tasks";
@@ -20,6 +20,7 @@ const {
   ETHERSCAN_API_KEY,
   POLYGONSCAN_API_KEY,
   STABILITY_API_KEY,
+  ASTRONSCAN_API_KEY,
 } = process.env;
 const IS_CI_ENV = process.env.NODE_ENV === "ci";
 
@@ -81,7 +82,22 @@ const config: HardhatUserConfig = {
        * Polygon
        */
       polygon: POLYGONSCAN_API_KEY!,
+      /**
+       * Astron
+       */
+      astron: ASTRONSCAN_API_KEY!,
     },
+    customChains: [{
+        /**
+         * Astron
+         */
+          network: "astron",
+          chainId: 1338,
+          urls: {
+              apiURL: "http://astronscanl2.bitfactory.cn/api",
+              browserURL: "http://astronscanl2.bitfactory.cn",
+          },
+      }],
   },
   networks: {
     /**
@@ -136,6 +152,13 @@ const config: HardhatUserConfig = {
       ...networkConfig,
       url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
     },
+    /**
+     * Astron
+     */
+    astron: {
+        ...networkConfig,
+        url: "http://astronlayer2.bitfactory.cn:8545",
+     },
     /**
      * Development
      */
