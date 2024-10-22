@@ -19,20 +19,28 @@ code for token registry (in `/contracts`) as well as the node package for using 
 
 ## Table of Contents
 
+- [Installation](#installation)
+- [Usage](#usage)
+  - [TradeTrustToken](#tradetrusttoken)
+  - [Title Escrow](#title-escrow)
+  - [Title Escrow Signable (Experimental)](#title-escrow-signable-experimental)
+  - [Provider & Signer](#provider--signer)
+  - [Roles and Access](#roles-and-access)
 - [Deployment](#deployment)
   - [Quick Start](#quick-start)
   - [Advanced Usage](#advanced-usage)
     - [Token Contract](#token-contract)
+      - [Stand-alone Contract](#stand-alone-contract)
       - [Using an existing Title Escrow Factory](#using-an-existing-title-escrow-factory)
     - [Title Escrow Factory](#title-escrow-factory)
       - [Deploy a new Title Escrow Factory](#deploy-a-new-title-escrow-factory)
   - [Verification](#verification)
   - [Network Configuration](#network-configuration)
-  - [Configuration](#configuration)
+- [Configuration](#configuration)
 - [Development](#development)
-    - [Scripts](#scripts)
-  - [Subgraph](#subgraph)
-  - [Notes](#notes)
+  - [Scripts](#scripts)
+- [Subgraph](#subgraph)
+- [Notes](#notes)
 
 ## Installation
 
