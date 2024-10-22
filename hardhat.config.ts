@@ -131,8 +131,7 @@ const config: HardhatUserConfig = {
     },
     amoy: {
       ...networkConfig,
-      // url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
-      url: "https://rpc-amoy.polygon.technology",
+      url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
     },
     /**
      * Development
