@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 interface ITradeTrustTokenRestorable {
   /**
-   * @dev Restore a surrendered token.
+   * @dev Restore a token returned to issuer.
    * @param tokenId The ID of the token to restore.
    * @return The address of the TitleEscrow contract.
    */

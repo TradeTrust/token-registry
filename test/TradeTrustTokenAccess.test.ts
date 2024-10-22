@@ -163,7 +163,7 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
 
   describe("Restorer Role", () => {
     beforeEach(async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+      await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
     });
 
     it("should allow a restorer to restore tokens", async () => {
@@ -183,7 +183,7 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
 
   describe("Accepter Role", () => {
     beforeEach(async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+      await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
     });
 
     it("should allow an accepter to burn tokens", async () => {

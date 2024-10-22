@@ -20,7 +20,7 @@ export const contractInterfaces = {
     "registry()",
     "tokenId()",
     "isHoldingToken()",
-    "surrender(bytes)",
+    "returnToIssuer(bytes)",
     "shred(bytes)",
   ],
   TitleEscrowSignable: [

@@ -101,7 +101,7 @@ describe("TradeTrustTokenMintable", async () => {
     });
 
     it("should not allow minting a token that has been burnt", async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+      await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
       await registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
       const tx = registryContractAsAdmin.mint(

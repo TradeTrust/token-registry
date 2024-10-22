@@ -341,7 +341,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should return false when not holding token", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         const res = await titleEscrowOwnerContract.isHoldingToken();
 
@@ -576,7 +576,7 @@ describe("Title Escrow", async () => {
           const titleEscrowAsBeneficiary = (await getTitleEscrowContract(registryContract, tokenId)).connect(
             users.beneficiary
           );
-          await titleEscrowAsBeneficiary.surrender(txnHexRemarks.surrenderRemark);
+          await titleEscrowAsBeneficiary.returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
           const tx = titleEscrowAsBeneficiary.nominate(beneficiaryNominee.address, txnHexRemarks.nominateRemark);
 
@@ -1324,8 +1324,8 @@ describe("Title Escrow", async () => {
           expect(_prevBeneficiary).to.equal(owner.address);
           expect(_prevHolder).to.equal(defaultAddress.Zero);
         });
-        it("should reset both prevBeneficiary and prevHolder upon surrender", async () => {
-          await titleEscrowOwnerContract.connect(owner).surrender(txnHexRemarks.surrenderRemark);
+        it("should reset both prevBeneficiary and prevHolder upon returnToIssuer", async () => {
+          await titleEscrowOwnerContract.connect(owner).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
           const [currentBeneficiary, currentHolder, _prevBeneficiary, _prevHolder] = await Promise.all([
             titleEscrowOwnerContract.beneficiary(),
             titleEscrowOwnerContract.holder(),
@@ -1340,7 +1340,7 @@ describe("Title Escrow", async () => {
       });
     });
 
-    describe("Surrendering", () => {
+    describe("ReturnToIssuer", () => {
       let beneficiary: SignerWithAddress;
       let holder: SignerWithAddress;
 
@@ -1353,47 +1353,49 @@ describe("Title Escrow", async () => {
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
       });
 
-      it("should not allow surrendering when remark length exceeds", async () => {
-        const tx = titleEscrowOwnerContract.connect(beneficiary).surrender(exceededLengthRemark);
+      it("should not allow returning to issuer when remark length exceeds", async () => {
+        const tx = titleEscrowOwnerContract.connect(beneficiary).returnToIssuer(exceededLengthRemark);
 
         await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "RemarkLengthExceeded");
       });
 
-      it("should allow a beneficiary who is also a holder to surrender", async () => {
-        await titleEscrowOwnerContract.connect(beneficiary).surrender(txnHexRemarks.surrenderRemark);
+      it("should allow a beneficiary who is also a holder to returnToIssuer", async () => {
+        await titleEscrowOwnerContract.connect(beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         const res = await registryContract.ownerOf(tokenId);
 
         expect(res).to.equal(registryContract.address);
       });
 
-      it("should not allow surrendering when title escrow is not holding token", async () => {
-        await titleEscrowOwnerContract.connect(beneficiary).surrender(txnHexRemarks.surrenderRemark);
-        const tx = titleEscrowOwnerContract.connect(beneficiary).surrender(txnHexRemarks.surrenderRemark);
+      it("should not allow returning to issuer when title escrow is not holding token", async () => {
+        await titleEscrowOwnerContract.connect(beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
+        const tx = titleEscrowOwnerContract.connect(beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "TitleEscrowNotHoldingToken");
       });
 
-      it("should not allow a beneficiary only to surrender", async () => {
+      it("should not allow a beneficiary only to returnToIssuer", async () => {
         tokenId = faker.datatype.hexaDecimal(64);
         await registryContract
           .connect(users.carrier)
           .mint(users.beneficiary.address, users.holder.address, tokenId, txnHexRemarks.mintRemark);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
 
-        const tx = titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        const tx = titleEscrowOwnerContract
+          .connect(users.beneficiary)
+          .returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotHolder");
       });
 
-      it("should not allow a holder only to surrender", async () => {
+      it("should not allow a holder only to returnToIssuer", async () => {
         tokenId = faker.datatype.hexaDecimal(64);
         await registryContract
           .connect(users.carrier)
           .mint(users.beneficiary.address, users.holder.address, tokenId, txnHexRemarks.mintRemark);
         titleEscrowOwnerContract = await getTitleEscrowContract(registryContract, tokenId);
 
-        const tx = titleEscrowOwnerContract.connect(users.holder).surrender(txnHexRemarks.surrenderRemark);
+        const tx = titleEscrowOwnerContract.connect(users.holder).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "CallerNotBeneficiary");
       });
@@ -1404,7 +1406,7 @@ describe("Title Escrow", async () => {
         await titleEscrowAsBeneficiary.nominate(beneficiaryNominee, txnHexRemarks.nominateRemark);
         const initialBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
 
-        await titleEscrowAsBeneficiary.surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowAsBeneficiary.returnToIssuer(txnHexRemarks.returnToIssuerRemark);
         const currentBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
 
         expect(initialBeneficiaryNominee).to.deep.equal(beneficiaryNominee);
@@ -1414,29 +1416,29 @@ describe("Title Escrow", async () => {
       it("should transfer token back to registry", async () => {
         const initialOwner = await registryContract.ownerOf(tokenId);
 
-        await titleEscrowOwnerContract.connect(beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
         const currentOwner = await registryContract.ownerOf(tokenId);
 
         expect(initialOwner).to.equal(titleEscrowOwnerContract.address);
         expect(currentOwner).to.equal(registryContract.address);
       });
 
-      it("should not hold token after surrendering", async () => {
+      it("should not hold token after returning to issuer", async () => {
         const initialHoldingStatus = await titleEscrowOwnerContract.isHoldingToken();
 
-        await titleEscrowOwnerContract.connect(beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
         const currentHoldingStatus = await titleEscrowOwnerContract.isHoldingToken();
 
         expect(initialHoldingStatus).to.equal(true);
         expect(currentHoldingStatus).to.equal(false);
       });
 
-      it("should emit Surrender event with correct values", async () => {
-        const tx = titleEscrowOwnerContract.connect(beneficiary).surrender(txnHexRemarks.surrenderRemark);
+      it("should emit ReturnToIssuer event with correct values", async () => {
+        const tx = titleEscrowOwnerContract.connect(beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         await expect(tx)
-          .to.emit(titleEscrowOwnerContract, "Surrender")
-          .withArgs(beneficiary.address, registryContract.address, tokenId, txnHexRemarks.surrenderRemark);
+          .to.emit(titleEscrowOwnerContract, "ReturnToIssuer")
+          .withArgs(beneficiary.address, registryContract.address, tokenId, txnHexRemarks.returnToIssuerRemark);
       });
       it("should reset previous beneficiary and holder", async () => {
         const [newOwner] = users.others;
@@ -1448,7 +1450,7 @@ describe("Title Escrow", async () => {
         expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(beneficiary.address);
         expect(await titleEscrowOwnerContract.prevHolder()).to.equal(holder.address);
 
-        await titleEscrowOwnerContract.connect(newOwner).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(newOwner).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         expect(await titleEscrowOwnerContract.prevBeneficiary()).to.equal(defaultAddress.Zero);
         expect(await titleEscrowOwnerContract.prevHolder()).to.equal(defaultAddress.Zero);
@@ -1467,14 +1469,14 @@ describe("Title Escrow", async () => {
       });
 
       it("should not allow shredding when remark length exceeds", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
         const tx = titleEscrowOwnerContract.connect(registrySigner).shred(exceededLengthRemark);
 
         await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "RemarkLengthExceeded");
       });
 
       it("should allow to be called from registry", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
         const holdingStatus = await titleEscrowOwnerContract.isHoldingToken();
 
         await titleEscrowOwnerContract.connect(registrySigner).shred(txnHexRemarks.burnRemark);
@@ -1488,11 +1490,11 @@ describe("Title Escrow", async () => {
         const tx = titleEscrowOwnerContract.connect(registrySigner).shred(txnHexRemarks.burnRemark);
 
         expect(holdingStatus).to.equal(true);
-        await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "TokenNotSurrendered");
+        await expect(tx).to.be.revertedWithCustomError(titleEscrowOwnerContract, "TokenNotReturnedToIssuer");
       });
 
       it("should not allow to be called from non-registry", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         const tx = titleEscrowOwnerContract.connect(users.beneficiary).shred(txnHexRemarks.burnRemark);
 
@@ -1500,7 +1502,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should reset nominated beneficiary", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         await titleEscrowOwnerContract.connect(registrySigner).shred(txnHexRemarks.burnRemark);
         const res = await titleEscrowOwnerContract.nominee();
@@ -1509,7 +1511,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should reset beneficiary", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         await titleEscrowOwnerContract.connect(registrySigner).shred(txnHexRemarks.burnRemark);
         const res = await titleEscrowOwnerContract.beneficiary();
@@ -1518,7 +1520,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should reset holder", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         await titleEscrowOwnerContract.connect(registrySigner).shred(txnHexRemarks.burnRemark);
         const res = await titleEscrowOwnerContract.holder();
@@ -1527,7 +1529,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should set active status to false", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         await titleEscrowOwnerContract.connect(registrySigner).shred(txnHexRemarks.burnRemark);
         const res = await titleEscrowOwnerContract.active();
@@ -1536,7 +1538,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should emit Shred event", async () => {
-        await titleEscrowOwnerContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowOwnerContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         const tx = titleEscrowOwnerContract.connect(registrySigner).shred(txnHexRemarks.burnRemark);
 

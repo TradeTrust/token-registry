@@ -176,7 +176,7 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
 
       describe("Token Registry Behaviour", () => {
         beforeEach(async () => {
-          await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+          await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
           await registryContractAsAdmin.pause(txnHexRemarks.pauseRemark);
 
           const paused = await registryContract.paused();
@@ -213,8 +213,8 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
           expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
 
-        it("should not allow surrendering", async () => {
-          const tx = titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        it("should not allow returToIssuer", async () => {
+          const tx = titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
           await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RegistryContractPaused");
         });
