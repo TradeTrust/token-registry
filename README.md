@@ -342,6 +342,7 @@ tasks (which internally uses the same plugin), you will need to include your cor
 
 - For Ethereum, set `ETHERSCAN_API_KEY`.
 - For Polygon, set `POLYGONSCAN_API_KEY`.
+- For Astron, set `ASTRONSCAN_API_KEY`.
 
 ## Network Configuration
 
@@ -357,6 +358,7 @@ Here's a list of network names currently pre-configured:
 - `hederatestnet` (Hedera Network TestNet)
 - `stabilitytestnet` (Stability TestNet)
 - `stability` (Stability Global Trust Network)
+- `astron` (astron Network MainNet)
 
 > 💡 You can configure existing and add other networks you wish to deploy to in the `hardhat.config.ts` file.
 
@@ -374,6 +376,7 @@ ETHERSCAN_API_KEY=
 POLYGONSCAN_API_KEY=
 COINMARKETCAP_API_KEY=
 STABILITY_API_KEY=
+ASTRONSCAN_API_KEY=
 
 # Deployer Private Key
 DEPLOYER_PK=
