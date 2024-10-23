@@ -33,7 +33,7 @@ export const remarkString = {
     "Remark: Beneficiary rights transferred to update the recipient information for the document.",
   holderTransferRemark:
     "Remark: Holder rights endorsed and transferred to reflect changes in the responsible party for the cargo.",
-  surrenderRemark: "Remark: Document surrendered as the cargo has been successfully delivered or no longer required.",
+  returnToIssuerRemark: "Remark: Document  as the cargo has been successfully delivered or no longer required.",
   transferOwnersRemark:
     "Remark: Ownership of the document transferred to update the records for the new managing party.",
   restorerRemark: "Remark: Document restored to reactivate it for further processing or corrections.",

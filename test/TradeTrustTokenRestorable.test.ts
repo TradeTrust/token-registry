@@ -74,23 +74,23 @@ describe("TradeTrustTokenRestorable", async () => {
     await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "InvalidTokenId");
   });
 
-  it("should revert if token is not surrendered", async () => {
+  it("should revert if token is not returned to issuer", async () => {
     const tx = registryContractAsAdmin.restore(tokenId, txnHexRemarks.restorerRemark);
 
-    await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
+    await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotReturnedToIssuer");
   });
 
   it("should not allow to restore burnt token", async () => {
-    await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+    await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
     await registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
     const tx = registryContractAsAdmin.restore(tokenId, txnHexRemarks.restorerRemark);
 
-    await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
+    await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotReturnedToIssuer");
   });
 
-  it("should allow to restore after token is surrendered", async () => {
-    await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+  it("should allow to restore after token is returned to issuer", async () => {
+    await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
     const tx = registryContractAsAdmin.restore(tokenId, txnHexRemarks.restorerRemark);
 
@@ -104,7 +104,7 @@ describe("TradeTrustTokenRestorable", async () => {
       implementationAddress: titleEscrowImplAddr,
       factoryAddress: mockTitleEscrowFactoryContract.address,
     });
-    await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+    await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
     await registryContractAsAdmin.restore(tokenId, txnHexRemarks.restorerRemark);
     const res = await registryContract.ownerOf(tokenId);
@@ -119,7 +119,7 @@ describe("TradeTrustTokenRestorable", async () => {
       implementationAddress: titleEscrowImplAddr,
       factoryAddress: mockTitleEscrowFactoryContract.address,
     });
-    await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+    await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
     const tx = await registryContractAsAdmin.restore(tokenId, txnHexRemarks.restorerRemark);
 

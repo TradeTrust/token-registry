@@ -290,9 +290,9 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   }
 
   /**
-   * @dev See {ITitleEscrow-surrender}.
+   * @dev See {ITitleEscrow-returnToIssuer}.
    */
-  function surrender(
+  function returnToIssuer(
     bytes calldata _remark
   )
     external
@@ -311,7 +311,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     prevBeneficiary = address(0);
     prevHolder = address(0);
 
-    emit Surrender(msg.sender, registry, tokenId, _remark);
+    emit ReturnToIssuer(msg.sender, registry, tokenId, _remark);
   }
 
   /**
@@ -319,7 +319,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    */
   function shred(bytes calldata _remark) external virtual override whenNotPaused whenActive remarkLengthLimit(_remark) {
     if (_isHoldingToken()) {
-      revert TokenNotSurrendered();
+      revert TokenNotReturnedToIssuer();
     }
     if (msg.sender != registry) {
       revert InvalidRegistry(msg.sender);

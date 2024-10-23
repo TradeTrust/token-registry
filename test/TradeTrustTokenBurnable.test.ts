@@ -68,9 +68,9 @@ describe("TradeTrustTokenBurnable", async () => {
     expect(res).to.be.true;
   });
 
-  describe("When token has been surrendered", () => {
+  describe("When token has been returned to issuer", () => {
     beforeEach(async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+      await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
     });
 
     it("should shred the correct title escrow", async () => {
@@ -108,11 +108,11 @@ describe("TradeTrustTokenBurnable", async () => {
     });
   });
 
-  describe("When token has not been surrendered", () => {
+  describe("When token has not been returned to issuer", () => {
     it("should revert when burn token", async () => {
       const tx = registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
-      await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
+      await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotReturnedToIssuer");
     });
 
     it("should revert before transfer when forcefully sent to burn address", async () => {
@@ -136,7 +136,7 @@ describe("TradeTrustTokenBurnable", async () => {
         .connect(tokenRecipientSigner)
         .transferFrom(tokenRecipientAddress, defaultAddress.Burn, tokenId, txnHexRemarks.burnRemark);
 
-      await expect(tx).to.be.revertedWithCustomError(registryContractMock, "TokenNotSurrendered");
+      await expect(tx).to.be.revertedWithCustomError(registryContractMock, "TokenNotReturnedToIssuer");
     });
   });
 });

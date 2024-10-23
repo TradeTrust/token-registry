@@ -207,7 +207,7 @@ describe("TitleEscrowSignable", async () => {
           await titleEscrowContract
             .connect(users.holder)
             .transferHolder(users.beneficiary.address, txnHexRemarks.holderTransferRemark);
-          await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+          await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
           await titleEscrowContract.connect(registrySigner as Signer).shred(txnHexRemarks.burnRemark);
         });
 
@@ -229,7 +229,7 @@ describe("TitleEscrowSignable", async () => {
           await titleEscrowContract
             .connect(users.holder)
             .transferHolder(users.beneficiary.address, txnHexRemarks.holderTransferRemark);
-          await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+          await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
         });
 
         it("3 should revert when calling: transferBeneficiaryWithSig", async () => {

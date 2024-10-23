@@ -38,7 +38,7 @@ interface ITitleEscrow is IERC721Receiver {
     uint256 tokenId,
     bytes remark
   );
-  event Surrender(address indexed surrenderer, address registry, uint256 tokenId, bytes remark);
+  event ReturnToIssuer(address indexed caller, address registry, uint256 tokenId, bytes remark);
   event Shred(address registry, uint256 tokenId, bytes remark);
   event RejectTransferOwners(
     address indexed fromBeneficiary,
@@ -131,9 +131,9 @@ interface ITitleEscrow is IERC721Receiver {
   function isHoldingToken() external returns (bool);
 
   /**
-   * @notice Allows the beneficiary and holder to surrender the token back to the registry
+   * @notice Allows the beneficiary and holder to returnToIssuer the token back to the registry
    */
-  function surrender(bytes calldata remark) external;
+  function returnToIssuer(bytes calldata remark) external;
 
   /**
    * @notice Allows the registry to shred the TitleEscrow by marking it as inactive and reset the beneficiary and holder addresses

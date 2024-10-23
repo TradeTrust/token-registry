@@ -196,17 +196,17 @@ describe("TradeTrustToken", async () => {
       });
     });
 
-    describe("Surrender Status", () => {
-      // These are just extra cases to test how the surrender status will be checked in an app
-      it("should not have registry and burn address as owner for an unsurrendered token", async () => {
+    describe("ReturnToIssuer Status", () => {
+      // These are just extra cases to test how the returnToIssuer status will be checked in an app
+      it("should not have registry and burn address as owner for a token not returned to issuer", async () => {
         const owner = await registryContract.ownerOf(tokenId);
 
         expect(owner).to.not.equal(registryContract.address);
         expect(owner).to.not.equal(defaultAddress.Burn);
       });
 
-      it("should have registry as owner for a surrendered token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+      it("should have registry as owner for a token returned to issuer", async () => {
+        await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
 
@@ -214,7 +214,7 @@ describe("TradeTrustToken", async () => {
       });
 
       it("should have burn address as owner for an accepted token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
         await registryContract.burn(tokenId, txnHexRemarks.burnRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
@@ -223,7 +223,7 @@ describe("TradeTrustToken", async () => {
       });
 
       it("should not have registry and burn address as owner for a restored token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender(txnHexRemarks.surrenderRemark);
+        await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
         await registryContract.restore(tokenId, txnHexRemarks.restorerRemark);
 
         const owner = await registryContract.ownerOf(tokenId);

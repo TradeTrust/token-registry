@@ -121,19 +121,19 @@ function nominate(address beneficiaryNominee) external;
 The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder.
 To transfer both beneficiary and holder in a single transaction, use `transferOwners`. Transfer of beneficiary will require a nomination done through the `nominate` method.
 
-#### Surrendering/Burning a Document
+#### returnToIssuer/Burning a Document
 
-Use the `surrender` method in the Title Escrow.
+Use the `returnToIssuer` method in the Title Escrow.
 
 ```solidity
-function surrender() external;
+function returnToIssuer() external;
 
 ```
 
 Example:
 
 ```ts
-await connectedEscrow.surrender();
+await connectedEscrow.returnToIssuer();
 ```
 
 #### Accessing the Current Owners
@@ -203,12 +203,12 @@ signerFromMnemonic.connect(provider);
 
 Roles are useful for granting users to access certain functions only. Currently, here are the designated roles meant for the different key operations.
 
-| Role           | Access                              |
-| -------------- | ----------------------------------- |
-| `DefaultAdmin` | Able to perform all operations      |
-| `MinterRole`   | Able to mint new tokens             |
-| `AccepterRole` | Able to accept a surrendered token  |
-| `RestorerRole` | Able to restore a surrendered token |
+| Role           | Access                                     |
+| -------------- | ------------------------------------------ |
+| `DefaultAdmin` | Able to perform all operations             |
+| `MinterRole`   | Able to mint new tokens                    |
+| `AccepterRole` | Able to accept a token returned to issuer  |
+| `RestorerRole` | Able to restore a token returned to issuer |
 
 A trusted user can be granted multiple roles by the admin user to perform different operations.
 The following functions can be called on the token contract by the admin user to grant and revoke roles to and from users.

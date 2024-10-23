@@ -51,7 +51,7 @@ abstract contract TradeTrustTokenBurnable is TradeTrustSBT, RegistryAccess, ITra
    */
   function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override {
     if (to == BURN_ADDRESS && ownerOf(tokenId) != address(this)) {
-      revert TokenNotSurrendered();
+      revert TokenNotReturnedToIssuer();
     }
     super._beforeTokenTransfer(from, to, tokenId);
   }

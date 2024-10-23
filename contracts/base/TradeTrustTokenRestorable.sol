@@ -30,7 +30,7 @@ abstract contract TradeTrustTokenRestorable is TradeTrustSBT, RegistryAccess, IT
       revert InvalidTokenId();
     }
     if (ownerOf(tokenId) != address(this)) {
-      revert TokenNotSurrendered();
+      revert TokenNotReturnedToIssuer();
     }
 
     address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
