@@ -124,8 +124,8 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
           tokenInitials: "GSC",
           deployer: users.carrier,
         });
-        const tokenRecipientAddress = await titleEscrowFactoryContract.getAddress(
-          registryContractMock.address,
+        const tokenRecipientAddress = await titleEscrowFactoryContract.getEscrowAddress(
+          registryContractMock.target,
           tokenId
         );
         const tokenRecipientSigner = await impersonateAccount({ address: tokenRecipientAddress });

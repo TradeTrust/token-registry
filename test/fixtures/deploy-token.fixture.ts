@@ -1,4 +1,4 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import { Contract, Signer } from "ethers";
 import { TitleEscrowFactory } from "@tradetrust/contracts";
@@ -20,11 +20,11 @@ export const deployTokenFixture = async <T extends Contract | unknown>({
   const escrowFactory = await ethers.getContractFactory("TitleEscrowFactory");
   let titleEscrowFactoryContract: TitleEscrowFactory;
   if (!escrowFactoryAddress) {
-    titleEscrowFactoryContract = (await escrowFactory.connect(deployer).deploy()) as TitleEscrowFactory;
+    titleEscrowFactoryContract = (await escrowFactory.connect(deployer).deploy()) as unknown as TitleEscrowFactory;
     // eslint-disable-next-line no-param-reassign
-    escrowFactoryAddress = titleEscrowFactoryContract.address;
+    escrowFactoryAddress = titleEscrowFactoryContract.target as string;
   } else {
-    titleEscrowFactoryContract = escrowFactory.attach(escrowFactoryAddress) as TitleEscrowFactory;
+    titleEscrowFactoryContract = escrowFactory.attach(escrowFactoryAddress) as unknown as TitleEscrowFactory;
   }
 
   const tradeTrustTokenFactory = await ethers.getContractFactory(tokenContractName);

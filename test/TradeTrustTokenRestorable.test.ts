@@ -100,9 +100,9 @@ describe("TradeTrustTokenRestorable", async () => {
   it("should restore to the correct title escrow", async () => {
     const expectedTitleEscrowAddr = computeTitleEscrowAddress({
       tokenId,
-      registryAddress: registryContract.address,
+      registryAddress: registryContract.target as string,
       implementationAddress: titleEscrowImplAddr,
-      factoryAddress: mockTitleEscrowFactoryContract.address,
+      factoryAddress: mockTitleEscrowFactoryContract.target as string,
     });
     await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
@@ -115,9 +115,9 @@ describe("TradeTrustTokenRestorable", async () => {
   it("should emit Transfer event with the correct values", async () => {
     const titleEscrowAddress = computeTitleEscrowAddress({
       tokenId,
-      registryAddress: registryContract.address,
+      registryAddress: registryContract.target as string,
       implementationAddress: titleEscrowImplAddr,
-      factoryAddress: mockTitleEscrowFactoryContract.address,
+      factoryAddress: mockTitleEscrowFactoryContract.target as string,
     });
     await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
@@ -125,6 +125,6 @@ describe("TradeTrustTokenRestorable", async () => {
 
     await expect(tx)
       .to.emit(registryContract, "Transfer")
-      .withArgs(registryContract.address, titleEscrowAddress, tokenId);
+      .withArgs(registryContract.target, titleEscrowAddress, tokenId);
   });
 });

@@ -39,7 +39,7 @@ abstract contract TradeTrustTokenBurnable is TradeTrustSBT, RegistryAccess, ITra
    * @param tokenId The ID of the token to burn.
    */
   function _burnTitle(uint256 tokenId, bytes calldata _remark) internal virtual {
-    address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
+    address titleEscrow = titleEscrowFactory().getEscrowAddress(address(this), tokenId);
     ITitleEscrow(titleEscrow).shred(_remark);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens

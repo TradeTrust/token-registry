@@ -1,7 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { Contract, TransactionResponse } from "ethers";
 import { TradeTrustTokenStandard } from "@tradetrust/contracts";
-import { ContractTransaction } from "ethers";
 import faker from "faker";
 import { ethers } from "hardhat";
 import { expect } from ".";
@@ -37,8 +37,8 @@ describe("TradeTrustTokenStandard", async () => {
     deployFixturesRunner = async () => {
       const implContractFixture = await deployTradeTrustTokenStandardFixture({ deployer });
 
-      const registryWithProxyContractFixture = await deployImplProxy<TradeTrustTokenStandard>({
-        implementation: implContractFixture,
+      const registryWithProxyContractFixture = await deployImplProxy<TradeTrustTokenStandard & Contract>({
+        implementation: implContractFixture as TradeTrustTokenStandard & Contract,
         deployer: users.carrier,
       });
 
@@ -47,13 +47,13 @@ describe("TradeTrustTokenStandard", async () => {
   });
 
   beforeEach(async () => {
-    fakeTitleEscrowFactory = ethers.utils.getAddress(faker.finance.ethereumAddress());
+    fakeTitleEscrowFactory = ethers.getAddress(faker.finance.ethereumAddress());
 
     [implContract, registryImplContract] = await loadFixture(deployFixturesRunner);
   });
 
   describe("Contract Creation", () => {
-    let initTx: ContractTransaction;
+    let initTx: TransactionResponse;
     let initParams: string;
 
     beforeEach(async () => {
@@ -65,7 +65,8 @@ describe("TradeTrustTokenStandard", async () => {
         titleEscrowFactory: fakeTitleEscrowFactory,
       });
 
-      initTx = await registryImplContract.connect(initialiserSigner).initialize(initParams);
+      const tx = await registryImplContract.connect(initialiserSigner).initialize(initParams);
+      initTx = tx;
     });
 
     it("should initialise implementation", async () => {
@@ -88,6 +89,7 @@ describe("TradeTrustTokenStandard", async () => {
 
     it("should return the initialisation block as genesis", async () => {
       const res = await registryImplContract.genesis();
+      initTx.wait();
 
       expect(res).to.equal(initTx.blockNumber);
     });
@@ -175,7 +177,7 @@ const encodeInitParamsWithFactory = ({
   deployer: string;
   titleEscrowFactory: string;
 }) =>
-  ethers.utils.defaultAbiCoder.encode(
+  ethers.AbiCoder.defaultAbiCoder().encode(
     ["bytes", "address"],
     [
       encodeInitParams({

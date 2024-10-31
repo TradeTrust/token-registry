@@ -1,5 +1,5 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { TitleEscrow, TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
 import { ethers } from "hardhat";
@@ -113,7 +113,7 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
     let fakeMinterAdminRole: string;
 
     beforeEach(async () => {
-      fakeMinterAdminRole = ethers.utils.id("FAKE_MINTER_ADMIN_ROLE");
+      fakeMinterAdminRole = ethers.id("FAKE_MINTER_ADMIN_ROLE");
     });
 
     it("should allow admin to set role admin", async () => {

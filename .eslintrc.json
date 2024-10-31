@@ -19,7 +19,8 @@
     "import/extensions": "off",
     "import/no-unresolved": "off",
     "no-unused-expressions": 0,
-    "@typescript-eslint/no-var-requires": 0
+    "@typescript-eslint/no-var-requires": 0,
+    "quotes": ["error", "double"]
   },
   "overrides": [
     {
@@ -33,7 +34,10 @@
         "no-restricted-globals": "off",
         "import/prefer-default-export": "off",
         "no-console": "off",
-        "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.test.*", "./hardhat.config.*", "./test/**/*.js", "./test/**/*.ts", "./tasks/**"]}]
+        "import/no-extraneous-dependencies": [
+          "error",
+          { "devDependencies": ["**/*.test.*", "./hardhat.config.*", "./test/**/*.js", "./test/**/*.ts", "./tasks/**"] }
+        ]
       }
     },
     {

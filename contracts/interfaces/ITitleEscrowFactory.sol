@@ -20,5 +20,5 @@ interface ITitleEscrowFactory {
    * @param tokenId The ID of the token.
    * @return The address of the TitleEscrow contract.
    */
-  function getAddress(address tokenRegistry, uint256 tokenId) external view returns (address);
+  function getEscrowAddress(address tokenRegistry, uint256 tokenId) external view returns (address);
 }

@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { SigHelperMock } from "@tradetrust/contracts";
 import { Signature } from "ethers";
 import faker from "faker";
@@ -31,7 +31,7 @@ describe("SigHelper", async () => {
         (async () => {
           return (await (await ethers.getContractFactory("SigHelperMock"))
             .connect(deployer)
-            .deploy(domainName)) as SigHelperMock;
+            .deploy(domainName)) as unknown as SigHelperMock;
         })()
       );
   });
@@ -40,18 +40,18 @@ describe("SigHelper", async () => {
     [sigHelperMock] = await loadFixture(deployFixturesRunner);
     sigHelperMock = sigHelperMock.connect(sender);
 
-    const chainId = await sender.getChainId();
+    const chainId = await sender.provider.getNetwork().then((network) => network.chainId);
     domain = {
       name: domainName,
       version: "1",
       chainId,
-      verifyingContract: sigHelperMock.address,
+      verifyingContract: sigHelperMock.target,
     };
   });
 
   describe("Initialisation", () => {
     it("should initialise the domain separator correctly", async () => {
-      const hashDomain = ethers.utils._TypedDataEncoder.hashDomain(domain);
+      const hashDomain = ethers.TypedDataEncoder.hashDomain(domain);
       await sigHelperMock.__SigHelper_initInternal(domainName, "1");
 
       const res = await sigHelperMock.DOMAIN_SEPARATOR();
@@ -64,7 +64,7 @@ describe("SigHelper", async () => {
     let fakeHash: string;
 
     beforeEach(async () => {
-      fakeHash = ethers.utils.keccak256(ethers.utils.randomBytes(32));
+      fakeHash = ethers.keccak256(ethers.randomBytes(32));
     });
 
     it("should cancel successfully", async () => {
@@ -114,19 +114,23 @@ describe("SigHelper", async () => {
         },
       };
 
-      hashStruct = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
+      hashStruct = ethers.keccak256(
+        ethers.AbiCoder.defaultAbiCoder().encode(
           ["bytes32", "address", "uint256"],
           [
-            ethers.utils.id("Endorsement(address beneficiary,uint256 deadline)"),
+            ethers.id("Endorsement(address beneficiary,uint256 deadline)"),
             fakeData.message.beneficiary,
             fakeData.message.deadline,
           ]
         )
       );
+      // hashStruct = ethers.TypedDataEncoder.hash(domain, fakeData.types, {
+      //   beneficiary: fakeData.message.beneficiary,
+      //   deadline: fakeData.message.deadline,
+      // });
 
-      sigHash = await sender._signTypedData(fakeData.domain, fakeData.types, fakeData.message);
-      sig = ethers.utils.splitSignature(sigHash);
+      sigHash = await sender.signTypedData(fakeData.domain, fakeData.types, fakeData.message);
+      sig = ethers.Signature.from(sigHash);
     });
 
     it("should return true for a valid signature", async () => {
@@ -136,11 +140,11 @@ describe("SigHelper", async () => {
     });
 
     it("should return false for an invalid signature", async () => {
-      sigHash = await sender._signTypedData(fakeData.domain, fakeData.types, {
+      sigHash = await sender.signTypedData(fakeData.domain, fakeData.types, {
         beneficiary: faker.finance.ethereumAddress(),
         deadline: Date.now(),
       });
-      sig = ethers.utils.splitSignature(sigHash);
+      sig = ethers.Signature.from(sigHash);
 
       const res = await sigHelperMock.validateSigInternal(hashStruct, sender.address, sig);
 

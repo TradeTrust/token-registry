@@ -37,9 +37,9 @@ contract TitleEscrowFactory is ITitleEscrowFactory, TitleEscrowFactoryErrors {
   }
 
   /**
-   * @dev See {ITitleEscrowFactory-getAddress}.
+   * @dev See {ITitleEscrowFactory-getEscrowAddress}.
    */
-  function getAddress(address tokenRegistry, uint256 tokenId) external view override returns (address) {
+  function getEscrowAddress(address tokenRegistry, uint256 tokenId) external view override returns (address) {
     return Clones.predictDeterministicAddress(implementation, keccak256(abi.encodePacked(tokenRegistry, tokenId)));
   }
 }

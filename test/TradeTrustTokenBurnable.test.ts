@@ -104,7 +104,7 @@ describe("TradeTrustTokenBurnable", async () => {
 
       await expect(tx)
         .to.emit(registryContract, "Transfer")
-        .withArgs(registryContract.address, defaultAddress.Burn, tokenId);
+        .withArgs(registryContract.target, defaultAddress.Burn, tokenId);
     });
   });
 
@@ -128,7 +128,10 @@ describe("TradeTrustTokenBurnable", async () => {
         );
 
       const [titleEscrowFactoryContract, registryContractMock] = await loadFixture(deployMockTokenFixturesRunner);
-      const tokenRecipientAddress = await titleEscrowFactoryContract.getAddress(registryContractMock.address, tokenId);
+      const tokenRecipientAddress = await titleEscrowFactoryContract.getEscrowAddress(
+        await registryContractMock.getAddress(),
+        tokenId
+      );
       const tokenRecipientSigner = await impersonateAccount({ address: tokenRecipientAddress });
       await registryContractMock.mintInternal(tokenRecipientAddress, tokenId);
 

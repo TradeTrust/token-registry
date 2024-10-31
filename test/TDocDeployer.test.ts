@@ -1,8 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { TDocDeployer, TradeTrustTokenStandard } from "@tradetrust/contracts";
-import { DeploymentEvent } from "@tradetrust/contracts/contracts/utils/TDocDeployer";
-import { ContractTransaction } from "ethers";
+import { ContractTransaction, TransactionReceipt } from "ethers";
 import faker from "faker";
 import { ethers } from "hardhat";
 import { expect } from ".";
@@ -18,6 +17,7 @@ describe("TDocDeployer", async () => {
   let deployerContract: TDocDeployer;
   let implContract: TradeTrustTokenStandard;
   let fakeTitleEscrowFactory: string;
+  let implContractAddress: string;
 
   let deployerContractAsOwner: TDocDeployer;
   let deployerContractAsNonOwner: TDocDeployer;
@@ -37,9 +37,10 @@ describe("TDocDeployer", async () => {
   });
 
   beforeEach(async () => {
-    fakeTitleEscrowFactory = ethers.utils.getAddress(faker.finance.ethereumAddress());
+    fakeTitleEscrowFactory = ethers.getAddress(faker.finance.ethereumAddress());
 
     [implContract, deployerContract] = await loadFixture(deployFixturesRunner);
+    implContractAddress = await implContract.getAddress();
 
     deployerContractAsOwner = deployerContract.connect(deployer);
     deployerContractAsNonOwner = deployerContract.connect(users.beneficiary);
@@ -51,7 +52,7 @@ describe("TDocDeployer", async () => {
     beforeEach(async () => {
       deployerImpl = (await (await ethers.getContractFactory("TDocDeployer"))
         .connect(deployer)
-        .deploy()) as TDocDeployer;
+        .deploy()) as unknown as TDocDeployer;
     });
 
     it("should initialise deployer implementation", async () => {
@@ -71,17 +72,17 @@ describe("TDocDeployer", async () => {
     let mockDeployerImpl: TDocDeployer;
 
     beforeEach(async () => {
-      mockDeployerImpl = (await (await ethers.getContractFactory("TDocDeployer")).deploy()) as TDocDeployer;
+      mockDeployerImpl = (await (await ethers.getContractFactory("TDocDeployer")).deploy()) as unknown as TDocDeployer;
     });
 
     it("should allow owner to upgrade", async () => {
-      const tx = deployerContractAsOwner.upgradeTo(mockDeployerImpl.address);
+      const tx = deployerContractAsOwner.upgradeTo(await mockDeployerImpl.getAddress());
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow non-owner to upgrade", async () => {
-      const tx = deployerContractAsNonOwner.upgradeTo(mockDeployerImpl.address);
+      const tx = deployerContractAsNonOwner.upgradeTo(await mockDeployerImpl.getAddress());
 
       await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
     });
@@ -97,14 +98,14 @@ describe("TDocDeployer", async () => {
     describe("Adding Implementation", () => {
       let addImplementationTx: ContractTransaction;
       beforeEach(async () => {
-        addImplementationTx = await deployerContractAsOwner.addImplementation(
-          implContract.address,
+        addImplementationTx = (await deployerContractAsOwner.addImplementation(
+          implContractAddress,
           fakeTitleEscrowFactory
-        );
+        )) as ContractTransaction;
       });
 
       it("should add implementation correctly", async () => {
-        const res = await deployerContractAsNonOwner.implementations(implContract.address);
+        const res = await deployerContractAsNonOwner.implementations(implContractAddress);
 
         expect(res).to.equal(fakeTitleEscrowFactory);
       });
@@ -112,17 +113,17 @@ describe("TDocDeployer", async () => {
       it("should emit AddImplementation when add implementation", async () => {
         await expect(addImplementationTx)
           .to.emit(deployerContract, "AddImplementation")
-          .withArgs(implContract.address, fakeTitleEscrowFactory);
+          .withArgs(implContractAddress, fakeTitleEscrowFactory);
       });
 
       it("should not allow adding an already added implementation", async () => {
-        const tx = deployerContractAsOwner.addImplementation(implContract.address, fakeTitleEscrowFactory);
+        const tx = deployerContractAsOwner.addImplementation(implContractAddress, fakeTitleEscrowFactory);
 
         await expect(tx).to.be.revertedWithCustomError(deployerContractAsNonOwner, "ImplementationAlreadyAdded");
       });
 
       it("should not allow non-owner to add implementation", async () => {
-        const tx = deployerContractAsNonOwner.addImplementation(implContract.address, fakeTitleEscrowFactory);
+        const tx = deployerContractAsNonOwner.addImplementation(implContractAddress, fakeTitleEscrowFactory);
 
         await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
       });
@@ -130,18 +131,18 @@ describe("TDocDeployer", async () => {
 
     describe("Removing Implementation", () => {
       it("should remove implementation correctly", async () => {
-        await deployerContractAsOwner.addImplementation(implContract.address, fakeTitleEscrowFactory);
-        const initialRes = await deployerContract.implementations(implContract.address);
+        await deployerContractAsOwner.addImplementation(implContractAddress, fakeTitleEscrowFactory);
+        const initialRes = await deployerContract.implementations(implContractAddress);
 
-        await deployerContractAsOwner.removeImplementation(implContract.address);
-        const currentRes = await deployerContract.implementations(implContract.address);
+        await deployerContractAsOwner.removeImplementation(implContractAddress);
+        const currentRes = await deployerContract.implementations(implContractAddress);
 
         expect(initialRes).to.equal(fakeTitleEscrowFactory);
         expect(currentRes).to.equal(defaultAddress.Zero);
       });
 
       it("should not allow non-owner to remove implementation", async () => {
-        const tx = deployerContractAsNonOwner.removeImplementation(implContract.address);
+        const tx = deployerContractAsNonOwner.removeImplementation(implContractAddress);
 
         await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
       });
@@ -166,7 +167,7 @@ describe("TDocDeployer", async () => {
       fakeTokenSymbol = "GSC";
       registryAdmin = users.others[faker.datatype.number(users.others.length - 1)];
 
-      await deployerContractAsOwner.addImplementation(implContract.address, fakeTitleEscrowFactory);
+      await deployerContractAsOwner.addImplementation(implContractAddress, fakeTitleEscrowFactory);
     });
 
     it("should not allow non-whitelisted implementations", async () => {
@@ -190,7 +191,7 @@ describe("TDocDeployer", async () => {
         symbol: fakeTokenSymbol,
         deployer: defaultAddress.Zero,
       });
-      const tx = deployerContractAsNonOwner.deploy(implContract.address, initParams);
+      const tx = deployerContractAsNonOwner.deploy(implContractAddress, initParams);
 
       await expect(tx).to.be.revertedWithCustomError(deployerContractAsNonOwner, "ImplementationInitializationFailure");
     });
@@ -206,15 +207,18 @@ describe("TDocDeployer", async () => {
           symbol: fakeTokenSymbol,
           deployer: registryAdmin.address,
         });
-        createTx = await deployerContractAsNonOwner.deploy(implContract.address, initParams);
-        const createReceipt = await createTx.wait();
-        const event = getEventFromReceipt<DeploymentEvent>(
-          createReceipt,
-          deployerContract.interface.getEventTopic("Deployment")
+        const tx = await deployerContractAsNonOwner.deploy(implContractAddress, initParams);
+        createTx = tx as ContractTransaction;
+        const createReceipt = await tx.wait();
+        const event = getEventFromReceipt<any>(
+          createReceipt as unknown as TransactionReceipt,
+          "Deployment",
+          deployerContract.interface
         );
+
         clonedRegistryContract = (await ethers.getContractFactory("TradeTrustTokenStandard")).attach(
           event.args.deployed
-        ) as TradeTrustTokenStandard;
+        ) as unknown as TradeTrustTokenStandard;
       });
 
       describe("Initialisation by deployer", () => {
@@ -245,7 +249,7 @@ describe("TDocDeployer", async () => {
 
         it("should not set deployer contract as admin", async () => {
           const adminRole = await clonedRegistryContract.DEFAULT_ADMIN_ROLE();
-          const res = await clonedRegistryContract.hasRole(adminRole, deployerContract.address);
+          const res = await clonedRegistryContract.hasRole(adminRole, deployerContract.target);
 
           expect(res).to.be.false;
         });
@@ -255,8 +259,8 @@ describe("TDocDeployer", async () => {
         await expect(createTx)
           .to.emit(deployerContract, "Deployment")
           .withArgs(
-            clonedRegistryContract.address,
-            implContract.address,
+            clonedRegistryContract.target,
+            implContractAddress,
             users.beneficiary.address,
             fakeTitleEscrowFactory,
             initParams

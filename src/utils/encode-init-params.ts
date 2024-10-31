@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { ethers } from 'ethers';
 
 export interface Params {
   name: string;
@@ -7,5 +7,5 @@ export interface Params {
 }
 
 export const encodeInitParams = ({ name, symbol, deployer }: Params) => {
-  return ethers.utils.defaultAbiCoder.encode(["string", "string", "address"], [name, symbol, deployer]);
+  return ethers.AbiCoder.defaultAbiCoder().encode(['string', 'string', 'address'], [name, symbol, deployer]);
 };

@@ -7,14 +7,16 @@ export const getTitleEscrowContract = async (
 ): Promise<TitleEscrow> => {
   const titleEscrowAddr = await tokenContract.ownerOf(tokenId);
   const titleEscrowFactory = await ethers.getContractFactory("TitleEscrow");
-  return titleEscrowFactory.attach(titleEscrowAddr) as TitleEscrow;
+  return titleEscrowFactory.attach(titleEscrowAddr) as unknown as TitleEscrow;
 };
 
 export const getTitleEscrowFactoryFromToken = async (
   tokenContract: TradeTrustToken | TradeTrustTokenMock
 ): Promise<TitleEscrowFactory> => {
   const escrowFactoryAddr = await tokenContract.titleEscrowFactory();
-  return (await ethers.getContractFactory("TitleEscrowFactory")).attach(escrowFactoryAddr) as TitleEscrowFactory;
+  return (await ethers.getContractFactory("TitleEscrowFactory")).attach(
+    escrowFactoryAddr
+  ) as unknown as TitleEscrowFactory;
 };
 
 export const toAccessControlRevertMessage = (account: string, role: string): string => {
@@ -47,10 +49,10 @@ type RemarkKeys = keyof typeof remarkString;
 
 export const txnHexRemarks = Object.keys(remarkString).reduce((acc, key) => {
   const typedKey = key as RemarkKeys; // Cast key as RemarkKeys
-  acc[typedKey] = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(remarkString[typedKey]));
+  acc[typedKey] = ethers.hexlify(ethers.toUtf8Bytes(remarkString[typedKey]));
   return acc;
 }, {} as Record<RemarkKeys, string>);
 
 export const hexToString = (hexRemark: string): string => {
-  return ethers.utils.toUtf8String(hexRemark);
+  return ethers.toUtf8String(hexRemark);
 };

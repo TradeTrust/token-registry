@@ -13,9 +13,9 @@ contract TitleEscrowFactoryGetterMock {
   function setAddress(address _titleEscrowAddress) public {
     titleEscrowAddress = _titleEscrowAddress;
   }
-  function getAddress(address tokenRegistry, uint256 tokenId) external view returns (address) {
+  function getEscrowAddress(address tokenRegistry, uint256 tokenId) external view returns (address) {
     if (titleEscrowAddress == address(0)) {
-      return ITitleEscrowFactory(tokenRegistry).getAddress(tokenRegistry, tokenId);
+      return ITitleEscrowFactory(tokenRegistry).getEscrowAddress(tokenRegistry, tokenId);
     }
     return titleEscrowAddress;
   }

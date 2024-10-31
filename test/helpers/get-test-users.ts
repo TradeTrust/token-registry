@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 export type TestUsers = {
   carrier: SignerWithAddress;

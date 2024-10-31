@@ -86,7 +86,7 @@ abstract contract TradeTrustTokenBase is
   ) internal virtual override(TradeTrustSBT, TradeTrustTokenBurnable) whenNotPaused {
     super._beforeTokenTransfer(from, to, tokenId);
 
-    address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
+    address titleEscrow = titleEscrowFactory().getEscrowAddress(address(this), tokenId);
     if (to != address(this) && to != titleEscrow && to != BURN_ADDRESS) {
       revert TransferFailure();
     }

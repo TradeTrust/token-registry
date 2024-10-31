@@ -2,6 +2,7 @@ import { task } from "hardhat/config";
 import { TitleEscrowFactory } from "@tradetrust/contracts";
 import { verifyContract, wait, deployContract } from "./helpers";
 import { TASK_DEPLOY_ESCROW_FACTORY } from "./task-names";
+import { Contract } from "ethers";
 
 task(TASK_DEPLOY_ESCROW_FACTORY)
   .setDescription("Deploys a new Title Escrow factory")
@@ -14,15 +15,15 @@ task(TASK_DEPLOY_ESCROW_FACTORY)
 
       console.log(`[Deployer] ${deployerAddress}`);
 
-      const titleEscrowFactoryContract = await deployContract<TitleEscrowFactory>({
+      const titleEscrowFactoryContract = await deployContract<TitleEscrowFactory & Contract>({
         params: [],
         contractName: "TitleEscrowFactory",
         hre,
       });
-      const factoryDeployTx = titleEscrowFactoryContract.deployTransaction;
-      console.log(`[Transaction] Pending ${factoryDeployTx.hash}`);
-      await titleEscrowFactoryContract.deployed();
-      const factoryAddress = titleEscrowFactoryContract.address;
+      const factoryDeployTx = titleEscrowFactoryContract.deploymentTransaction();
+      console.log(`[Transaction] Pending ${factoryDeployTx?.hash}`);
+      await titleEscrowFactoryContract.deploymentTransaction();
+      const factoryAddress = titleEscrowFactoryContract.target;
       console.log(`[Status] Deployed to ${factoryAddress}`);
 
       if (verify) {
@@ -38,7 +39,7 @@ task(TASK_DEPLOY_ESCROW_FACTORY)
         });
 
         await verifyContract({
-          address: factoryAddress,
+          address: factoryAddress as string,
           constructorArgsParams: [],
           contract: "contracts/TitleEscrowFactory.sol:TitleEscrowFactory",
           hre,
