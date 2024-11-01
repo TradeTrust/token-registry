@@ -99,7 +99,7 @@ describe("Title Escrow", async () => {
 
     it("should initialise implementation", async () => {
       const tx = implContract.initialize(defaultAddress.Zero, tokenId);
-      await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
+      await expect(tx).to.be.revertedWithCustomError(implContract, "InvalidInitialization");
     });
 
     describe("Initialisation", () => {

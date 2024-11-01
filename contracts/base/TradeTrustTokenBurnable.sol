@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "./TradeTrustSBT.sol";
-import "./RegistryAccess.sol";
-import "../interfaces/ITradeTrustTokenBurnable.sol";
+import { TradeTrustSBT, ITitleEscrow, SBTUpgradeable } from "./TradeTrustSBT.sol";
+import { RegistryAccess } from "./RegistryAccess.sol";
+import { ITradeTrustTokenBurnable } from "../interfaces/ITradeTrustTokenBurnable.sol";
 
 /**
  * @title TradeTrustTokenBurnable

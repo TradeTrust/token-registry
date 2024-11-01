@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-import "../interfaces/SigHelperErrors.sol";
+import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+// import { ECDSAUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+
+// import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { SigHelperErrors } from "../interfaces/SigHelperErrors.sol";
 
 abstract contract SigHelper is SigHelperErrors {
-  using ECDSAUpgradeable for bytes32;
+  using ECDSA for bytes32;
 
   bytes32 public DOMAIN_SEPARATOR;
   mapping(address => uint256) public nonces;
@@ -29,15 +32,11 @@ abstract contract SigHelper is SigHelperErrors {
     );
   }
 
-  function _validateSig(
-    bytes32 hash,
-    address signer,
-    Sig memory sig
-  ) internal view virtual returns (bool) {
+  function _validateSig(bytes32 hash, address signer, Sig memory sig) internal view virtual returns (bool) {
     if (cancelled[hash]) {
       revert SignatureAlreadyCancelled();
     }
-    bytes32 digest = DOMAIN_SEPARATOR.toTypedDataHash(hash);
+    bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, hash));
     address rSigner = digest.recover(abi.encodePacked(sig.r, sig.s, sig.v));
     return rSigner != address(0) && rSigner == signer;
   }

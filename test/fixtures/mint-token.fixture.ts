@@ -23,8 +23,8 @@ export const mintTokenFixture = async ({
   }
 
   const titleEscrowFactoryInterface = (await ethers.getContractFactory("TitleEscrowFactory")).interface;
-  const titleEscrowCreatedEvent = titleEscrowFactoryInterface.getEvent("TitleEscrowCreated");
-  const topicHash = titleEscrowCreatedEvent ? titleEscrowCreatedEvent.topicHash : "0x";
+  // const titleEscrowCreatedEvent = titleEscrowFactoryInterface.getEvent("TitleEscrowCreated");
+  // const topicHash = titleEscrowCreatedEvent ? titleEscrowCreatedEvent.topicHash : "0x";
   const event = getEventFromReceipt<any>(
     receipt as unknown as TransactionReceipt,
     "TitleEscrowCreated",

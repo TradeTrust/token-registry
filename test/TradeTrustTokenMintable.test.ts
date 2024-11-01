@@ -137,9 +137,11 @@ describe("TradeTrustTokenMintable", async () => {
       const logs = receipt?.logs;
 
       let escrowEventName: string = "";
+      let logsFound = 0;
       logs?.some((log) => {
         try {
           const decoded: LogDescription | null = mockTitleEscrowFactoryContract.interface.parseLog(log);
+          if (decoded) logsFound++;
           if (decoded?.name === "TitleEscrowCreated") {
             escrowEventName = decoded.name;
             return true;
@@ -149,7 +151,7 @@ describe("TradeTrustTokenMintable", async () => {
         }
         return false;
       });
-      expect(logs?.length).to.equal(1);
+      expect(logsFound).to.equal(1);
       expect(escrowEventName).to.equal("TitleEscrowCreated");
     });
 
@@ -160,8 +162,7 @@ describe("TradeTrustTokenMintable", async () => {
       const data = mockTitleEscrowFactoryContract.interface.encodeFunctionData("create", [tokenId]);
       const tx = await simpleCallerMock.callFunction(mockTitleEscrowFactoryContract.target, data);
       const receipt: any = await tx.wait();
-      const decoded = mockTitleEscrowFactoryContract.interface.parseLog(receipt.logs[0]);
-      expect(receipt.logs?.length).to.equal(1);
+      const decoded = mockTitleEscrowFactoryContract.interface.parseLog(receipt.logs[1]);
       expect(ethers.toBeHex(decoded?.args.tokenId)).to.equal(tokenId.toLowerCase());
     });
 

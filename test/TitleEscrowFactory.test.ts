@@ -70,7 +70,7 @@ describe("TitleEscrowFactory", async () => {
 
       const tx = titleEscrowContract.connect(punk).initialize(badAddress, "123");
 
-      await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
+      await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "InvalidInitialization");
     });
 
     it("should not allow calling shred on implementation", async () => {

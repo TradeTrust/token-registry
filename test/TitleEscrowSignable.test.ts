@@ -295,6 +295,7 @@ describe("TitleEscrowSignable", async () => {
             ]
           )
         );
+        // hashStruct = ethers.TypedDataEncoder.hash(domain, beneficiaryTransferTypes, endorsement);
       });
 
       describe("Beneficiary Transfer: transferBeneficiaryWithSig", () => {

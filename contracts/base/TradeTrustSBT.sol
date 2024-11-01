@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "./SBTUpgradeable.sol";
-import "../interfaces/ITitleEscrow.sol";
-import "../interfaces/ITitleEscrowFactory.sol";
-import "../interfaces/TradeTrustTokenErrors.sol";
-import "../interfaces/ITradeTrustSBT.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import { SBTUpgradeable } from "./SBTUpgradeable.sol";
+import { ITitleEscrow, IERC721Receiver } from "../interfaces/ITitleEscrow.sol";
+import { ITitleEscrowFactory } from "../interfaces/ITitleEscrowFactory.sol";
+import { TradeTrustTokenErrors } from "../interfaces/TradeTrustTokenErrors.sol";
+import { ITradeTrustSBT, IERC165 } from "../interfaces/ITradeTrustSBT.sol";
 
 /**
  * @title TradeTrustSBT
@@ -32,9 +32,7 @@ abstract contract TradeTrustSBT is SBTUpgradeable, PausableUpgradeable, TradeTru
   /**
    * @dev See {ERC165Upgradeable-supportsInterface}.
    */
-  function supportsInterface(
-    bytes4 interfaceId
-  ) public view virtual override(SBTUpgradeable, IERC165Upgradeable) returns (bool) {
+  function supportsInterface(bytes4 interfaceId) public view virtual override(SBTUpgradeable, IERC165) returns (bool) {
     return interfaceId == type(ITradeTrustSBT).interfaceId || SBTUpgradeable.supportsInterface(interfaceId);
   }
 

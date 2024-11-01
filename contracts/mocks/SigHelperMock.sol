@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "../utils/SigHelper.sol";
+import { SigHelper } from "../utils/SigHelper.sol";
 
 contract SigHelperMock is SigHelper {
   constructor(string memory name) {
@@ -12,11 +12,7 @@ contract SigHelperMock is SigHelper {
     super.__SigHelper_init(name, version);
   }
 
-  function validateSigInternal(
-    bytes32 hash,
-    address signer,
-    Sig memory sig
-  ) public view returns (bool) {
+  function validateSigInternal(bytes32 hash, address signer, Sig memory sig) public view returns (bool) {
     return super._validateSig(hash, signer, sig);
   }
 

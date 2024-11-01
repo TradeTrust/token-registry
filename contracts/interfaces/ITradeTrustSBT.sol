@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import "./ISBTUpgradeable.sol";
-import "./ITitleEscrowFactory.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import { ISBTUpgradeable, IERC165 } from "./ISBTUpgradeable.sol";
+import { ITitleEscrowFactory } from "./ITitleEscrowFactory.sol";
 
-interface ITradeTrustSBT is IERC721ReceiverUpgradeable, ISBTUpgradeable {
+interface ITradeTrustSBT is IERC721Receiver, ISBTUpgradeable {
   // Event emitted when the contract is paused with a remark.
   event PauseWithRemark(address account, bytes remark);
 

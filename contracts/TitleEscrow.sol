@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/interfaces/IERC165.sol";
-import "./interfaces/ITitleEscrow.sol";
-import "./interfaces/ITradeTrustToken.sol";
-import "./interfaces/TitleEscrowErrors.sol";
+import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
+import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
+import { ITitleEscrow } from "./interfaces/ITitleEscrow.sol";
+import { ITradeTrustToken } from "./interfaces/ITradeTrustToken.sol";
+import { TitleEscrowErrors } from "./interfaces/TitleEscrowErrors.sol";
 
 /**
  * @title TitleEscrow

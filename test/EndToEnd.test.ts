@@ -1,6 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { Contract } from "ethers";
+// import { Contract } from "ethers";
 import {
   TitleEscrowFactory,
   TDocDeployer,
@@ -298,7 +298,7 @@ describe("End to end", () => {
         await expect(tx)
           .to.emit(tokenRegistry, "PauseWithRemark")
           .withArgs(registryAdmin.address, txnHexRemarks.pauseRemark);
-        const receipt: any = await tx.wait();
+        // const receipt: any = await tx.wait();
 
         // Extract the event arguments from the receipt
         const filter = tokenRegistry.filters.PauseWithRemark;
