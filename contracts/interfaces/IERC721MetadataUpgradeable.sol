@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1 (token/ERC721/extensions/IERC721Metadata.sol)
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.27;
 
 import { ISBTUpgradeable } from "./ISBTUpgradeable.sol";
 
