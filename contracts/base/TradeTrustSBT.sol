@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.20;
 
-import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { SBTUpgradeable } from "./SBTUpgradeable.sol";
 import { ITitleEscrow, IERC721Receiver } from "../interfaces/ITitleEscrow.sol";
 import { ITitleEscrowFactory } from "../interfaces/ITitleEscrowFactory.sol";

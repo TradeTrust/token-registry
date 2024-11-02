@@ -1,7 +1,7 @@
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { Contract, TransactionResponse } from "ethers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TradeTrustTokenStandard } from "@tradetrust/contracts";
+import { Contract, TransactionResponse } from "ethers";
 import faker from "faker";
 import { ethers } from "hardhat";
 import { expect } from ".";

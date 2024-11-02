@@ -1,9 +1,9 @@
-import { TitleEscrow, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { TitleEscrow, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
+import { TransactionReceipt } from "ethers";
 import { ethers } from "hardhat";
 import { getEventFromReceipt } from "../../src/utils";
 import { txnHexRemarks } from "../helpers";
-import { TransactionReceipt } from "ethers";
 
 export const mintTokenFixture = async ({
   token,

@@ -21,10 +21,10 @@ abstract contract RegistryAccess is AccessControlUpgradeable, RegistryAccessErro
     if (admin == address(0)) {
       revert InvalidAdminAddress();
     }
-    _setupRole(DEFAULT_ADMIN_ROLE, admin);
-    _setupRole(MINTER_ROLE, admin);
-    _setupRole(RESTORER_ROLE, admin);
-    _setupRole(ACCEPTER_ROLE, admin);
+    _grantRole(DEFAULT_ADMIN_ROLE, admin);
+    _grantRole(MINTER_ROLE, admin);
+    _grantRole(RESTORER_ROLE, admin);
+    _grantRole(ACCEPTER_ROLE, admin);
   }
 
   /**

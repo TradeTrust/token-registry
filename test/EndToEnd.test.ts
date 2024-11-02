@@ -1,20 +1,22 @@
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 // import { Contract } from "ethers";
 import {
-  TitleEscrowFactory,
   TDocDeployer,
-  TradeTrustTokenStandard,
-  TradeTrustToken,
   TitleEscrow,
+  TitleEscrowFactory,
+  TradeTrustToken,
+  TradeTrustTokenStandard,
 } from "@tradetrust/contracts";
 import faker from "faker";
 import { ethers } from "hardhat";
 import { expect } from ".";
+import { defaultAddress, roleHash } from "../src/constants";
+import { encodeInitParams } from "../src/utils";
 import {
+  deployEscrowFactoryFixture,
   deployTDocDeployerFixture,
   deployTradeTrustTokenStandardFixture,
-  deployEscrowFactoryFixture,
 } from "./fixtures";
 import {
   createDeployFixtureRunner,
@@ -22,11 +24,8 @@ import {
   hexToString,
   remarkString,
   TestUsers,
-  toAccessControlRevertMessage,
   txnHexRemarks,
 } from "./helpers";
-import { encodeInitParams } from "../src/utils";
-import { defaultAddress, roleHash } from "../src/constants";
 
 describe("End to end", () => {
   let users: TestUsers;
@@ -163,9 +162,7 @@ describe("End to end", () => {
         const filter = deployerContract.filters.Deployment;
         const events = await deployerContract.queryFilter(filter, -1);
         const event = events[0];
-        const args = event.args;
-
-        cloneAddress = args.deployed;
+        ({ deployed: cloneAddress } = event.args);
 
         // Verify that the clone was initialized with the correct parameters
         const cloneContract = await ethers.getContractAt("TradeTrustTokenStandard", cloneAddress);
@@ -222,12 +219,16 @@ describe("End to end", () => {
       it("should not allow mint when called by restorer", async () => {
         await expect(
           tokenRegistry.connect(restorer).mint(beneficiary.address, holder.address, tokenId, txnHexRemarks.mintRemark)
-        ).to.be.revertedWith(toAccessControlRevertMessage(restorer.address, ethers.id("MINTER_ROLE")));
+        )
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(restorer.address, ethers.id("MINTER_ROLE"));
       });
       it("should not allow mint when called by accepter", async () => {
         await expect(
           tokenRegistry.connect(accepter).mint(beneficiary.address, holder.address, tokenId, txnHexRemarks.mintRemark)
-        ).to.be.revertedWith(toAccessControlRevertMessage(accepter.address, ethers.id("MINTER_ROLE")));
+        )
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(accepter.address, ethers.id("MINTER_ROLE"));
       });
       it("should not allow mint if remark length is greater than 120 character", async () => {
         await expect(
@@ -238,7 +239,6 @@ describe("End to end", () => {
         const tx = await tokenRegistry
           .connect(minter)
           .mint(beneficiary.address, holder.address, tokenId, txnHexRemarks.mintRemark);
-        // console.log(tx);/
         await expect(tx)
           .to.emit(titleEscrow, "TokenReceived")
           .withArgs(beneficiary.address, holder.address, true, tokenRegistryAddress, tokenId, txnHexRemarks.mintRemark)
@@ -283,15 +283,15 @@ describe("End to end", () => {
     });
     describe("Paused", () => {
       it("should not allow pause when called by non-admin", async () => {
-        await expect(tokenRegistry.connect(minter).pause(txnHexRemarks.pauseRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(minter.address, roleHash.DefaultAdmin)
-        );
-        await expect(tokenRegistry.connect(accepter).pause(txnHexRemarks.pauseRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(accepter.address, roleHash.DefaultAdmin)
-        );
-        await expect(tokenRegistry.connect(restorer).pause(txnHexRemarks.pauseRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(restorer.address, roleHash.DefaultAdmin)
-        );
+        await expect(tokenRegistry.connect(minter).pause(txnHexRemarks.pauseRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(minter.address, roleHash.DefaultAdmin);
+        await expect(tokenRegistry.connect(accepter).pause(txnHexRemarks.pauseRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(accepter.address, roleHash.DefaultAdmin);
+        await expect(tokenRegistry.connect(restorer).pause(txnHexRemarks.pauseRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(restorer.address, roleHash.DefaultAdmin);
       });
       it("should allow pause when called by registry admin", async () => {
         const tx = await tokenRegistry.connect(registryAdmin).pause(txnHexRemarks.pauseRemark);
@@ -304,8 +304,8 @@ describe("End to end", () => {
         const filter = tokenRegistry.filters.PauseWithRemark;
         const events = await tokenRegistry.queryFilter(filter, -1);
         const event = events[0];
-        const args = event.args;
-        const [, emittedRemark] = args;
+        const [, emittedRemark] = event.args;
+
         // convert the hex string to utf8 and compare
         expect(hexToString(emittedRemark)).to.equal(remarkString.pauseRemark);
         expect(await tokenRegistry.paused()).to.be.true;
@@ -314,30 +314,31 @@ describe("End to end", () => {
       it("should not allow minting when paused", async () => {
         await expect(
           tokenRegistry.connect(minter).mint(beneficiary.address, holder.address, tokenId, txnHexRemarks.mintRemark)
-        ).to.be.rejectedWith("Pausable: paused");
+        ).to.be.revertedWithCustomError(tokenRegistry, "EnforcedPause");
       });
 
       it("should not allow burning when paused", async () => {
-        await expect(tokenRegistry.connect(accepter).burn(tokenId, txnHexRemarks.burnRemark)).to.be.rejectedWith(
-          "Pausable: paused"
-        );
+        await expect(
+          tokenRegistry.connect(accepter).burn(tokenId, txnHexRemarks.burnRemark)
+        ).to.be.revertedWithCustomError(tokenRegistry, "EnforcedPause");
       });
 
       it("should not allow restoring when paused", async () => {
-        await expect(tokenRegistry.connect(restorer).restore(tokenId, txnHexRemarks.restorerRemark)).to.be.rejectedWith(
-          "Pausable: paused"
-        );
+        await expect(
+          tokenRegistry.connect(restorer).restore(tokenId, txnHexRemarks.restorerRemark)
+        ).to.be.revertedWithCustomError(tokenRegistry, "EnforcedPause");
       });
       it("should not allow un-pause when called by non-admin", async () => {
-        await expect(tokenRegistry.connect(minter).unpause(txnHexRemarks.unPauseRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(minter.address, roleHash.DefaultAdmin)
-        );
-        await expect(tokenRegistry.connect(accepter).unpause(txnHexRemarks.unPauseRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(accepter.address, roleHash.DefaultAdmin)
-        );
-        await expect(tokenRegistry.connect(restorer).unpause(txnHexRemarks.unPauseRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(restorer.address, roleHash.DefaultAdmin)
-        );
+        await expect(tokenRegistry.connect(minter).unpause(txnHexRemarks.unPauseRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(minter.address, roleHash.DefaultAdmin);
+        await expect(tokenRegistry.connect(accepter).unpause(txnHexRemarks.unPauseRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(accepter.address, roleHash.DefaultAdmin);
+
+        await expect(tokenRegistry.connect(restorer).unpause(txnHexRemarks.unPauseRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(restorer.address, roleHash.DefaultAdmin);
       });
       it("should  allow un-pause when called by registry admin", async () => {
         const tx = await tokenRegistry.connect(registryAdmin).unpause(txnHexRemarks.unPauseRemark);
@@ -349,8 +350,8 @@ describe("End to end", () => {
         const filter = tokenRegistry.filters.UnpauseWithRemark;
         const events = await tokenRegistry.queryFilter(filter, -1);
         const event = events[0];
-        const args = event.args;
-        const [, emittedRemark] = args;
+        const [, emittedRemark] = event.args;
+
         // convert the hex string to utf8 and compare
         expect(hexToString(emittedRemark)).to.equal(remarkString.unPauseRemark);
         expect(await tokenRegistry.paused()).to.be.false;
@@ -841,19 +842,19 @@ describe("End to end", () => {
     });
     describe("Restore", () => {
       it("should not allow restore if the caller is holder", async () => {
-        await expect(tokenRegistry.connect(holder).restore(tokenId, txnHexRemarks.restorerRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(holder.address, ethers.id("RESTORER_ROLE"))
-        );
+        await expect(tokenRegistry.connect(holder).restore(tokenId, txnHexRemarks.restorerRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(holder.address, ethers.id("RESTORER_ROLE"));
       });
       it("should not allow restore if the caller is minter", async () => {
-        await expect(tokenRegistry.connect(minter).restore(tokenId, txnHexRemarks.restorerRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(minter.address, ethers.id("RESTORER_ROLE"))
-        );
+        await expect(tokenRegistry.connect(minter).restore(tokenId, txnHexRemarks.restorerRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(minter.address, ethers.id("RESTORER_ROLE"));
       });
       it("should not allow restore if the caller is accepter", async () => {
-        await expect(tokenRegistry.connect(accepter).restore(tokenId, txnHexRemarks.restorerRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(accepter.address, ethers.id("RESTORER_ROLE"))
-        );
+        await expect(tokenRegistry.connect(accepter).restore(tokenId, txnHexRemarks.restorerRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(accepter.address, ethers.id("RESTORER_ROLE"));
       });
       it("should allow restore after returnToIssuer", async () => {
         await expect(tokenRegistry.connect(restorer).restore(tokenId, txnHexRemarks.restorerRemark))
@@ -897,19 +898,19 @@ describe("End to end", () => {
           .withArgs(holder.address, tokenRegistryAddress, tokenId, txnHexRemarks.returnToIssuerRemark);
       });
       it("should not allow burn if the caller is minter", async () => {
-        await expect(tokenRegistry.connect(minter).burn(tokenId, txnHexRemarks.burnRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(minter.address, ethers.id("ACCEPTER_ROLE"))
-        );
+        await expect(tokenRegistry.connect(minter).burn(tokenId, txnHexRemarks.burnRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(minter.address, ethers.id("ACCEPTER_ROLE"));
       });
       it("should not allow burn if the caller is restorer", async () => {
-        await expect(tokenRegistry.connect(restorer).burn(tokenId, txnHexRemarks.burnRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(restorer.address, ethers.id("ACCEPTER_ROLE"))
-        );
+        await expect(tokenRegistry.connect(restorer).burn(tokenId, txnHexRemarks.burnRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(restorer.address, ethers.id("ACCEPTER_ROLE"));
       });
       it("should not allow burn if the caller is holder", async () => {
-        await expect(tokenRegistry.connect(holder).burn(tokenId, txnHexRemarks.burnRemark)).to.be.revertedWith(
-          toAccessControlRevertMessage(holder.address, ethers.id("ACCEPTER_ROLE"))
-        );
+        await expect(tokenRegistry.connect(holder).burn(tokenId, txnHexRemarks.burnRemark))
+          .to.be.revertedWithCustomError(tokenRegistry, "AccessControlUnauthorizedAccount")
+          .withArgs(holder.address, ethers.id("ACCEPTER_ROLE"));
       });
       it("should allow burn/shred after returnToIssuer if called is acceptor", async () => {
         await expect(tokenRegistry.connect(accepter).burn(tokenId, txnHexRemarks.burnRemark))

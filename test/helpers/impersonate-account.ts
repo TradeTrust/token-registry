@@ -1,5 +1,5 @@
-import { ethers, network } from "hardhat";
 import { Signer } from "ethers";
+import { ethers, network } from "hardhat";
 
 /**
  * Impersonate an account as signer.

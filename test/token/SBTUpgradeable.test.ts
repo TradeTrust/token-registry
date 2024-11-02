@@ -1,11 +1,11 @@
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ERC721ReceiverMock, SBTUpgradeableMock } from "@tradetrust/contracts";
-import faker from "faker";
-import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { ethers, network } from "hardhat";
 import { ContractTransactionResponse } from "ethers";
-import { assert, expect } from "../index";
+import faker from "faker";
+import { ethers, network } from "hardhat";
 import { getTestUsers, TestUsers, txnHexRemarks } from "../helpers";
+import { assert, expect } from "../index";
 
 describe("SBTUpgradeable", async () => {
   let users: TestUsers;

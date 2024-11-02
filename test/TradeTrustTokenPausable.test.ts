@@ -4,14 +4,7 @@ import faker from "faker";
 import { expect } from ".";
 import { roleHash } from "../src/constants";
 import { deployTokenFixture, DeployTokenFixtureRunner, mintTokenFixture } from "./fixtures";
-import {
-  createDeployFixtureRunner,
-  getTestUsers,
-  impersonateAccount,
-  TestUsers,
-  toAccessControlRevertMessage,
-  txnHexRemarks,
-} from "./helpers";
+import { createDeployFixtureRunner, getTestUsers, impersonateAccount, TestUsers, txnHexRemarks } from "./helpers";
 
 describe("TradeTrustToken Pausable Behaviour", async () => {
   let users: TestUsers;
@@ -65,9 +58,9 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
       it("should not allow non-admin to unpause", async () => {
         const tx = registryContractAsNonAdmin.unpause(txnHexRemarks.unPauseRemark);
 
-        await expect(tx).to.be.revertedWith(
-          toAccessControlRevertMessage(users.beneficiary.address, roleHash.DefaultAdmin)
-        );
+        await expect(tx)
+          .to.be.revertedWithCustomError(registryContract, "AccessControlUnauthorizedAccount")
+          .withArgs(users.beneficiary.address, roleHash.DefaultAdmin);
       });
     });
 
@@ -89,9 +82,9 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
       it("should not allow non-admin to pause", async () => {
         const tx = registryContractAsNonAdmin.pause(txnHexRemarks.pauseRemark);
 
-        await expect(tx).to.be.revertedWith(
-          toAccessControlRevertMessage(users.beneficiary.address, roleHash.DefaultAdmin)
-        );
+        await expect(tx)
+          .to.be.revertedWithCustomError(registryContract, "AccessControlUnauthorizedAccount")
+          .withArgs(users.beneficiary.address, roleHash.DefaultAdmin);
       });
     });
   });
@@ -114,7 +107,7 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
           txnHexRemarks.mintRemark
         );
 
-        await expect(tx).to.be.revertedWith("Pausable: paused");
+        await expect(tx).to.be.revertedWithCustomError(registryContract, "EnforcedPause");
       });
 
       it("should not allow transfers token", async () => {
@@ -136,7 +129,7 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
           .connect(tokenRecipientSigner)
           .transferFrom(tokenRecipientAddress, users.holder.address, tokenId, txnHexRemarks.mintRemark);
 
-        await expect(tx).to.be.revertedWith("Pausable: paused");
+        await expect(tx).to.be.revertedWithCustomError(registryContractMock, "EnforcedPause");
       });
     });
 
@@ -187,13 +180,13 @@ describe("TradeTrustToken Pausable Behaviour", async () => {
         it("should not allow restoring token", async () => {
           const tx = registryContractAsAdmin.restore(tokenId, txnHexRemarks.restorerRemark);
 
-          await expect(tx).to.be.revertedWith("Pausable: paused");
+          await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "EnforcedPause");
         });
 
         it("should not allow accepting token", async () => {
           const tx = registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
-          await expect(tx).to.be.revertedWith("Pausable: paused");
+          await expect(tx).to.be.revertedWithCustomError(registryContract, "EnforcedPause");
         });
       });
 

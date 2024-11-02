@@ -4,13 +4,7 @@ import faker from "faker";
 import { expect } from ".";
 import { roleHash } from "../src/constants";
 import { deployTokenFixture, DeployTokenFixtureRunner } from "./fixtures";
-import {
-  createDeployFixtureRunner,
-  getTestUsers,
-  TestUsers,
-  toAccessControlRevertMessage,
-  txnHexRemarks,
-} from "./helpers";
+import { createDeployFixtureRunner, getTestUsers, TestUsers, txnHexRemarks } from "./helpers";
 
 describe("TradeTrustTokenBaseURI", async () => {
   let users: TestUsers;
@@ -55,7 +49,9 @@ describe("TradeTrustTokenBaseURI", async () => {
     const nonAdminSigner = users.beneficiary;
     const tx = registryContract.connect(nonAdminSigner).setBaseURI(fakeBaseURI);
 
-    await expect(tx).to.be.revertedWith(toAccessControlRevertMessage(nonAdminSigner.address, roleHash.DefaultAdmin));
+    await expect(tx)
+      .to.be.revertedWithCustomError(registryContract, "AccessControlUnauthorizedAccount")
+      .withArgs(nonAdminSigner.address, roleHash.DefaultAdmin);
   });
 
   it("should set base URI when caller has admin role", async () => {

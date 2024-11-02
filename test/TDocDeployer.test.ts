@@ -58,7 +58,7 @@ describe("TDocDeployer", async () => {
     it("should initialise deployer implementation", async () => {
       const tx = deployerImpl.initialize();
 
-      await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
+      await expect(tx).to.be.revertedWithCustomError(deployerImpl, "InvalidInitialization");
     });
 
     it("should have zero address as owner", async () => {
@@ -76,15 +76,17 @@ describe("TDocDeployer", async () => {
     });
 
     it("should allow owner to upgrade", async () => {
-      const tx = deployerContractAsOwner.upgradeTo(await mockDeployerImpl.getAddress());
+      const tx = deployerContractAsOwner.upgradeToAndCall(await mockDeployerImpl.getAddress(), "0x");
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow non-owner to upgrade", async () => {
-      const tx = deployerContractAsNonOwner.upgradeTo(await mockDeployerImpl.getAddress());
+      const tx = deployerContractAsNonOwner.upgradeToAndCall(await mockDeployerImpl.getAddress(), "0x");
 
-      await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(tx)
+        .to.be.revertedWithCustomError(deployerContractAsNonOwner, "OwnableUnauthorizedAccount")
+        .withArgs(users.beneficiary.address);
     });
   });
 
@@ -125,7 +127,9 @@ describe("TDocDeployer", async () => {
       it("should not allow non-owner to add implementation", async () => {
         const tx = deployerContractAsNonOwner.addImplementation(implContractAddress, fakeTitleEscrowFactory);
 
-        await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        await expect(tx)
+          .to.be.revertedWithCustomError(deployerContractAsNonOwner, "OwnableUnauthorizedAccount")
+          .withArgs(users.beneficiary.address);
       });
     });
 
@@ -144,7 +148,9 @@ describe("TDocDeployer", async () => {
       it("should not allow non-owner to remove implementation", async () => {
         const tx = deployerContractAsNonOwner.removeImplementation(implContractAddress);
 
-        await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        await expect(tx)
+          .to.be.revertedWithCustomError(deployerContractAsNonOwner, "OwnableUnauthorizedAccount")
+          .withArgs(users.beneficiary.address);
       });
 
       it("should not allow removing an invalid implementation", async () => {
@@ -205,7 +211,7 @@ describe("TDocDeployer", async () => {
         initParams = encodeInitParams({
           name: fakeTokenName,
           symbol: fakeTokenSymbol,
-          deployer: registryAdmin.address,
+          deployer: await registryAdmin.getAddress(),
         });
         const tx = await deployerContractAsNonOwner.deploy(implContractAddress, initParams);
         createTx = tx as ContractTransaction;

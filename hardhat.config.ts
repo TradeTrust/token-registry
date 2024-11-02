@@ -1,17 +1,17 @@
-import { randomBytes } from "crypto";
+import "@nomicfoundation/hardhat-ethers";
 import "@typechain/hardhat";
-// import "@nomicfoundation/hardhat-ethers";
+import { randomBytes } from "crypto";
 // import "@nomicfoundation/hardhat-chai-matchers";
 // import "@nomicfoundation/hardhat-network-helpers";
-import "hardhat-watcher";
 import "hardhat-gas-reporter";
+import "hardhat-watcher";
 import "solidity-coverage";
 // import "@nomicfoundation/hardhat-etherscan";
-// import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-toolbox";
 import dotenv from "dotenv";
 import { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
 import "./tasks";
-import "@nomicfoundation/hardhat-toolbox";
 
 dotenv.config();
 
@@ -47,7 +47,7 @@ if (IS_CI_ENV) {
 
 const config: HardhatUserConfig = {
   solidity: {
-    compilers: [{ version: "0.8.9" }, { version: "0.8.20" }],
+    compilers: [{ version: "0.8.27" }],
 
     settings: {
       optimizer: {

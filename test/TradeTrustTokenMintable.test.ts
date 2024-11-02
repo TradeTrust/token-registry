@@ -141,7 +141,7 @@ describe("TradeTrustTokenMintable", async () => {
       logs?.some((log) => {
         try {
           const decoded: LogDescription | null = mockTitleEscrowFactoryContract.interface.parseLog(log);
-          if (decoded) logsFound++;
+          if (decoded) logsFound += 1;
           if (decoded?.name === "TitleEscrowCreated") {
             escrowEventName = decoded.name;
             return true;

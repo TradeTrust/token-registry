@@ -123,7 +123,7 @@ describe("TitleEscrowFactory", async () => {
           (await titleEscrowFactoryCreateTx.wait()) as TransactionReceipt,
           "TitleEscrowCreated",
           titleEscrowFactory.interface
-        ).args["titleEscrow"];
+        ).args.titleEscrow;
         titleEscrowContract = (await ethers.getContractFactory("TitleEscrow")).attach(
           titleEscrowAddress
         ) as unknown as TitleEscrow;

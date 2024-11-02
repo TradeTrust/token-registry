@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { SigHelperMock } from "@tradetrust/contracts";
 import { Signature } from "ethers";
 import faker from "faker";

@@ -71,7 +71,7 @@
     "@ethersproject/abstract-signer": "5.6.2",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@openzeppelin/contracts": "^5.1.0",
-    "@openzeppelin/contracts-upgradeable": "^4.5.2",
+    "@openzeppelin/contracts-upgradeable": "^5.1.0",
     "@types/chai": "^4.2.22",
     "@types/chai-as-promised": "^7.1.4",
     "@types/faker": "^5.5.8",
@@ -96,7 +96,7 @@
     "eslint-plugin-prettier": "^3.1.2",
     "faker": "^5.5.3",
     "git-cz": "^4.7.6",
-    "hardhat": "^2.10.1",
+    "hardhat": "^2.22.15",
     "hardhat-watcher": "^2.3.0",
     "jest": "^27.2.4",
     "prettier": "^2.4.1",
@@ -119,6 +119,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@typechain/ethers-v6": "^0.5.1"
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
+    "@typechain/ethers-v6": "^0.5.1",
+    "ethers": "^6.13.4"
   }
 }

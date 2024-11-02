@@ -1,7 +1,7 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { ethers } from "hardhat";
-import { Contract, Signer } from "ethers";
 import { TitleEscrowFactory } from "@tradetrust/contracts";
+import { Contract, Signer } from "ethers";
+import { ethers } from "hardhat";
 
 export const deployTokenFixture = async <T extends Contract | unknown>({
   tokenContractName,
