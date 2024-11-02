@@ -1,8 +1,8 @@
-import { task } from "hardhat/config";
 import { TradeTrustTokenStandard } from "@tradetrust/contracts";
-import { verifyContract, wait, deployContract } from "./helpers";
-import { TASK_DEPLOY_TOKEN_IMPL } from "./task-names";
 import { Contract } from "ethers";
+import { task } from "hardhat/config";
+import { deployContract, verifyContract, wait } from "./helpers";
+import { TASK_DEPLOY_TOKEN_IMPL } from "./task-names";
 
 task(TASK_DEPLOY_TOKEN_IMPL)
   .setDescription("Deploys the token implementation contract")

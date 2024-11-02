@@ -1,8 +1,8 @@
-import { task } from "hardhat/config";
 import { TitleEscrowFactory } from "@tradetrust/contracts";
-import { verifyContract, wait, deployContract } from "./helpers";
-import { TASK_DEPLOY_ESCROW_FACTORY } from "./task-names";
 import { Contract } from "ethers";
+import { task } from "hardhat/config";
+import { deployContract, verifyContract, wait } from "./helpers";
+import { TASK_DEPLOY_ESCROW_FACTORY } from "./task-names";
 
 task(TASK_DEPLOY_ESCROW_FACTORY)
   .setDescription("Deploys a new Title Escrow factory")

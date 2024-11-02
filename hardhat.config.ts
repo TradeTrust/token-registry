@@ -1,16 +1,11 @@
-import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-toolbox";
 import "@typechain/hardhat";
 import { randomBytes } from "crypto";
-// import "@nomicfoundation/hardhat-chai-matchers";
-// import "@nomicfoundation/hardhat-network-helpers";
+import dotenv from "dotenv";
 import "hardhat-gas-reporter";
 import "hardhat-watcher";
-import "solidity-coverage";
-// import "@nomicfoundation/hardhat-etherscan";
-import "@nomicfoundation/hardhat-ethers";
-import "@nomicfoundation/hardhat-toolbox";
-import dotenv from "dotenv";
 import { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
+import "solidity-coverage";
 import "./tasks";
 
 dotenv.config();

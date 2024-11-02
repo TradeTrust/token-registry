@@ -1,12 +1,12 @@
 // noinspection ExceptionCaughtLocallyJS
 
-import { task } from "hardhat/config";
 import { TDocDeployer, TradeTrustToken } from "@tradetrust/contracts";
-import { verifyContract, wait, deployContract, isSupportedTitleEscrowFactory } from "./helpers";
-import { TASK_DEPLOY_TOKEN } from "./task-names";
+import { Contract, TransactionReceipt } from "ethers";
+import { task } from "hardhat/config";
 import { constants } from "../src";
 import { encodeInitParams, getEventFromReceipt } from "../src/utils";
-import { TransactionReceipt, Contract } from "ethers";
+import { deployContract, isSupportedTitleEscrowFactory, verifyContract, wait } from "./helpers";
+import { TASK_DEPLOY_TOKEN } from "./task-names";
 task(TASK_DEPLOY_TOKEN)
   .setDescription("Deploys the TradeTrust token")
   .addParam("name", "Name of the token")
@@ -20,7 +20,7 @@ task(TASK_DEPLOY_TOKEN)
     try {
       const [deployer] = await ethers.getSigners();
       const deployerAddress = await deployer.getAddress();
-      const chainId = Number(await deployer.provider.getNetwork().then((network) => network.chainId));
+      const chainId = Number(await deployer.provider.getNetwork().then((net) => net.chainId));
       let factoryAddress = factory;
       let registryAddress: string;
 
@@ -65,7 +65,7 @@ task(TASK_DEPLOY_TOKEN)
           receipt as unknown as TransactionReceipt,
           "Deployment",
           deployerContract.interface
-        ).args["deployed"];
+        ).args.deployed;
       } else {
         // Standalone deployment
         const contractName = "TradeTrustToken";

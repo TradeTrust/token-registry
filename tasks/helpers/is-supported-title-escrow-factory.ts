@@ -2,10 +2,7 @@ import { ethers, Provider } from "ethers";
 import { TitleEscrow, TitleEscrowFactory } from "@tradetrust/contracts";
 import { contractInterfaceId } from "../../src/constants";
 
-export const isSupportedTitleEscrowFactory = async (
-  factoryAddress: string,
-  provider?: Provider
-): Promise<boolean> => {
+export const isSupportedTitleEscrowFactory = async (factoryAddress: string, provider?: Provider): Promise<boolean> => {
   const titleEscrowFactoryContract = new ethers.Contract(
     factoryAddress,
     ["function implementation() view returns (address)"],
