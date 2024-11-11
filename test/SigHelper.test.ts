@@ -124,10 +124,6 @@ describe("SigHelper", async () => {
           ]
         )
       );
-      // hashStruct = ethers.TypedDataEncoder.hash(domain, fakeData.types, {
-      //   beneficiary: fakeData.message.beneficiary,
-      //   deadline: fakeData.message.deadline,
-      // });
 
       sigHash = await sender.signTypedData(fakeData.domain, fakeData.types, fakeData.message);
       sig = ethers.Signature.from(sigHash);

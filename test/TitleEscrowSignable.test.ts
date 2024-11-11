@@ -31,7 +31,6 @@ describe("TitleEscrowSignable", async () => {
   let domain: Record<string, any>;
 
   let deployFixturesRunner: () => Promise<[TitleEscrowSignable]>;
-  // let deployTokenFixtureRunner: DeployTokenFixtureRunner;
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -295,7 +294,6 @@ describe("TitleEscrowSignable", async () => {
             ]
           )
         );
-        // hashStruct = ethers.TypedDataEncoder.hash(domain, beneficiaryTransferTypes, endorsement);
       });
 
       describe("Beneficiary Transfer: transferBeneficiaryWithSig", () => {

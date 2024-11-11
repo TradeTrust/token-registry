@@ -96,7 +96,6 @@ describe("End to end", () => {
     holder = users.holder;
     [registryAdmin, minter, restorer, accepter] = users.others;
 
-    // registryAdmin = users.others[faker.datatype.number(users.others.length - 1)];
     deployFixturesRunner = async () =>
       createDeployFixtureRunner(
         deployTradeTrustTokenStandardFixture({ deployer }),
@@ -297,7 +296,6 @@ describe("End to end", () => {
         await expect(tx)
           .to.emit(tokenRegistry, "PauseWithRemark")
           .withArgs(registryAdmin.address, txnHexRemarks.pauseRemark);
-        // const receipt: any = await tx.wait();
 
         // Extract the event arguments from the receipt
         const filter = tokenRegistry.filters.PauseWithRemark;

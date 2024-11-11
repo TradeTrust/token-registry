@@ -7,6 +7,7 @@ import { constants } from "../src";
 import { encodeInitParams, getEventFromReceipt } from "../src/utils";
 import { deployContract, isSupportedTitleEscrowFactory, verifyContract, wait } from "./helpers";
 import { TASK_DEPLOY_TOKEN } from "./task-names";
+
 task(TASK_DEPLOY_TOKEN)
   .setDescription("Deploys the TradeTrust token")
   .addParam("name", "Name of the token")

@@ -2,10 +2,8 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@typechain/hardhat";
 import { randomBytes } from "crypto";
 import dotenv from "dotenv";
-import "hardhat-gas-reporter";
 import "hardhat-watcher";
 import { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
-import "solidity-coverage";
 import "./tasks";
 
 dotenv.config();

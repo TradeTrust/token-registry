@@ -2,9 +2,6 @@
 pragma solidity ^0.8.27;
 
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-// import { ECDSAUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-
-// import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import { SigHelperErrors } from "../interfaces/SigHelperErrors.sol";
 
 abstract contract SigHelper is SigHelperErrors {

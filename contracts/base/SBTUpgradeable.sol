@@ -4,12 +4,10 @@
 pragma solidity ^0.8.27;
 
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-// import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
 import { ISBTUpgradeable, IERC165 } from "../interfaces/ISBTUpgradeable.sol";
 import { IERC721MetadataUpgradeable } from "../interfaces/IERC721MetadataUpgradeable.sol";
 
@@ -24,7 +22,6 @@ contract SBTUpgradeable is
   ISBTUpgradeable,
   IERC721MetadataUpgradeable
 {
-  // using Address for address;
   using Strings for uint256;
 
   // Token name
