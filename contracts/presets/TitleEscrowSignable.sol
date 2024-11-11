@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.27;
 
-import "../TitleEscrow.sol";
-import "../utils/SigHelper.sol";
+import { TitleEscrow } from "../TitleEscrow.sol";
+import { SigHelper } from "../utils/SigHelper.sol";
 import { BeneficiaryTransferEndorsement } from "../lib/TitleEscrowStructs.sol";
-import "../interfaces/ITitleEscrowSignable.sol";
-import "../interfaces/TitleEscrowSignableErrors.sol";
+import { ITitleEscrowSignable } from "../interfaces/ITitleEscrowSignable.sol";
+import { TitleEscrowSignableErrors } from "../interfaces/TitleEscrowSignableErrors.sol";
 
 /**
  * @title TitleEscrowSignable
@@ -25,7 +25,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
 
   function __TitleEscrowSignable_init(address _registry, uint256 _tokenId) internal virtual onlyInitializing {
     super.__TitleEscrow_init(_registry, _tokenId);
-    __SigHelper_init(name, "1");
+    super.__SigHelper_init(name, "1");
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {

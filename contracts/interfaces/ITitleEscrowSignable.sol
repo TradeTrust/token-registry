@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.27;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "../utils/SigHelper.sol";
-import "./ITitleEscrow.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import { SigHelper } from "../utils/SigHelper.sol";
+import { ITitleEscrow } from "./ITitleEscrow.sol";
 import { BeneficiaryTransferEndorsement } from "../lib/TitleEscrowStructs.sol";
 
 interface ITitleEscrowSignable is ITitleEscrow {
@@ -14,8 +14,10 @@ interface ITitleEscrowSignable is ITitleEscrow {
    * @param endorsement The endorsement to transfer the beneficiary.
    * @param sig The signature of the endorsement.
    */
-  function transferBeneficiaryWithSig(BeneficiaryTransferEndorsement memory endorsement, SigHelper.Sig memory sig)
-    external;
+  function transferBeneficiaryWithSig(
+    BeneficiaryTransferEndorsement memory endorsement,
+    SigHelper.Sig memory sig
+  ) external;
 
   /**
    * @notice Cancel a beneficiary transfer.

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.27;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../interfaces/RegistryAccessErrors.sol";
+import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { RegistryAccessErrors } from "../interfaces/RegistryAccessErrors.sol";
 
 /**
  * @title RegistryAccess
@@ -21,10 +21,10 @@ abstract contract RegistryAccess is AccessControlUpgradeable, RegistryAccessErro
     if (admin == address(0)) {
       revert InvalidAdminAddress();
     }
-    _setupRole(DEFAULT_ADMIN_ROLE, admin);
-    _setupRole(MINTER_ROLE, admin);
-    _setupRole(RESTORER_ROLE, admin);
-    _setupRole(ACCEPTER_ROLE, admin);
+    _grantRole(DEFAULT_ADMIN_ROLE, admin);
+    _grantRole(MINTER_ROLE, admin);
+    _grantRole(RESTORER_ROLE, admin);
+    _grantRole(ACCEPTER_ROLE, admin);
   }
 
   /**

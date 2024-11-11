@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.27;
 
-import "../base/TradeTrustTokenBase.sol";
+import { TradeTrustTokenBase, ITitleEscrowFactory } from "../base/TradeTrustTokenBase.sol";
 
 /**
  * @title TradeTrustTokenStandard

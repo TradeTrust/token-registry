@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.27;
 
-import "../TitleEscrow.sol";
+import { TitleEscrow } from "../TitleEscrow.sol";
 
 contract TitleEscrowMock is TitleEscrow {
   constructor() TitleEscrow() {}

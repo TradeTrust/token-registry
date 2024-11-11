@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.5.0) (token/ERC721/ERC721.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.27;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
-import "../interfaces/ISBTUpgradeable.sol";
-import "../interfaces/IERC721MetadataUpgradeable.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { ISBTUpgradeable, IERC165 } from "../interfaces/ISBTUpgradeable.sol";
+import { IERC721MetadataUpgradeable } from "../interfaces/IERC721MetadataUpgradeable.sol";
 
 /**
  * @dev A trimmed version of the https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token
@@ -24,8 +22,7 @@ contract SBTUpgradeable is
   ISBTUpgradeable,
   IERC721MetadataUpgradeable
 {
-  using AddressUpgradeable for address;
-  using StringsUpgradeable for uint256;
+  using Strings for uint256;
 
   // Token name
   string private _name;
@@ -59,7 +56,7 @@ contract SBTUpgradeable is
    */
   function supportsInterface(
     bytes4 interfaceId
-  ) public view virtual override(ERC165Upgradeable, IERC165Upgradeable) returns (bool) {
+  ) public view virtual override(ERC165Upgradeable, IERC165) returns (bool) {
     return
       interfaceId == type(ISBTUpgradeable).interfaceId ||
       interfaceId == type(IERC721MetadataUpgradeable).interfaceId ||
@@ -289,9 +286,9 @@ contract SBTUpgradeable is
     uint256 tokenId,
     bytes memory _data
   ) private returns (bool) {
-    if (to.isContract()) {
-      try IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(), from, tokenId, _data) returns (bytes4 retval) {
-        return retval == IERC721ReceiverUpgradeable.onERC721Received.selector;
+    if (to.code.length > 0) {
+      try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, _data) returns (bytes4 retval) {
+        return retval == IERC721Receiver.onERC721Received.selector;
       } catch (bytes memory reason) {
         if (reason.length == 0) {
           revert("ERC721: transfer to non ERC721Receiver implementer");

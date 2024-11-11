@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.27;
 
-import "./TradeTrustSBT.sol";
-import "./RegistryAccess.sol";
-import "../interfaces/ITradeTrustTokenRestorable.sol";
+import { TradeTrustSBT, ITitleEscrow, SBTUpgradeable } from "./TradeTrustSBT.sol";
+import { RegistryAccess } from "./RegistryAccess.sol";
+import { ITradeTrustTokenRestorable } from "../interfaces/ITradeTrustTokenRestorable.sol";
 
 /**
  * @title TradeTrustTokenRestorable
@@ -33,7 +33,7 @@ abstract contract TradeTrustTokenRestorable is TradeTrustSBT, RegistryAccess, IT
       revert TokenNotReturnedToIssuer();
     }
 
-    address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
+    address titleEscrow = titleEscrowFactory().getEscrowAddress(address(this), tokenId);
     _registryTransferTo(titleEscrow, tokenId, _remark);
 
     return titleEscrow;

@@ -1,5 +1,5 @@
 import { SimpleCaller, TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
-import { LogDescription } from "ethers/lib/utils";
+import { LogDescription } from "ethers";
 import faker from "faker";
 import { ethers } from "hardhat";
 import { expect } from ".";
@@ -35,13 +35,13 @@ describe("TradeTrustTokenMintable", async () => {
     deployMockTitleEscrowAndTokenFixtureRunner = async () => {
       const mockTitleEscrowFactoryContractFixture = (await (
         await ethers.getContractFactory("TitleEscrowFactory")
-      ).deploy()) as TitleEscrowFactory;
+      ).deploy()) as unknown as TitleEscrowFactory;
 
       const [, registryContractFixture] = await deployTokenFixture<TradeTrustToken>({
         tokenContractName: "TradeTrustToken",
         tokenName: registryName,
         tokenInitials: registrySymbol,
-        escrowFactoryAddress: mockTitleEscrowFactoryContractFixture.address,
+        escrowFactoryAddress: mockTitleEscrowFactoryContractFixture.target as string,
         deployer: users.carrier,
       });
 
@@ -90,9 +90,9 @@ describe("TradeTrustTokenMintable", async () => {
     it("should mint token to a correct title escrow address", async () => {
       const expectedTitleEscrowAddr = computeTitleEscrowAddress({
         tokenId,
-        registryAddress: registryContract.address,
+        registryAddress: registryContract.target as string,
         implementationAddress: titleEscrowImplAddr,
-        factoryAddress: mockTitleEscrowFactoryContract.address,
+        factoryAddress: mockTitleEscrowFactoryContract.target as string,
       });
 
       const res = await registryContract.ownerOf(tokenId);
@@ -126,19 +126,23 @@ describe("TradeTrustTokenMintable", async () => {
     });
 
     it("should create title escrow from factory", async () => {
-      const simpleCallerMock = (await (await ethers.getContractFactory("SimpleCaller")).deploy()) as SimpleCaller;
+      const simpleCallerMock = (await (
+        await ethers.getContractFactory("SimpleCaller")
+      ).deploy()) as unknown as SimpleCaller;
 
       const data = mockTitleEscrowFactoryContract.interface.encodeFunctionData("create", [tokenId]);
-      const tx = await simpleCallerMock.callFunction(mockTitleEscrowFactoryContract.address, data);
+      const tx = await simpleCallerMock.callFunction(mockTitleEscrowFactoryContract.target, data);
 
       const receipt = await tx.wait();
-      const { logs } = receipt;
+      const logs = receipt?.logs;
 
       let escrowEventName: string = "";
-      logs.some((log) => {
+      let logsFound = 0;
+      logs?.some((log) => {
         try {
-          const decoded: LogDescription = mockTitleEscrowFactoryContract.interface.parseLog(log);
-          if (decoded.name === "TitleEscrowCreated") {
+          const decoded: LogDescription | null = mockTitleEscrowFactoryContract.interface.parseLog(log);
+          if (decoded) logsFound += 1;
+          if (decoded?.name === "TitleEscrowCreated") {
             escrowEventName = decoded.name;
             return true;
           }
@@ -147,18 +151,19 @@ describe("TradeTrustTokenMintable", async () => {
         }
         return false;
       });
-      expect(logs?.length).to.equal(1);
+      expect(logsFound).to.equal(1);
       expect(escrowEventName).to.equal("TitleEscrowCreated");
     });
 
     it("should create title escrow with correct token ID", async () => {
-      const simpleCallerMock = (await (await ethers.getContractFactory("SimpleCaller")).deploy()) as SimpleCaller;
+      const simpleCallerMock = (await (
+        await ethers.getContractFactory("SimpleCaller")
+      ).deploy()) as unknown as SimpleCaller;
       const data = mockTitleEscrowFactoryContract.interface.encodeFunctionData("create", [tokenId]);
-      const tx = await simpleCallerMock.callFunction(mockTitleEscrowFactoryContract.address, data);
-      const receipt = await tx.wait();
-      const decoded = mockTitleEscrowFactoryContract.interface.parseLog(receipt.logs[0]);
-      expect(receipt.logs?.length).to.equal(1);
-      expect(decoded.args.tokenId.toHexString()).to.equal(tokenId.toLowerCase());
+      const tx = await simpleCallerMock.callFunction(mockTitleEscrowFactoryContract.target, data);
+      const receipt: any = await tx.wait();
+      const decoded = mockTitleEscrowFactoryContract.interface.parseLog(receipt.logs[1]);
+      expect(ethers.toBeHex(decoded?.args.tokenId)).to.equal(tokenId.toLowerCase());
     });
 
     it("should emit Transfer event with correct values", async () => {
@@ -173,7 +178,7 @@ describe("TradeTrustTokenMintable", async () => {
 
       await expect(tx)
         .to.emit(registryContract, "Transfer")
-        .withArgs(defaultAddress.Zero, titleEscrowContract.address, tokenId);
+        .withArgs(defaultAddress.Zero, titleEscrowContract.target, tokenId);
     });
 
     describe("Mint with correct beneficiary , holder and remark", () => {
@@ -205,7 +210,7 @@ describe("TradeTrustTokenMintable", async () => {
         expect(remark).to.equal(txnHexRemarks.mintRemark);
 
         // convert the hex string to utf8 and compare
-        expect(ethers.utils.toUtf8String(remark)).to.equal(remarkString.mintRemark);
+        expect(ethers.toUtf8String(remark)).to.equal(remarkString.mintRemark);
       });
     });
   });

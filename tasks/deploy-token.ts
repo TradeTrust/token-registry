@@ -1,12 +1,12 @@
 // noinspection ExceptionCaughtLocallyJS
 
-import { task } from "hardhat/config";
 import { TDocDeployer, TradeTrustToken } from "@tradetrust/contracts";
-import { DeploymentEvent } from "@tradetrust/contracts/contracts/utils/TDocDeployer";
-import { verifyContract, wait, deployContract, isSupportedTitleEscrowFactory } from "./helpers";
-import { TASK_DEPLOY_TOKEN } from "./task-names";
+import { Contract, TransactionReceipt } from "ethers";
+import { task } from "hardhat/config";
 import { constants } from "../src";
 import { encodeInitParams, getEventFromReceipt } from "../src/utils";
+import { deployContract, isSupportedTitleEscrowFactory, verifyContract, wait } from "./helpers";
+import { TASK_DEPLOY_TOKEN } from "./task-names";
 
 task(TASK_DEPLOY_TOKEN)
   .setDescription("Deploys the TradeTrust token")
@@ -21,7 +21,7 @@ task(TASK_DEPLOY_TOKEN)
     try {
       const [deployer] = await ethers.getSigners();
       const deployerAddress = await deployer.getAddress();
-      const chainId = await deployer.getChainId();
+      const chainId = Number(await deployer.provider.getNetwork().then((net) => net.chainId));
       let factoryAddress = factory;
       let registryAddress: string;
 
@@ -53,7 +53,7 @@ task(TASK_DEPLOY_TOKEN)
         }
         const deployerContract = (await ethers.getContractFactory("TDocDeployer")).attach(
           deployerContractAddress
-        ) as TDocDeployer;
+        ) as unknown as TDocDeployer;
         const initParam = encodeInitParams({
           name,
           symbol,
@@ -62,19 +62,20 @@ task(TASK_DEPLOY_TOKEN)
         const tx = await deployerContract.deploy(implAddress, initParam);
         console.log(`[Transaction] Pending ${tx.hash}`);
         const receipt = await tx.wait();
-        registryAddress = getEventFromReceipt<DeploymentEvent>(
-          receipt,
-          deployerContract.interface.getEventTopic("Deployment")
+        registryAddress = getEventFromReceipt<any>(
+          receipt as unknown as TransactionReceipt,
+          "Deployment",
+          deployerContract.interface
         ).args.deployed;
       } else {
         // Standalone deployment
         const contractName = "TradeTrustToken";
-        const token = await deployContract<TradeTrustToken>({
+        const token = await deployContract<TradeTrustToken & Contract>({
           params: [name, symbol, factoryAddress],
           contractName,
           hre,
         });
-        registryAddress = token.address;
+        registryAddress = token.target as string;
       }
 
       if (verify) {

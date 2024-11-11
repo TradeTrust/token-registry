@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.27;
 
-import "@openzeppelin/contracts-upgradeable/proxy/ClonesUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "../interfaces/TDocDeployerErrors.sol";
+import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { TDocDeployerErrors } from "../interfaces/TDocDeployerErrors.sol";
 
 /**
  * @title TDocDeployer
@@ -27,7 +27,7 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
   constructor() initializer {}
 
   function initialize() external initializer {
-    __Ownable_init();
+    __Ownable_init(msg.sender);
   }
 
   function _authorizeUpgrade(address) internal view override onlyOwner {}
@@ -38,7 +38,7 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
       revert UnsupportedImplementationContractAddress();
     }
 
-    address deployed = ClonesUpgradeable.clone(implementation);
+    address deployed = Clones.clone(implementation);
     bytes memory payload = abi.encodeWithSignature("initialize(bytes)", abi.encode(params, titleEscrowFactory));
     (bool success, ) = address(deployed).call(payload);
     if (!success) {

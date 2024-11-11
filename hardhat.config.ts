@@ -1,12 +1,8 @@
-import { randomBytes } from "crypto";
+import "@nomicfoundation/hardhat-toolbox";
 import "@typechain/hardhat";
-import "@nomiclabs/hardhat-ethers";
-import "@nomicfoundation/hardhat-chai-matchers";
-import "hardhat-watcher";
-import "hardhat-gas-reporter";
-import "solidity-coverage";
-import "@nomiclabs/hardhat-etherscan";
+import { randomBytes } from "crypto";
 import dotenv from "dotenv";
+import "hardhat-watcher";
 import { HardhatUserConfig, HttpNetworkUserConfig } from "hardhat/types";
 import "./tasks";
 
@@ -44,7 +40,8 @@ if (IS_CI_ENV) {
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.9",
+    compilers: [{ version: "0.8.27" }],
+
     settings: {
       optimizer: {
         enabled: true,
@@ -59,7 +56,7 @@ const config: HardhatUserConfig = {
   },
   typechain: {
     outDir: "src/contracts",
-    alwaysGenerateOverloads: true,
+    // alwaysGenerateOverloads: true,
   },
   watcher: {
     test: {

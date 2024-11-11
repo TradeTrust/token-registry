@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.27;
 
-import "./TradeTrustSBT.sol";
-import "./RegistryAccess.sol";
+import { TradeTrustSBT } from "./TradeTrustSBT.sol";
+import { RegistryAccess } from "./RegistryAccess.sol";
 
 /**
  * @title TradeTrustTokenBaseURI

@@ -1,5 +1,5 @@
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   TitleEscrow,
   TitleEscrowFactoryGetterMock,
@@ -7,7 +7,7 @@ import {
   TradeTrustToken,
   TradeTrustTokenMock,
 } from "@tradetrust/contracts";
-import { Signer } from "ethers";
+import { Contract, Signer } from "ethers";
 import faker from "faker";
 import { ethers } from "hardhat";
 import { expect } from ".";
@@ -32,7 +32,7 @@ describe("Title Escrow", async () => {
   let users: TestUsers;
 
   let tokenId: string;
-  const exceededLengthRemark = ethers.utils.hexlify(ethers.utils.randomBytes(121));
+  const exceededLengthRemark = ethers.hexlify(ethers.randomBytes(121));
 
   // eslint-disable-next-line no-undef
   before(async () => {
@@ -74,16 +74,16 @@ describe("Title Escrow", async () => {
     before(async () => {
       deployer = users.others[users.others.length - 1];
 
-      deployFixturesRunner = async () => {
+      deployFixturesRunner = async (): Promise<[TradeTrustToken, TitleEscrow, TitleEscrow]> => {
         const [, registryContractFixture] = await deployTokenFixture<TradeTrustToken>({
           tokenContractName: "TradeTrustToken",
           tokenName: "The Great Shipping Company",
           tokenInitials: "GSC",
           deployer: users.carrier,
         });
-        const implContractFixture = await deployTitleEscrowFixture({ deployer });
-        const titleEscrowContractFixture = await deployImplProxy<TitleEscrow>({
-          implementation: implContractFixture,
+        const implContractFixture = (await deployTitleEscrowFixture({ deployer })) as unknown as TitleEscrow;
+        const titleEscrowContractFixture = await deployImplProxy<TitleEscrow & Contract>({
+          implementation: implContractFixture as TitleEscrow & Contract,
           deployer: users.carrier,
         });
 
@@ -99,14 +99,14 @@ describe("Title Escrow", async () => {
 
     it("should initialise implementation", async () => {
       const tx = implContract.initialize(defaultAddress.Zero, tokenId);
-      await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
+      await expect(tx).to.be.revertedWithCustomError(implContract, "InvalidInitialization");
     });
 
     describe("Initialisation", () => {
       let fakeRegistryAddress: string;
 
       beforeEach(async () => {
-        fakeRegistryAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
+        fakeRegistryAddress = ethers.getAddress(faker.finance.ethereumAddress());
 
         await titleEscrowContract.initialize(fakeRegistryAddress, tokenId);
       });
@@ -144,11 +144,11 @@ describe("Title Escrow", async () => {
         // using registry contract as fake registry, no special set state is needed for these tests
         fakeRegistry = registryContract;
         (fakeRegistry as any).wallet = await impersonateAccount({
-          address: fakeRegistry.address,
+          address: fakeRegistry.target as string,
         });
-        fakeAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
+        fakeAddress = ethers.getAddress(faker.finance.ethereumAddress());
 
-        await titleEscrowContract.initialize(fakeRegistry.address, tokenId);
+        await titleEscrowContract.initialize(fakeRegistry.target, tokenId);
       });
 
       it("should only be able to receive designated token ID", async () => {
@@ -175,7 +175,7 @@ describe("Title Escrow", async () => {
         let data: string;
 
         beforeEach(async () => {
-          data = new ethers.utils.AbiCoder().encode(
+          data = new ethers.AbiCoder().encode(
             ["address", "address", "bytes"],
             [users.beneficiary.address, users.holder.address, txnHexRemarks.mintRemark]
           );
@@ -211,7 +211,7 @@ describe("Title Escrow", async () => {
                 users.beneficiary.address,
                 users.holder.address,
                 true,
-                fakeRegistry.address,
+                fakeRegistry.target,
                 tokenId,
                 txnHexRemarks.mintRemark
               );
@@ -244,7 +244,7 @@ describe("Title Escrow", async () => {
           });
 
           it("should revert if receiving beneficiary is zero address", async () => {
-            data = new ethers.utils.AbiCoder().encode(
+            data = new ethers.AbiCoder().encode(
               ["address", "address", "bytes"],
               [defaultAddress.Zero, users.holder.address, txnHexRemarks.mintRemark]
             );
@@ -259,7 +259,7 @@ describe("Title Escrow", async () => {
           });
 
           it("should revert if receiving holder is zero address", async () => {
-            data = new ethers.utils.AbiCoder().encode(
+            data = new ethers.AbiCoder().encode(
               ["address", "address", "bytes"],
               [users.beneficiary.address, defaultAddress.Zero, txnHexRemarks.mintRemark]
             );
@@ -296,7 +296,7 @@ describe("Title Escrow", async () => {
 
             await expect(tx)
               .to.emit(titleEscrowContract, "TokenReceived")
-              .withArgs(users.beneficiary.address, users.holder.address, false, fakeRegistry.address, tokenId, "0x");
+              .withArgs(users.beneficiary.address, users.holder.address, false, fakeRegistry.target, tokenId, "0x");
           });
         });
 
@@ -308,7 +308,7 @@ describe("Title Escrow", async () => {
 
             await expect(tx)
               .to.emit(titleEscrowContract, "BeneficiaryTransfer")
-              .withArgs(defaultAddress.Zero, users.beneficiary.address, fakeRegistry.address, tokenId, "0x");
+              .withArgs(defaultAddress.Zero, users.beneficiary.address, fakeRegistry.target, tokenId, "0x");
           });
 
           it("should emit HolderTransfer event", async () => {
@@ -318,7 +318,7 @@ describe("Title Escrow", async () => {
 
             await expect(tx)
               .to.emit(titleEscrowContract, "HolderTransfer")
-              .withArgs(defaultAddress.Zero, users.holder.address, fakeRegistry.address, tokenId, "0x");
+              .withArgs(defaultAddress.Zero, users.holder.address, fakeRegistry.target, tokenId, "0x");
           });
         });
       });
@@ -356,7 +356,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should return true after being initialised", async () => {
-        await titleEscrowContract.initialize(registryContract.address, tokenId);
+        await titleEscrowContract.initialize(registryContract.getAddress(), tokenId);
         const res = await titleEscrowContract.active();
         expect(res).to.be.true;
       });
@@ -365,12 +365,12 @@ describe("Title Escrow", async () => {
         let fakeAddress: string;
         let mockTitleEscrowContract: TitleEscrowMock;
         beforeEach(async () => {
-          fakeAddress = ethers.utils.getAddress(faker.finance.ethereumAddress());
+          fakeAddress = ethers.getAddress(faker.finance.ethereumAddress());
           const deployMockFixtureRunner = async (): Promise<[TitleEscrowMock, TradeTrustTokenMock]> => {
             // Deploying the title escrow factory contract mock to return the title escrow mock correctly
             const titleEscrowFactoryGetterMock = (await (
               await ethers.getContractFactory("TitleEscrowFactoryGetterMock")
-            ).deploy()) as TitleEscrowFactoryGetterMock;
+            ).deploy()) as unknown as TitleEscrowFactoryGetterMock;
 
             // Deploy the TradeTrustTokenMock contract to be used as the registry and adding escrow factory address
             const [, registryContractMock] = await deployTokenFixture<TradeTrustTokenMock>({
@@ -378,17 +378,17 @@ describe("Title Escrow", async () => {
               tokenName: "The Great Shipping Company",
               tokenInitials: "GSC",
               deployer: users.carrier,
-              escrowFactoryAddress: titleEscrowFactoryGetterMock.address,
+              escrowFactoryAddress: titleEscrowFactoryGetterMock.target as string,
             });
 
             // Deploy the Title Escrow mock contract and initialize it with the required parameters
             mockTitleEscrowContract = await deployTitleEscrowMockFixture({ deployer: users.carrier });
 
             // setting the title escrow  address in the escrow factory so that it can return the correct title escrow when called by registry
-            await titleEscrowFactoryGetterMock.setAddress(mockTitleEscrowContract.address);
+            await titleEscrowFactoryGetterMock.setAddress(mockTitleEscrowContract.getAddress());
 
             await mockTitleEscrowContract.initializeMock(
-              registryContractMock.address,
+              registryContractMock.getAddress(),
               tokenId,
               fakeAddress,
               fakeAddress,
@@ -396,7 +396,7 @@ describe("Title Escrow", async () => {
             );
             // minting the token directly to the title escrow contract to set the correct ownerof function
             // this mintinter is a mock function which dosen't deploys the escrow contract
-            await registryContractMock.mintInternal(mockTitleEscrowContract.address, tokenId);
+            await registryContractMock.mintInternal(mockTitleEscrowContract.getAddress(), tokenId);
             // achieving active status as
             await mockTitleEscrowContract.setActive(false);
 
@@ -617,7 +617,7 @@ describe("Title Escrow", async () => {
             .withArgs(
               defaultAddress.Zero,
               beneficiaryNominee.address,
-              registryContract.address,
+              registryContract.target,
               tokenId,
               txnHexRemarks.nominateRemark
             );
@@ -739,7 +739,7 @@ describe("Title Escrow", async () => {
             .withArgs(
               users.beneficiary.address,
               beneficiaryNominee.address,
-              registryContract.address,
+              registryContract.target,
               tokenId,
               txnHexRemarks.beneficiaryTransferRemark
             );
@@ -828,7 +828,7 @@ describe("Title Escrow", async () => {
             .withArgs(
               users.holder.address,
               targetNewHolder.address,
-              registryContract.address,
+              await registryContract.getAddress(),
               tokenId,
               txnHexRemarks.holderTransferRemark
             );
@@ -883,7 +883,7 @@ describe("Title Escrow", async () => {
             .withArgs(
               users.beneficiary.address,
               beneficiaryNominee.address,
-              registryContract.address,
+              await registryContract.getAddress(),
               tokenId,
               txnHexRemarks.transferOwnersRemark
             );
@@ -892,7 +892,7 @@ describe("Title Escrow", async () => {
             .withArgs(
               users.holder.address,
               holderNominee.address,
-              registryContract.address,
+              await registryContract.getAddress(),
               tokenId,
               txnHexRemarks.transferOwnersRemark
             );
@@ -957,7 +957,7 @@ describe("Title Escrow", async () => {
             .withArgs(
               newBeneficiary.address,
               prevBeneficiary.address,
-              registryContract.address,
+              await registryContract.getAddress(),
               tokenId,
               txnHexRemarks.rejectTransferRemark
             );
@@ -1067,7 +1067,7 @@ describe("Title Escrow", async () => {
               previousBeneficiary.address,
               newHolder.address,
               previousHolder.address,
-              registryContract.address,
+              await registryContract.getAddress(),
               tokenId,
               txnHexRemarks.rejectTransferRemark
             );
@@ -1140,7 +1140,7 @@ describe("Title Escrow", async () => {
               prevOwner.address,
               newOwner.address,
               prevOwner.address,
-              registryContract.address,
+              await registryContract.getAddress(),
               tokenId,
               txnHexRemarks.rejectTransferRemark
             );
@@ -1364,7 +1364,7 @@ describe("Title Escrow", async () => {
 
         const res = await registryContract.ownerOf(tokenId);
 
-        expect(res).to.equal(registryContract.address);
+        expect(res).to.equal(registryContract.target);
       });
 
       it("should not allow returning to issuer when title escrow is not holding token", async () => {
@@ -1401,7 +1401,7 @@ describe("Title Escrow", async () => {
       });
 
       it("should reset beneficiary nominee", async () => {
-        const beneficiaryNominee = ethers.utils.getAddress(faker.finance.ethereumAddress());
+        const beneficiaryNominee = ethers.getAddress(faker.finance.ethereumAddress());
         const titleEscrowAsBeneficiary = titleEscrowOwnerContract.connect(beneficiary);
         await titleEscrowAsBeneficiary.nominate(beneficiaryNominee, txnHexRemarks.nominateRemark);
         const initialBeneficiaryNominee = await titleEscrowOwnerContract.nominee();
@@ -1419,8 +1419,8 @@ describe("Title Escrow", async () => {
         await titleEscrowOwnerContract.connect(beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
         const currentOwner = await registryContract.ownerOf(tokenId);
 
-        expect(initialOwner).to.equal(titleEscrowOwnerContract.address);
-        expect(currentOwner).to.equal(registryContract.address);
+        expect(initialOwner).to.equal(titleEscrowOwnerContract.target);
+        expect(currentOwner).to.equal(registryContract.target);
       });
 
       it("should not hold token after returning to issuer", async () => {
@@ -1438,7 +1438,7 @@ describe("Title Escrow", async () => {
 
         await expect(tx)
           .to.emit(titleEscrowOwnerContract, "ReturnToIssuer")
-          .withArgs(beneficiary.address, registryContract.address, tokenId, txnHexRemarks.returnToIssuerRemark);
+          .withArgs(beneficiary.address, registryContract.target, tokenId, txnHexRemarks.returnToIssuerRemark);
       });
       it("should reset previous beneficiary and holder", async () => {
         const [newOwner] = users.others;
@@ -1461,7 +1461,7 @@ describe("Title Escrow", async () => {
       let registrySigner: Signer;
 
       beforeEach(async () => {
-        registrySigner = await impersonateAccount({ address: registryContract.address });
+        registrySigner = await impersonateAccount({ address: registryContract.target as string });
         await registryContract
           .connect(users.carrier)
           .mint(users.beneficiary.address, users.beneficiary.address, tokenId, txnHexRemarks.mintRemark);
@@ -1544,7 +1544,7 @@ describe("Title Escrow", async () => {
 
         await expect(tx)
           .to.emit(titleEscrowOwnerContract, "Shred")
-          .withArgs(registryContract.address, tokenId, txnHexRemarks.burnRemark);
+          .withArgs(registryContract.target, tokenId, txnHexRemarks.burnRemark);
       });
     });
   });
