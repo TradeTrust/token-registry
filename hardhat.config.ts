@@ -94,8 +94,8 @@ const config: HardhatUserConfig = {
           network: "astron",
           chainId: 1338,
           urls: {
-              apiURL: "http://astronscanl2.bitfactory.cn/api",
-              browserURL: "http://astronscanl2.bitfactory.cn",
+              apiURL: "https://astronscanl2.bitfactory.cn/api",
+              browserURL: "https://astronscanl2.bitfactory.cn",
           },
       }],
   },
@@ -157,7 +157,7 @@ const config: HardhatUserConfig = {
      */
     astron: {
         ...networkConfig,
-        url: "http://astronlayer2.bitfactory.cn:8545",
+        url: "https://astronlayer2.bitfactory.cn/rpc/",
      },
     /**
      * Development
