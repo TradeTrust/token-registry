@@ -1,5 +1,10 @@
 import { ethers } from "ethers";
 
+if (ethers.version.includes("/5")) {
+  ethers.id = (ethers as any).utils.id;
+  ethers.ZeroHash = (ethers as any).constants.HashZero;
+}
+
 export const roleHash = {
   DefaultAdmin: ethers.ZeroHash,
   MinterRole: ethers.id("MINTER_ROLE"),

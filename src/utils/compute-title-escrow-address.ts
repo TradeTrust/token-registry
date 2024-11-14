@@ -7,6 +7,13 @@ interface Params {
   tokenId: string;
 }
 
+if (ethers.version.includes("/5")) {
+  ethers.keccak256 = (ethers as any).utils.keccak256;
+  ethers.solidityPackedKeccak256 = (ethers as any).utils.solidityPackedKeccak256;
+  ethers.solidityPacked = (ethers as any).utils.solidityPacked;
+  ethers.getCreate2Address = (ethers as any).utils.getCreate2Address;
+}
+
 export const computeTitleEscrowAddress = (params: Params) => {
   const { implementationAddress, factoryAddress, registryAddress, tokenId } = params;
   const initCodeHash = ethers.keccak256(
