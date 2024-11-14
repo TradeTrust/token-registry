@@ -13,5 +13,5 @@ if (ethers.version.includes("/5")) {
 }
 
 export const encodeInitParams = ({ name, symbol, deployer }: Params) => {
-  return ethers.AbiCoder.defaultAbiCoder().encode(["string", "string", "address"], [name, symbol, deployer]);
+  return (ethers as any).AbiCoder.defaultAbiCoder().encode(["string", "string", "address"], [name, symbol, deployer]);
 };

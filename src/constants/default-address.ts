@@ -1,10 +1,10 @@
 import { ethers } from "ethers";
 
 if (ethers.version.includes("/5")) {
-  ethers.ZeroAddress = (ethers as any)?.constants?.AddressZero
+  (ethers as any).ZeroAddress = (ethers as any)?.constants?.AddressZero
 }
 
 export const defaultAddress = {
-  Zero: ethers.ZeroAddress,
+  Zero: (ethers as any).ZeroAddress,
   Burn: "0x000000000000000000000000000000000000dEaD",
 };

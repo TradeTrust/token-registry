@@ -1,11 +1,20 @@
 import { ethers } from "ethers";
 
 if (ethers.version.includes("/5")) {
-  ethers.Interface = (ethers as any).utils.Interface;
-  ethers.TransactionReceipt = (ethers as any).ContractReceipt;
+  (ethers as any).Interface = (ethers as any).utils.Interface;
+  (ethers as any).TransactionReceipt = (ethers as any).ContractReceipt;
 }
 
-export const getEventFromReceipt = <T extends any>(receipt: ethers.TransactionReceipt, topic: string, iface: ethers.Interface) => {
+/**
+ * Ethers v6, Get event from receipt.logs
+ * Ethers v5, Get event from receipt.events
+ *
+ * @param receipt {TransactionReceipt | ContractReceipt}
+ * @param topic {string}
+ * @param iface {ethers.Interface | ethers.utils.Interface}
+ * @returns
+ */
+export const getEventFromReceipt = <T extends any>(receipt: any, topic: string, iface: any) => {
   if (ethers.version.includes("/5")) {
     if (!(receipt as any).events) throw new Error("Events object is undefined");
     const event = (receipt as any).events.find((evt: any) => evt.topics[0] === topic);
