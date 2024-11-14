@@ -54,11 +54,14 @@ task(TASK_DEPLOY_TOKEN)
         const deployerContract = (await ethers.getContractFactory("TDocDeployer")).attach(
           deployerContractAddress
         ) as unknown as TDocDeployer;
-        const initParam = encodeInitParams({
+        let initParam = encodeInitParams({
           name,
           symbol,
           deployer: deployerAddress,
         });
+        console.log(initParam);
+        console.log("here 0");
+
         const tx = await deployerContract.deploy(implAddress, initParam);
         console.log(`[Transaction] Pending ${tx.hash}`);
         const receipt = await tx.wait();

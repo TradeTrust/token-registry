@@ -78,6 +78,14 @@ const config: HardhatUserConfig = {
        * Polygon
        */
       polygon: POLYGONSCAN_API_KEY!,
+      /**
+       * polygon amoy
+       */
+      polygonAmoy: POLYGONSCAN_API_KEY!,
+      /**
+       * stability testnet
+       */
+      stabilitytestnet: STABILITY_API_KEY!,
     },
   },
   networks: {
@@ -128,7 +136,8 @@ const config: HardhatUserConfig = {
     },
     amoy: {
       ...networkConfig,
-      url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
+      url: "https://rpc-amoy.polygon.technology",
+      // url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
     },
     /**
      * Development
