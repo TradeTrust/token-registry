@@ -9,8 +9,8 @@ interface Params {
 
 if (ethers.version.includes("/5")) {
   (ethers as any).keccak256 = (ethers as any).utils.keccak256;
-  (ethers as any).solidityPackedKeccak256 = (ethers as any).utils.solidityPackedKeccak256;
-  (ethers as any).solidityPacked = (ethers as any).utils.solidityPacked;
+  (ethers as any).solidityPackedKeccak256 = (ethers as any).utils.solidityKeccak256;
+  (ethers as any).solidityPacked = (ethers as any).utils.solidityPack;
   (ethers as any).getCreate2Address = (ethers as any).utils.getCreate2Address;
 }
 
