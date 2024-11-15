@@ -8,8 +8,8 @@ export interface Params {
 
 if (ethers.version.includes("/5")) {
   (ethers as any).AbiCoder = {
-    defaultAbiCoder: () => (ethers as any).utils.defaultAbiCoder
-  }
+    defaultAbiCoder: () => (ethers as any).utils.defaultAbiCoder,
+  };
 }
 
 export const encodeInitParams = ({ name, symbol, deployer }: Params) => {
