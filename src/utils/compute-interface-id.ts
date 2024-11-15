@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 
-const { id } = ethers;
+if (ethers.version.includes("/5")) {
+  (ethers as any).id = (ethers as any).utils.id;
+}
 
 export const computeInterfaceId = (functionSignatures: string[] = []) => {
   const INTERFACE_ID_LENGTH = 4;
