@@ -40,7 +40,7 @@ if (IS_CI_ENV) {
 
 const config: HardhatUserConfig = {
   solidity: {
-    compilers: [{ version: "0.8.27" }],
+    compilers: [{ version: "0.8.22" }],
 
     settings: {
       optimizer: {
