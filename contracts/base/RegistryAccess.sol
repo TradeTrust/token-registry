@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.27;
+pragma solidity ^0.8.20;
 
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { RegistryAccessErrors } from "../interfaces/RegistryAccessErrors.sol";

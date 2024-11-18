@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.27;
+pragma solidity ^0.8.20;
 
 interface ITitleEscrowFactory {
   event TitleEscrowCreated(address indexed titleEscrow, address indexed tokenRegistry, uint256 indexed tokenId);
