@@ -9,6 +9,7 @@ const ChainId = {
   HederaTestnet: 296,
   Stability: 101010,
   StabilityTestnet: 20180427,
+  Astron: 1338,
 };
 
 export const contractAddress = {
@@ -23,6 +24,7 @@ export const contractAddress = {
     [ChainId.HederaMainnet]: "0x335ae7ef2a70952d3f7cd4b76f5597067f61157e",
     [ChainId.Stability]: "0x5B5F8d94782be18E22420f3276D5ef5a1bc65C53",
     [ChainId.StabilityTestnet]: "0xd334a95bbA0b666981fD067A5Edd505aFB6cFa1d",
+    [ChainId.Astron]: "",
   },
   Deployer: {
     [ChainId.Ethereum]: "0x92470d0Fc33Cbf2f04B39696733806a15eD7eef3",
@@ -33,6 +35,7 @@ export const contractAddress = {
     [ChainId.XDC]: "0xF69B8542a1015c8af590c3aF833A225094aAB57C",
     [ChainId.XDCApothem]: "0xc435E2B62F10301e3F2905219ee124011A8774C6",
     [ChainId.PolygonAmoy]: "0x274eF26b068C0E100cD3A9bf39998CAe336c8e1f",
+    [ChainId.Astron]: "",
   },
   TokenImplementation: {
     [ChainId.Ethereum]: "0xd3F09dD800525Ecf7e452C3c167C7c716632d016",
@@ -43,5 +46,6 @@ export const contractAddress = {
     [ChainId.Stability]: "0xc9A4F6b4f7afAeC816f2CFB715bB92384Fa46BCa",
     [ChainId.XDC]: "0xAfc53249DC017030f73Cc57b18bD460d9d1f27aa",
     [ChainId.XDCApothem]: "0x79ED245fFecdAF8C87BFE35ccF6A7b9FE9024240",
+    [ChainId.Astron]: "",
   },
 };

@@ -16,6 +16,7 @@ const {
   ETHERSCAN_API_KEY,
   POLYGONSCAN_API_KEY,
   STABILITY_API_KEY,
+  ASTRONSCAN_API_KEY,
 } = process.env;
 const IS_CI_ENV = process.env.NODE_ENV === "ci";
 
@@ -78,7 +79,22 @@ const config: HardhatUserConfig = {
        * Polygon
        */
       polygon: POLYGONSCAN_API_KEY!,
+      /**
+       * Astron
+       */
+      astron: ASTRONSCAN_API_KEY!,
     },
+    customChains: [{
+      /**
+       * Astron
+       */
+      network: "astron",
+      chainId: 1338,
+      urls: {
+        apiURL: "https://astronscanl2.bitfactory.cn/api",
+        browserURL: "https://astronscanl2.bitfactory.cn",
+      },
+    }],
   },
   networks: {
     /**
@@ -100,6 +116,9 @@ const config: HardhatUserConfig = {
       ...networkConfig,
       url: "https://erpc.apothem.network",
     },
+    /**
+     * Hedera
+     */
     hederamainnet: {
       ...networkConfig,
       url: "https://mainnet.hashio.io/api",
@@ -129,6 +148,13 @@ const config: HardhatUserConfig = {
     amoy: {
       ...networkConfig,
       url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
+    },
+    /**
+     * Astron
+     */
+    astron: {
+      ...networkConfig,
+      url: "https://astronlayer2.bitfactory.cn/rpc/",
     },
     /**
      * Development
