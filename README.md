@@ -139,7 +139,7 @@ function nominate(address nominee, bytes calldata remark) external;
 > The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder.
 > To transfer both beneficiary and holder in a single transaction, use `transferOwners`.
 >
-> In an event when the **`holder`** is different with **`beneficiary`**, the Transfer of beneficiary will require a nomination done through the `nominate` method.
+> In the event where the **`holder`** is different from the **`beneficiary`**, the transfer of beneficiary will require a nomination done through the `nominate` method.
 
 ### Reject Transfers of Beneficiary/Holder
 
@@ -154,10 +154,9 @@ function rejectTransferOwners(bytes calldata _remark) external;
 ```
 
 > [!IMPORTANT]
-> The rejection must happen on the first action, upon the appointment as **`beneficiary`** and **`holder`**. Any transaction will constitute as an implicit acceptance of appointment.
+> Rejection must occur as the very next action after being appointed as **`beneficiary`** and/or **`holder`**. If any transactions occur after that, it will be considered as accepting the appointment.
 >
-> The `rejectTransferBeneficiary` rejects only the beneficiary and `rejectTransferHolder` rejects only the holder.
-> If you are both **`beneficiary`** and **`holder`**, use `rejectTransferOwners`, as the other two instructions will fail in this case.
+> There are separate methods to reject a **`beneficiary`** (`rejectTransferBeneficiary`) and a **`holder`** (`rejectTransferHolder`). However, if you are both, you must use `rejectTransferOwners`, as the other two methods will not work in this case.
 
 ### Return ETR Document to Issuer
 
@@ -261,6 +260,7 @@ Hardhat tasks to simplify the deployment process.
 
 Starting from v4, we have included an easy and cost-effective way to deploy the contracts while also keeping options available for advanced users to setup the contracts their preferred way.
 
+> [!TIP]
 > 💡 Please ensure that you have setup your configuration file before deployment.
 >
 > See [Configuration](#configuration) section for more details. The deployer (configured in your `.env` file) will be made the default admin.
@@ -275,7 +275,8 @@ npx hardhat deploy:token --network stability --name "The Great Shipping Co." --s
 
 👆 This is the easiest and most cost-effective method to deploy. The deployed contract will inherit all the standard functionality from our on-chain contracts. This helps to save deployment costs and make the process more convenient for users and integrators.
 
-> 💡 Remember to supply the`--network` argument with the name of the network you wish to deploy on.
+> [!TIP]
+> 💡 Remember to supply the `--network` argument with the name of the network you wish to deploy on.
 >
 > See [Network Configuration](#network-configuration) section for more info on the list of network names.
 
@@ -305,7 +306,8 @@ OPTIONS:
 deploy:token: Deploys the TradeTrust token
 ```
 
-> 💡 Tip: Note that the `--factory` argument is optional. When not provided, the task will use the default Title Escrow Factory.
+> [!TIP]
+> 💡 Note that the `--factory` argument is optional. When not provided, the task will use the default Title Escrow Factory.
 > You can also reuse a Title Escrow factory that you have previously deployed by passing its address to the `--factory` argument.
 
 #### Using an existing Title Escrow Factory
@@ -371,6 +373,7 @@ Here's a list of network names currently pre-configured:
 - `stabilitytestnet` (Stability TestNet)
 - `stability` (Stability Global Trust Network)
 
+> [!TIP]
 > 💡 You can configure existing and add other networks you wish to deploy to in the `hardhat.config.ts` file.
 
 # Configuration
