@@ -422,7 +422,7 @@ npx hardhat deploy:token:impl
 
 # Subgraph
 
-Check out our [Token Registry Subgraph](https://github.com/Open-Attestation/token-registry-subgraph) Github repository
+Check out our [Token Registry Subgraph](https://github.com/tradetrust/token-registry-subgraph) Github repository
 for more information on using and deploying your own subgraphs for the Token Registry contracts.
 
 # Notes
