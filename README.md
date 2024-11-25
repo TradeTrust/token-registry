@@ -314,7 +314,7 @@ deploy:token: Deploys the TradeTrust token
 
 - To use an existing version of Title Escrow factory, you can supply its address to the `—-factory` argument.
 
-- To use your own veresion of Title Escrow factory, you need to supply its address to the `--factory` with the `--standalone` flag.
+- To use your own version of Title Escrow factory, you need to supply its address to the `--factory` with the `--standalone` flag.
 
 ```
 npx hardhat deploy:token --network polygon --name "The Great Shipping Co." --symbol GSC --factory 0xfac70
@@ -368,8 +368,6 @@ Here's a list of network names currently pre-configured:
 - `amoy` (Polygon Amoy)
 - `xdc` (XDC Network Mainnet)
 - `xdcapothem` (XDC Apothem TestNet)
-- `hederamainet` (Hedera Network Mainnet)
-- `hederatestnet` (Hedera Network TestNet)
 - `stabilitytestnet` (Stability TestNet)
 - `stability` (Stability Global Trust Network)
 
