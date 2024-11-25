@@ -84,17 +84,19 @@ const config: HardhatUserConfig = {
        */
       astron: ASTRONSCAN_API_KEY!,
     },
-    customChains: [{
-      /**
-       * Astron
-       */
-      network: "astron",
-      chainId: 1338,
-      urls: {
-        apiURL: "https://astronscanl2.bitfactory.cn/api",
-        browserURL: "https://astronscanl2.bitfactory.cn",
-      },
-    }],
+    customChains: [
+      {
+        /**
+         * Astron
+         */
+        network: "astron",
+        chainId: 1338,
+        urls: {
+          apiURL: "https://astronscanl2.bitfactory.cn/api",
+          browserURL: "https://astronscanl2.bitfactory.cn",
+        },
+      }
+    ],
   },
   networks: {
     /**
