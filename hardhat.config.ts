@@ -95,7 +95,7 @@ const config: HardhatUserConfig = {
           apiURL: "https://astronscanl2.bitfactory.cn/api",
           browserURL: "https://astronscanl2.bitfactory.cn",
         },
-      }
+      },
     ],
   },
   networks: {
