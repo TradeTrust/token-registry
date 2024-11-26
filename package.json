@@ -1,6 +1,13 @@
 {
   "name": "@tradetrust-tt/token-registry",
-  "version": "1.0.0",
+  "version": "4.0.0",
+  "release": {
+    "branches": [
+      "master",
+      "v4"
+    ],
+    "tagFormat": "v${version}"
+  },
   "files": [
     "dist",
     "contracts"
