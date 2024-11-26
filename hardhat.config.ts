@@ -89,7 +89,7 @@ const config: HardhatUserConfig = {
        * stability testnet
        */
       stabilitytestnet: STABILITY_API_KEY!,
-      /** 
+      /**
        * Astron
        */
       astron: ASTRONSCAN_API_KEY!,
