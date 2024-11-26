@@ -13,12 +13,21 @@ const ChainId = {
 
 export const contractAddress = {
   TitleEscrowFactory: {
+<<<<<<< HEAD
     [ChainId.Ethereum]: "0x65FC1DbE2EC6BD37Ab01C3Ac3cf235e6Fe793745",
     [ChainId.Sepolia]: "0xfcafea839e576967b96ad1FBFB52b5CA26cd1D25",
     [ChainId.Polygon]: "0xF94f95014304dC45B097439765A4D321bbE165c7",
     [ChainId.PolygonAmoy]: "0x8bbCc8F707DE9ca637f83182215E3BfC53f3e9e1",
     [ChainId.XDC]: "0x9310396503A188E91dfc98fFE90459c25765E639",
     [ChainId.XDCApothem]: "0xca70f36aeeda435c1048fd372bf286a41ac538be",
+=======
+    [ChainId.Ethereum]: "0xA38CC56c9291B9C1f52F862dd92326d352e710b8",
+    [ChainId.Sepolia]: "0xB9d7a127dC96aA1382B6B286E30E7BaDa798CB25",
+    [ChainId.Polygon]: "0x5B5F8d94782be18E22420f3276D5ef5a1bc65C53",
+    [ChainId.PolygonAmoy]: "0xe54Da2e30B8c83316994bca7A7Aaa8AD762a2866",
+    [ChainId.XDC]: "0x50BfCc1b699fD2308B978B7a6A26e3C3Bbad16DC",
+    [ChainId.XDCApothem]: "0xce28778bE6cF32ef3Ccbc09910258DF592F3b6F1",
+>>>>>>> d1d3e96 (fix: contract address (#26))
     [ChainId.HederaTestnet]: "0x5B5F8d94782be18E22420f3276D5ef5a1bc65C53",
     [ChainId.HederaMainnet]: "0x335ae7ef2a70952d3f7cd4b76f5597067f61157e",
     [ChainId.Stability]: "0x96cc41e7007Dee20eB409586E2e8206d5053219B",
