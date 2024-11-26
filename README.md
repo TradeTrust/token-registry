@@ -8,13 +8,13 @@
 </p>
 
 <p align="center"> 
-  <a href="https://circleci.com/gh/Open-Attestation/token-registry/tree/master" alt="Circle CI"><img src="https://img.shields.io/circleci/build/github/Open-Attestation/token-registry/master" /></a>
+  <a href="https://github.com/tradetrust/token-registry/tree/master" alt="Release"><img src="https://github.com/tradetrust/token-registry/actions/workflows/release.yml/badge.svg?event=push" /></a>
   <a href="https://codecov.io/gh/Open-Attestation/token-registry" alt="Code Coverage"><img src="https://codecov.io/gh/Open-Attestation/token-registry/branch/master/graph/badge.svg?token=Y4R9SWXATG" /></a>
   <a href="https://www.npmjs.com/package/@tradetrust-tt/token-registry" alt="NPM"><img src="https://img.shields.io/npm/dw/@tradetrust-tt/token-registry" /></a>
   <img src="https://img.shields.io/github/license/open-attestation/token-registry" />
 </p>
 
-The Electronic Bill of Lading (eBL) is a digital document that can be used to prove the ownership of goods. It is a standardised document that is accepted by all major shipping lines and customs authorities. The [Token Registry](https://github.com/Open-Attestation/token-registry) repository contains both the smart contract
+The Electronic Bill of Lading (eBL) is a digital document that can be used to prove the ownership of goods. It is a standardised document that is accepted by all major shipping lines and customs authorities. The [Token Registry](https://github.com/TradeTrust/token-registry) repository contains both the smart contract
 code for token registry (in `/contracts`) as well as the node package for using this library (in `/src`).
 
 ## Table of Contents
@@ -22,15 +22,25 @@ code for token registry (in `/contracts`) as well as the node package for using 
 - [Installation](#installation)
 - [Usage](#usage)
   - [TradeTrustToken](#tradetrusttoken)
+    - [Connect to existing token registry](#connect-to-existing-token-registry)
+    - [Issuing a Document](#issuing-a-document)
+    - [Restoring a Document](#restoring-a-document)
+    - [Accept/Burn a Document](#acceptburn-a-document)
   - [Title Escrow](#title-escrow)
-  - [Title Escrow Signable (Experimental)](#title-escrow-signable-experimental)
-  - [Provider & Signer](#provider--signer)
+    - [Connect to Title Escrow](#connect-to-title-escrow)
+    - [Transfer of Beneficiary/Holder](#transfer-of-beneficiaryholder)
+    - [Reject Transfers of Beneficiary/Holder](#reject-transfers-of-beneficiaryholder)
+    - [Return ETR Document to Issuer](#return-etr-document-to-issuer)
+    - [Accessing the Current Owners](#accessing-the-current-owners)
+  - [Provider \& Signer](#provider--signer)
   - [Roles and Access](#roles-and-access)
+    - [Grant a role to a user](#grant-a-role-to-a-user)
+    - [Revoke a role from a user](#revoke-a-role-from-a-user)
+    - [Setting a role admin (Advanced Usage)](#setting-a-role-admin-advanced-usage)
 - [Deployment](#deployment)
   - [Quick Start](#quick-start)
   - [Advanced Usage](#advanced-usage)
     - [Token Contract](#token-contract)
-      - [Stand-alone Contract](#stand-alone-contract)
       - [Using an existing Title Escrow Factory](#using-an-existing-title-escrow-factory)
     - [Title Escrow Factory](#title-escrow-factory)
       - [Deploy a new Title Escrow Factory](#deploy-a-new-title-escrow-factory)
@@ -42,7 +52,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
 - [Subgraph](#subgraph)
 - [Notes](#notes)
 
-## Installation
+# Installation
 
 ```sh
 npm install --save @tradetrust-tt/token-registry
@@ -50,20 +60,20 @@ npm install --save @tradetrust-tt/token-registry
 
 ---
 
-## Usage
+# Usage
 
 To use the package, you will need to provide your own
 Web3 [provider](https://docs.ethers.io/v5/api/providers/api-providers/)
 or [signer](https://docs.ethers.io/v5/api/signer/#Wallet) (if you are writing to the blockchain).
-This package exposes the [Typechain (Ethers)](https://github.com/dethcrypto/TypeChain/tree/master/packages/target-ethers-v5) bindings for the contracts.
+This package exposes the [Typechain (Ethers)](https://github.com/dethcrypto/TypeChain/tree/master/packages/target-ethers-v6) bindings for the contracts.
 
-### TradeTrustToken
+## TradeTrustToken
 
 The `TradeTrustToken` is a Soulbound Token (SBT) tied to the Title Escrow. The SBT implementation is loosely based on OpenZeppelin's implementation of the [ERC721](http://erc721.org/) standard.
 An SBT is used in this case because the token, while can be transferred to the registry, is largely restricted to its designated Title Escrow contracts.
 See issue [#108](https://github.com/Open-Attestation/token-registry/issues/108) for more details.
 
-#### Connect to existing token registry
+### Connect to existing token registry
 
 ```ts
 import { TradeTrustToken__factory } from "@tradetrust-tt/token-registry/contracts";
@@ -71,31 +81,39 @@ import { TradeTrustToken__factory } from "@tradetrust-tt/token-registry/contract
 const connectedRegistry = TradeTrustToken__factory.connect(tokenRegistryAddress, signer);
 ```
 
-#### Issuing a Document
+### Issuing a Document
 
 ```ts
-await connectedRegistry.mint(beneficiaryAddress, holderAddress, tokenId);
+await connectedRegistry.mint(beneficiaryAddress, holderAddress, tokenId, remarks);
 ```
 
-#### Restoring a Document
+### Restoring a Document
 
 ```ts
-await connectedRegistry.restore(tokenId);
+await connectedRegistry.restore(tokenId, remarks);
 ```
 
-#### Accept/Burn a Document
+### Accept/Burn a Document
 
 ```ts
-await connectedRegistry.burn(tokenId);
+await connectedRegistry.burn(tokenId, remarks);
 ```
 
-### Title Escrow
+## Title Escrow
 
-The Title Escrow contract is used to manage and represent the ownership of a token between a beneficiary and holder.
+The Title Escrow contract is used to manage and represent the ownership of a token between a **`beneficiary`** and **`holder`**.
 During minting, the Token Registry will create and assign a Title Escrow as the owner of that token.
 The actual owners will use the Title Escrow contract to perform their ownership operations.
 
-#### Connect to Title Escrow
+> [!IMPORTANT]
+> A new `remark` field has been **introduced** for all contract operations.
+> 
+> The `remark` field is optional and can be left empty by providing an empty string `"0x"`.
+> Please note that any value in the `remark` field is limited to **120** characters, and encryption is **recommended**.
+>
+> Please refer to the sample encryption implementation [here]().
+
+### Connect to Title Escrow
 
 ```ts
 import { TitleEscrow__factory } from "@tradetrust-tt/token-registry/contracts";
@@ -103,40 +121,52 @@ import { TitleEscrow__factory } from "@tradetrust-tt/token-registry/contracts";
 const connectedEscrow = TitleEscrow__factory.connect(existingTitleEscrowAddress, signer);
 ```
 
-#### Transfer of Beneficiary/Holder
+### Transfer of Beneficiary/Holder
 
-Transferring of beneficiary and holder within the Title Escrow relies on the following methods:
+Transferring of **`beneficiary`** and **`holder`** within the Title Escrow relies on the following methods:
 
 ```solidity
-function transferBeneficiary(address beneficiaryNominee) external;
+function transferBeneficiary(address nominee, bytes calldata remark) external;
 
-function transferHolder(address newHolder) external;
+function transferHolder(address newHolder, bytes calldata remark) external;
 
-function transferOwners(address beneficiaryNominee, address newHolder) external;
+function transferOwners(address nominee, address newHolder, bytes calldata remark) external;
 
-function nominate(address beneficiaryNominee) external;
-
+function nominate(address nominee, bytes calldata remark) external;
 ```
 
-The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder.
-To transfer both beneficiary and holder in a single transaction, use `transferOwners`. Transfer of beneficiary will require a nomination done through the `nominate` method.
+> [!NOTE]
+> The `transferBeneficiary` transfers only the beneficiary and `transferHolder` transfers only the holder.
+> To transfer both beneficiary and holder in a single transaction, use `transferOwners`.
+>
+> In the event where the **`holder`** is different from the **`beneficiary`**, the transfer of beneficiary will require a nomination done through the `nominate` method.
 
-#### returnToIssuer/Burning a Document
+### Reject Transfers of Beneficiary/Holder
+
+Rejection of transfers for any wrongful transactions.
+
+```solidity
+function rejectTransferBeneficiary(bytes calldata _remark) external;
+
+function rejectTransferHolder(bytes calldata _remark) external;
+
+function rejectTransferOwners(bytes calldata _remark) external;
+```
+
+> [!IMPORTANT]
+> Rejection must occur as the very next action after being appointed as **`beneficiary`** and/or **`holder`**. If any transactions occur by the new appointee, it will be considered as an implicit acceptance of appointment.
+>
+> There are separate methods to reject a **`beneficiary`** (`rejectTransferBeneficiary`) and a **`holder`** (`rejectTransferHolder`). However, if you are both, you must use `rejectTransferOwners`, as the other two methods will not work in this case.
+
+### Return ETR Document to Issuer
 
 Use the `returnToIssuer` method in the Title Escrow.
 
 ```solidity
-function returnToIssuer() external;
-
+function returnToIssuer(bytes calldata remark) external;
 ```
 
-Example:
-
-```ts
-await connectedEscrow.returnToIssuer();
-```
-
-#### Accessing the Current Owners
+### Accessing the Current Owners
 
 The addresses of the current owners can be retrieved from the `beneficiary`, `holder` and `nominee` methods.
 
@@ -150,37 +180,7 @@ const currentHolder = await connectedEscrow.holder();
 const nominatedBeneficiary = await connectedEscrow.nominee();
 ```
 
-### Title Escrow Signable (Experimental)
-
-This is similar to the [Title Escrow](#title-escrow) with the additional support for off-chain nomination and endorsement of beneficiary nominees. The on-chain nominee will take precedence.
-The current beneficiary will initiate the transfer transaction with the endorsement.
-
-This feature could help to save on gas fees for cases where there are frequent nominations and endorsements between the owners.
-
-Currently, this is not the default Title Escrow. To use this version of the Title Escrow, you will need to make some changes to the `TitleEscrowFactory.sol` file before deployment by following these steps:
-
-```solidity
-// Step 1. Import the TitleEscrowSignable contract
-import "./TitleEscrowSignable.sol";
-
-contract TitleEscrowFactory is ITitleEscrowFactory {
-  // ...
-
-  constructor() {
-    // Step 2. Look for this line in the constructor
-    implementation = address(new TitleEscrow());
-    // Step 3. Replace the line in Step #2 with the following line:
-    implementation = address(new TitleEscrowSignable());
-  }
-
-  // ...
-}
-
-```
-
-Note that this is currently an experimental feature. Implementers will need to setup a "book-keeping" backend for the signed data.
-
-### Provider & Signer
+## Provider & Signer
 
 Different ways to get provider or signer:
 
@@ -195,11 +195,12 @@ const metamaskProvider = new providers.Web3Provider(web3.currentProvider); // Wi
 const signerFromPrivateKey = new Wallet("YOUR-PRIVATE-KEY-HERE", provider);
 const signerFromEncryptedJson = Wallet.fromEncryptedJson(json, password);
 signerFromEncryptedJson.connect(provider);
+
 const signerFromMnemonic = Wallet.fromMnemonic("MNEMONIC-HERE");
 signerFromMnemonic.connect(provider);
 ```
 
-### Roles and Access
+## Roles and Access
 
 Roles are useful for granting users to access certain functions only. Currently, here are the designated roles meant for the different key operations.
 
@@ -213,27 +214,29 @@ Roles are useful for granting users to access certain functions only. Currently,
 A trusted user can be granted multiple roles by the admin user to perform different operations.
 The following functions can be called on the token contract by the admin user to grant and revoke roles to and from users.
 
-#### Grant a role to a user
+### Grant a role to a user
 
 ```ts
 import { constants } from "@tradetrust-tt/token-registry";
 
-await tokenRegistry.grantRole(constants.roleHash.MinterRole, "0xbabe");
+await connectedRegistry.grantRole(constants.roleHash.MinterRole, accountAddress);
 ```
 
-Can only be called by default admin or role admin.
+> [!IMPORTANT]
+> Can only be called by **default admin** or **role admin**.
 
-#### Revoke a role from a user
+### Revoke a role from a user
 
 ```ts
 import { constants } from "@tradetrust-tt/token-registry";
 
-await tokenRegistry.revokeRole(constants.roleHash.AccepterRole, "0xbabe");
+await connectedRegistry.revokeRole(constants.roleHash.AccepterRole, accountAddress);
 ```
 
-Can only be called by default admin or role admin.
+> [!IMPORTANT]
+> Can only be called by **default admin** or **role admin**.
 
-#### Setting a role admin
+### Setting a role admin (Advanced Usage)
 
 The standard setup does not add the role-admin roles so that users don't deploy (and, hence, pay the gas for) more than what they need.
 If you need a more complex setup, you can add the admin roles to the designated roles.
@@ -242,12 +245,13 @@ If you need a more complex setup, you can add the admin roles to the designated 
 import { constants } from "@tradetrust-tt/token-registry";
 const { roleHash } = constants;
 
-await tokenRegistry.setRoleAdmin(roleHash.MinterRole, roleHash.MinterAdminRole);
-await tokenRegistry.setRoleAdmin(roleHash.RestorerRole, roleHash.RestorerAdminRole);
-await tokenRegistry.setRoleAdmin(roleHash.AccepterRole, roleHash.AccepterAdminRole);
+await connectedRegistry.setRoleAdmin(roleHash.MinterRole, roleHash.MinterAdminRole);
+await connectedRegistry.setRoleAdmin(roleHash.RestorerRole, roleHash.RestorerAdminRole);
+await connectedRegistry.setRoleAdmin(roleHash.AccepterRole, roleHash.AccepterAdminRole);
 ```
 
-Can only be called by default admin.
+> [!IMPORTANT]
+> Can only be called by **default admin**.
 
 # Deployment
 
@@ -256,7 +260,9 @@ Hardhat tasks to simplify the deployment process.
 
 Starting from v4, we have included an easy and cost-effective way to deploy the contracts while also keeping options available for advanced users to setup the contracts their preferred way.
 
+> [!TIP]
 > 💡 Please ensure that you have setup your configuration file before deployment.
+>
 > See [Configuration](#configuration) section for more details. The deployer (configured in your `.env` file) will be made the default admin.
 
 ## Quick Start
@@ -267,9 +273,11 @@ For users who want to quickly deploy their contracts without too much hassle, yo
 npx hardhat deploy:token --network stability --name "The Great Shipping Co." --symbol GSC
 ```
 
-👆 This is the easiest and most cost-effective method to deploy. Currently, this is supported on Ethereum, Sepolia, Polygon, Stability and Stability Testnet. The deployed contract will inherit all the standard functionality from our on-chain contracts. This helps to save deployment costs and make the process more convenient for users and integrators.
+👆 This is the easiest and most cost-effective method to deploy. The deployed contract will inherit all the standard functionality from our on-chain contracts. This helps to save deployment costs and make the process more convenient for users and integrators.
 
-> 💡 Remember to supply the`--network` argument with the name of the network you wish to deploy on.
+> [!TIP]
+> 💡 Remember to supply the `--network` argument with the name of the network you wish to deploy on.
+>
 > See [Network Configuration](#network-configuration) section for more info on the list of network names.
 
 ## Advanced Usage
@@ -283,6 +291,8 @@ You should already know what you are doing when using any of these options.
 Deploys the token contract.
 
 ```
+user@NMacBook-Pro token-registry % npx hardhat deploy:token --help
+
 Usage: hardhat [GLOBAL OPTIONS] deploy:token --factory <STRING> --name <STRING> [--standalone] --symbol <STRING> [--verify]
 
 OPTIONS:
@@ -296,12 +306,15 @@ OPTIONS:
 deploy:token: Deploys the TradeTrust token
 ```
 
-> 💡 Tip: Note that the `--factory` argument is optional. When not provided, the task will use the default Title Escrow Factory.
+> [!TIP]
+> 💡 Note that the `--factory` argument is optional. When not provided, the task will use the default Title Escrow Factory.
 > You can also reuse a Title Escrow factory that you have previously deployed by passing its address to the `--factory` argument.
 
 #### Using an existing Title Escrow Factory
 
-To use an existing or your own version of Title Escrow factory, you can supply its address to the `—factory` argument. This option only works with the `--standalone` flag.
+- To use an existing version of Title Escrow factory, you can supply its address to the `—-factory` argument.
+
+- To use your own version of Title Escrow factory, you need to supply its address to the `--factory` with the `--standalone` flag.
 
 ```
 npx hardhat deploy:token --network polygon --name "The Great Shipping Co." --symbol GSC --factory 0xfac70
@@ -315,6 +328,8 @@ network using an existing Title Escrow factory at `0xfac70`.
 Deploys the Title Escrow factory.
 
 ```
+user@NMacBook-Pro token-registry % npx hardhat deploy:token --help
+
 Usage: hardhat [GLOBAL OPTIONS] deploy:factory [--verify]
 
 OPTIONS:
@@ -353,14 +368,13 @@ Here's a list of network names currently pre-configured:
 - `amoy` (Polygon Amoy)
 - `xdc` (XDC Network Mainnet)
 - `xdcapothem` (XDC Apothem TestNet)
-- `hederamainet` (Hedera Network Mainnet)
-- `hederatestnet` (Hedera Network TestNet)
 - `stabilitytestnet` (Stability TestNet)
 - `stability` (Stability Global Trust Network)
 
+> [!TIP]
 > 💡 You can configure existing and add other networks you wish to deploy to in the `hardhat.config.ts` file.
 
-## Configuration
+# Configuration
 
 Create a `.env` file and add your own keys into it. You can rename from the sample file `.env.sample` or copy the
 following into a new file:
@@ -390,7 +404,7 @@ This repository's development framework uses [HardHat](https://hardhat.org/getti
 
 Tests are run using `npm run test`, more development tasks can be found in the package.json scripts.
 
-### Scripts
+## Scripts
 
 ```sh
 npm install
@@ -404,11 +418,11 @@ npx hardhat deploy:factory
 npx hardhat deploy:token:impl
 ```
 
-## Subgraph
+# Subgraph
 
-Check out our [Token Registry Subgraph](https://github.com/Open-Attestation/token-registry-subgraph) Github repository
+Check out our [Token Registry Subgraph](https://github.com/tradetrust/token-registry-subgraph) Github repository
 for more information on using and deploying your own subgraphs for the Token Registry contracts.
 
-## Notes
+# Notes
 
 - The contracts have not gone through formal audits yet. Please use them at your own discretion.
