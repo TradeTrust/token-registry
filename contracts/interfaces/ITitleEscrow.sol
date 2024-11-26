@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /**
  * @title ITitleEscrow
@@ -14,48 +14,107 @@ interface ITitleEscrow is IERC721Receiver {
     address indexed holder,
     bool indexed isMinting,
     address registry,
-    uint256 tokenId
+    uint256 tokenId,
+    bytes remark
   );
-  event Nomination(address indexed prevNominee, address indexed nominee, address registry, uint256 tokenId);
+  event Nomination(
+    address indexed prevNominee,
+    address indexed nominee,
+    address registry,
+    uint256 tokenId,
+    bytes remark
+  );
   event BeneficiaryTransfer(
     address indexed fromBeneficiary,
     address indexed toBeneficiary,
     address registry,
-    uint256 tokenId
+    uint256 tokenId,
+    bytes remark
   );
-  event HolderTransfer(address indexed fromHolder, address indexed toHolder, address registry, uint256 tokenId);
-  event Surrender(address indexed surrenderer, address registry, uint256 tokenId);
-  event Shred(address registry, uint256 tokenId);
+  event HolderTransfer(
+    address indexed fromHolder,
+    address indexed toHolder,
+    address registry,
+    uint256 tokenId,
+    bytes remark
+  );
+  event ReturnToIssuer(address indexed caller, address registry, uint256 tokenId, bytes remark);
+  event Shred(address registry, uint256 tokenId, bytes remark);
+  event RejectTransferOwners(
+    address indexed fromBeneficiary,
+    address indexed toBeneficiary,
+    address indexed fromHolder,
+    address toHolder,
+    address registry,
+    uint256 tokenId,
+    bytes remark
+  );
+  event RejectTransferBeneficiary(
+    address indexed fromBeneficiary,
+    address indexed toBeneficiary,
+    address registry,
+    uint256 tokenId,
+    bytes remark
+  );
+  event RejectTransferHolder(
+    address indexed fromHolder,
+    address indexed toHolder,
+    address registry,
+    uint256 tokenId,
+    bytes remark
+  );
 
   /**
    * @notice Allows the beneficiary to nominate a new beneficiary
    * @dev The nominated beneficiary will need to be transferred by the holder to become the actual beneficiary
    * @param nominee The address of the nominee
    */
-  function nominate(address nominee) external;
+  function nominate(address nominee, bytes calldata remark) external;
 
   /**
    * @notice Allows the holder to transfer the beneficiary role to the nominated beneficiary or to themselves
    * @param nominee The address of the new beneficiary
    */
-  function transferBeneficiary(address nominee) external;
+  function transferBeneficiary(address nominee, bytes calldata remark) external;
 
   /**
    * @notice Allows the holder to transfer their role to another address
    * @param newHolder The address of the new holder
    */
-  function transferHolder(address newHolder) external;
+  function transferHolder(address newHolder, bytes calldata remark) external;
 
   /**
    * @notice Allows for the simultaneous transfer of both beneficiary and holder roles
    * @param nominee The address of the new beneficiary
    * @param newHolder The address of the new holder
    */
-  function transferOwners(address nominee, address newHolder) external;
+  function transferOwners(address nominee, address newHolder, bytes calldata remark) external;
+
+  /**
+   * @notice Allows the new beneficiary to reject the nomination
+   * @param _remark The remark for the rejection
+   */
+  function rejectTransferBeneficiary(bytes calldata _remark) external;
+
+  /**
+   * @notice Allows the new holder to reject the transfer of the holder role
+   * @param _remark The remark for the rejection
+   */
+  function rejectTransferHolder(bytes calldata _remark) external;
+
+  /**
+   * @notice Allows the new beneficiary and holder to reject the transfer of both roles
+   * @param _remark The remark for the rejection
+   */
+  function rejectTransferOwners(bytes calldata _remark) external;
 
   function beneficiary() external view returns (address);
 
   function holder() external view returns (address);
+
+  function prevBeneficiary() external view returns (address);
+
+  function prevHolder() external view returns (address);
 
   function active() external view returns (bool);
 
@@ -72,12 +131,12 @@ interface ITitleEscrow is IERC721Receiver {
   function isHoldingToken() external returns (bool);
 
   /**
-   * @notice Allows the beneficiary and holder to surrender the token back to the registry
+   * @notice Allows the beneficiary and holder to returnToIssuer the token back to the registry
    */
-  function surrender() external;
+  function returnToIssuer(bytes calldata remark) external;
 
   /**
    * @notice Allows the registry to shred the TitleEscrow by marking it as inactive and reset the beneficiary and holder addresses
    */
-  function shred() external;
+  function shred(bytes calldata remark) external;
 }

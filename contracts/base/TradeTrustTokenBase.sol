@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "./RegistryAccess.sol";
-import "./TradeTrustTokenBurnable.sol";
-import "./TradeTrustTokenMintable.sol";
-import "./TradeTrustTokenRestorable.sol";
-import "../interfaces/ITradeTrustToken.sol";
-import "./TradeTrustTokenBaseURI.sol";
+import { RegistryAccess } from "./RegistryAccess.sol";
+import { TradeTrustTokenBurnable, TradeTrustSBT, SBTUpgradeable } from "./TradeTrustTokenBurnable.sol"; //check-circular-imports
+import { TradeTrustTokenMintable, TradeTrustSBT, SBTUpgradeable } from "./TradeTrustTokenMintable.sol";
+import { TradeTrustTokenRestorable, TradeTrustSBT, SBTUpgradeable } from "./TradeTrustTokenRestorable.sol";
+import { ITradeTrustToken, ITitleEscrowFactory } from "../interfaces/ITradeTrustToken.sol"; //check-circular-imports
+import { TradeTrustTokenBaseURI } from "./TradeTrustTokenBaseURI.sol";
 
 /**
  * @title TradeTrustTokenBase
@@ -60,16 +60,20 @@ abstract contract TradeTrustTokenBase is
    * @dev Pauses all token transfers.
    * @notice Requires the caller to be admin.
    */
-  function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function pause(bytes calldata _remark) external onlyRole(DEFAULT_ADMIN_ROLE) remarkLengthLimit(_remark) {
     _pause();
+    remark = _remark;
+    emit PauseWithRemark(msg.sender, _remark);
   }
 
   /**
    * @dev Unpauses all token transfers.
    * @notice Requires the caller to be admin.
    */
-  function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function unpause(bytes calldata _remark) external onlyRole(DEFAULT_ADMIN_ROLE) remarkLengthLimit(_remark) {
     _unpause();
+    remark = _remark;
+    emit UnpauseWithRemark(msg.sender, _remark);
   }
 
   /**
@@ -82,7 +86,7 @@ abstract contract TradeTrustTokenBase is
   ) internal virtual override(TradeTrustSBT, TradeTrustTokenBurnable) whenNotPaused {
     super._beforeTokenTransfer(from, to, tokenId);
 
-    address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
+    address titleEscrow = titleEscrowFactory().getEscrowAddress(address(this), tokenId);
     if (to != address(this) && to != titleEscrow && to != BURN_ADDRESS) {
       revert TransferFailure();
     }

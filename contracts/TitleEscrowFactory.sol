@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/proxy/Clones.sol";
-import "./TitleEscrow.sol";
-import "./interfaces/ITitleEscrowFactory.sol";
-import "./interfaces/TitleEscrowFactoryErrors.sol";
+import { Clones } from "@openzeppelin/contracts/proxy/Clones.sol";
+import { TitleEscrow } from "./TitleEscrow.sol";
+import { ITitleEscrowFactory } from "./interfaces/ITitleEscrowFactory.sol";
+import { TitleEscrowFactoryErrors } from "./interfaces/TitleEscrowFactoryErrors.sol";
 
 /**
  * @title TitleEscrowFactory
@@ -37,9 +37,9 @@ contract TitleEscrowFactory is ITitleEscrowFactory, TitleEscrowFactoryErrors {
   }
 
   /**
-   * @dev See {ITitleEscrowFactory-getAddress}.
+   * @dev See {ITitleEscrowFactory-getEscrowAddress}.
    */
-  function getAddress(address tokenRegistry, uint256 tokenId) external view override returns (address) {
+  function getEscrowAddress(address tokenRegistry, uint256 tokenId) external view override returns (address) {
     return Clones.predictDeterministicAddress(implementation, keccak256(abi.encodePacked(tokenRegistry, tokenId)));
   }
 }

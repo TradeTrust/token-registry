@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.5.0) (token/ERC721/ERC721.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-
-import "../interfaces/ISBTUpgradeable.sol";
-import "../interfaces/IERC721MetadataUpgradeable.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
+import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
+import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { ISBTUpgradeable, IERC165 } from "../interfaces/ISBTUpgradeable.sol";
+import { IERC721MetadataUpgradeable } from "../interfaces/IERC721MetadataUpgradeable.sol";
 
 /**
  * @dev A trimmed version of the https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token
@@ -24,14 +22,16 @@ contract SBTUpgradeable is
   ISBTUpgradeable,
   IERC721MetadataUpgradeable
 {
-  using AddressUpgradeable for address;
-  using StringsUpgradeable for uint256;
+  using Strings for uint256;
 
   // Token name
   string private _name;
 
   // Token symbol
   string private _symbol;
+
+  // Last Transaction Remark
+  bytes public remark;
 
   // Mapping from token ID to owner address
   mapping(uint256 => address) private _owners;
@@ -54,13 +54,9 @@ contract SBTUpgradeable is
   /**
    * @dev See {ERC165Upgradeable-supportsInterface}.
    */
-  function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    virtual
-    override(ERC165Upgradeable, IERC165Upgradeable)
-    returns (bool)
-  {
+  function supportsInterface(
+    bytes4 interfaceId
+  ) public view virtual override(ERC165Upgradeable, IERC165) returns (bool) {
     return
       interfaceId == type(ISBTUpgradeable).interfaceId ||
       interfaceId == type(IERC721MetadataUpgradeable).interfaceId ||
@@ -120,13 +116,9 @@ contract SBTUpgradeable is
   /**
    * @dev See {IERC721-safeTransferFrom}.
    */
-  function transferFrom(
-    address from,
-    address to,
-    uint256 tokenId
-  ) public virtual override {
+  function transferFrom(address from, address to, uint256 tokenId, bytes memory _remark) public virtual override {
     require(_isOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
-    _safeTransfer(from, to, tokenId, "");
+    _safeTransfer(from, to, tokenId, _remark);
   }
 
   /**
@@ -147,12 +139,7 @@ contract SBTUpgradeable is
    *
    * Emits a {Transfer} event.
    */
-  function _safeTransfer(
-    address from,
-    address to,
-    uint256 tokenId,
-    bytes memory _data
-  ) internal virtual {
+  function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual {
     _transfer(from, to, tokenId);
     require(_checkOnERC721Received(from, to, tokenId, _data), "ERC721: transfer to non ERC721Receiver implementer");
   }
@@ -200,11 +187,7 @@ contract SBTUpgradeable is
    * @dev Same as {xref-ERC721-_safeMint-address-uint256-}[`_safeMint`], with an additional `data` parameter which is
    * forwarded in {IERC721Receiver-onERC721Received} to contract recipients.
    */
-  function _safeMint(
-    address to,
-    uint256 tokenId,
-    bytes memory _data
-  ) internal virtual {
+  function _safeMint(address to, uint256 tokenId, bytes memory _data) internal virtual {
     _mint(to, tokenId);
     require(
       _checkOnERC721Received(address(0), to, tokenId, _data),
@@ -272,11 +255,7 @@ contract SBTUpgradeable is
    *
    * Emits a {Transfer} event.
    */
-  function _transfer(
-    address from,
-    address to,
-    uint256 tokenId
-  ) internal virtual {
+  function _transfer(address from, address to, uint256 tokenId) internal virtual {
     require(SBTUpgradeable.ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
     require(to != address(0), "ERC721: transfer to the zero address");
 
@@ -307,9 +286,9 @@ contract SBTUpgradeable is
     uint256 tokenId,
     bytes memory _data
   ) private returns (bool) {
-    if (to.isContract()) {
-      try IERC721ReceiverUpgradeable(to).onERC721Received(_msgSender(), from, tokenId, _data) returns (bytes4 retval) {
-        return retval == IERC721ReceiverUpgradeable.onERC721Received.selector;
+    if (to.code.length > 0) {
+      try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, _data) returns (bytes4 retval) {
+        return retval == IERC721Receiver.onERC721Received.selector;
       } catch (bytes memory reason) {
         if (reason.length == 0) {
           revert("ERC721: transfer to non ERC721Receiver implementer");
@@ -338,11 +317,7 @@ contract SBTUpgradeable is
    *
    * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
    */
-  function _beforeTokenTransfer(
-    address from,
-    address to,
-    uint256 tokenId
-  ) internal virtual {}
+  function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual {}
 
   /**
    * @dev Hook that is called after any transfer of tokens. This includes
@@ -355,11 +330,7 @@ contract SBTUpgradeable is
    *
    * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
    */
-  function _afterTokenTransfer(
-    address from,
-    address to,
-    uint256 tokenId
-  ) internal virtual {}
+  function _afterTokenTransfer(address from, address to, uint256 tokenId) internal virtual {}
 
   /**
    * @dev This empty reserved space is put in place to allow future versions to add new

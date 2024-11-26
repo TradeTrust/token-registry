@@ -1,6 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { TitleEscrow, TitleEscrowFactory, TradeTrustToken } from "@tradetrust/contracts";
-import { Signer } from "ethers";
+import { Signer } from "ethers"; // Import TransactionResponse type
 import faker from "faker";
 import { expect } from ".";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
@@ -11,6 +11,7 @@ import {
   getTitleEscrowContract,
   impersonateAccount,
   TestUsers,
+  txnHexRemarks,
 } from "./helpers";
 
 describe("TradeTrustToken", async () => {
@@ -106,12 +107,12 @@ describe("TradeTrustToken", async () => {
     });
 
     it("should deploy with genesis block", async () => {
-      const genesisBlock = registryContract.deployTransaction.blockNumber;
-      expect(await registryContract.genesis()).to.equal(genesisBlock);
+      const tx = registryContract.deploymentTransaction();
+      expect(await registryContract.genesis()).to.equal(tx?.blockNumber);
     });
 
     it("should deploy with title escrow factory address", async () => {
-      expect(await registryContract.titleEscrowFactory()).to.equal(mockTitleEscrowFactoryContract.address);
+      expect(await registryContract.titleEscrowFactory()).to.equal(mockTitleEscrowFactoryContract.target);
     });
   });
 
@@ -129,7 +130,12 @@ describe("TradeTrustToken", async () => {
     let titleEscrowContract: TitleEscrow;
 
     beforeEach(async () => {
-      await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+      await registryContractAsAdmin.mint(
+        users.beneficiary.address,
+        users.beneficiary.address,
+        tokenId,
+        txnHexRemarks.mintRemark
+      );
       titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
     });
 
@@ -137,18 +143,23 @@ describe("TradeTrustToken", async () => {
       let titleEscrowContractSigner: Signer;
 
       beforeEach(async () => {
-        titleEscrowContractSigner = await impersonateAccount({ address: titleEscrowContract.address });
+        titleEscrowContractSigner = await impersonateAccount({ address: titleEscrowContract.target as string });
       });
 
       it("should revert with TransferFailure when transfer to non-designated title escrow contract", async () => {
-        const nonDesignatedTitleEscrowAddress = await mockTitleEscrowFactoryContract.getAddress(
-          registryContract.address,
+        const nonDesignatedTitleEscrowAddress = await mockTitleEscrowFactoryContract.getEscrowAddress(
+          registryContract.target as string,
           faker.datatype.hexaDecimal(64)
         );
 
         const tx = registryContract
           .connect(titleEscrowContractSigner)
-          .transferFrom(titleEscrowContract.address, nonDesignatedTitleEscrowAddress, tokenId);
+          .transferFrom(
+            titleEscrowContract.target as string,
+            nonDesignatedTitleEscrowAddress,
+            tokenId,
+            txnHexRemarks.restorerRemark
+          );
 
         await expect(tx).to.be.revertedWithCustomError(registryContract, "TransferFailure");
       });
@@ -156,7 +167,12 @@ describe("TradeTrustToken", async () => {
       it("should revert with TransferFailure when transfer to an EOA", async () => {
         const tx = registryContract
           .connect(titleEscrowContractSigner)
-          .transferFrom(titleEscrowContract.address, users.beneficiary.address, tokenId);
+          .transferFrom(
+            titleEscrowContract.target as string,
+            users.beneficiary.address,
+            tokenId,
+            txnHexRemarks.restorerRemark
+          );
 
         await expect(tx).to.be.revertedWithCustomError(registryContract, "TransferFailure");
       });
@@ -164,42 +180,52 @@ describe("TradeTrustToken", async () => {
       it("should transfer successfully to registry token contract", async () => {
         await registryContract
           .connect(titleEscrowContractSigner)
-          .transferFrom(titleEscrowContract.address, registryContract.address, tokenId);
+          .transferFrom(
+            titleEscrowContract.target as string,
+            registryContract.target as string,
+            tokenId,
+            txnHexRemarks.restorerRemark
+          );
 
         const owner = await registryContract.ownerOf(tokenId);
 
-        expect(owner).to.equal(registryContract.address);
+        expect(owner).to.equal(registryContract.target as string);
       });
 
       it("should transfer successfully to designated title escrow contract", async () => {
         const tx = registryContract
           .connect(titleEscrowContractSigner)
-          .transferFrom(titleEscrowContract.address, titleEscrowContract.address, tokenId);
+          .transferFrom(
+            titleEscrowContract.target as string,
+            titleEscrowContract.target as string,
+            tokenId,
+            txnHexRemarks.restorerRemark
+          );
 
         await expect(tx).to.not.be.reverted;
       });
     });
 
-    describe("Surrender Status", () => {
-      // These are just extra cases to test how the surrender status will be checked in an app
-      it("should not have registry and burn address as owner for an unsurrendered token", async () => {
+    describe("ReturnToIssuer Status", () => {
+      // These are just extra cases to test how the returnToIssuer status will be checked in an app
+      it("should not have registry and burn address as owner for a token not returned to issuer", async () => {
         const owner = await registryContract.ownerOf(tokenId);
 
-        expect(owner).to.not.equal(registryContract.address);
+        expect(owner).to.not.equal(registryContract.target as string);
         expect(owner).to.not.equal(defaultAddress.Burn);
       });
 
-      it("should have registry as owner for a surrendered token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender();
+      it("should have registry as owner for a token returned to issuer", async () => {
+        await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
 
-        expect(owner).to.equal(registryContract.address);
+        expect(owner).to.equal(registryContract.target as string);
       });
 
       it("should have burn address as owner for an accepted token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender();
-        await registryContract.burn(tokenId);
+        await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
+        await registryContract.burn(tokenId, txnHexRemarks.burnRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
 
@@ -207,12 +233,12 @@ describe("TradeTrustToken", async () => {
       });
 
       it("should not have registry and burn address as owner for a restored token", async () => {
-        await titleEscrowContract.connect(users.beneficiary).surrender();
-        await registryContract.restore(tokenId);
+        await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
+        await registryContract.restore(tokenId, txnHexRemarks.restorerRemark);
 
         const owner = await registryContract.ownerOf(tokenId);
 
-        expect(owner).to.not.equal(registryContract.address);
+        expect(owner).to.not.equal(registryContract.target as string);
         expect(owner).to.not.equal(defaultAddress.Burn);
       });
     });

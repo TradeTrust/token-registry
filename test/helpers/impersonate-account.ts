@@ -1,5 +1,5 @@
-import { ethers, network } from "hardhat";
 import { Signer } from "ethers";
+import { ethers, network } from "hardhat";
 
 /**
  * Impersonate an account as signer.
@@ -17,8 +17,9 @@ export const impersonateAccount = async ({
     method: "hardhat_impersonateAccount",
     params: [address],
   });
-  const hexBalance = ethers.utils.parseEther(String(balance)).toHexString();
-  await network.provider.send("hardhat_setBalance", [address, ethers.utils.hexStripZeros(hexBalance)]);
+  const hexBalance = ethers.toBeHex(ethers.parseEther(String(balance)));
+  await network.provider.send("hardhat_setBalance", [address, ethers.stripZerosLeft(hexBalance)]);
+
   return ethers.provider.getSigner(address);
 };
 

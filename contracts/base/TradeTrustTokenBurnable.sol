@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "./TradeTrustSBT.sol";
-import "./RegistryAccess.sol";
-import "../interfaces/ITradeTrustTokenBurnable.sol";
+import { TradeTrustSBT, ITitleEscrow, SBTUpgradeable } from "./TradeTrustSBT.sol";
+import { RegistryAccess } from "./RegistryAccess.sol";
+import { ITradeTrustTokenBurnable } from "../interfaces/ITradeTrustTokenBurnable.sol";
 
 /**
  * @title TradeTrustTokenBurnable
@@ -27,20 +27,23 @@ abstract contract TradeTrustTokenBurnable is TradeTrustSBT, RegistryAccess, ITra
   /**
    * @dev See {ITradeTrustTokenBurnable-burn}.
    */
-  function burn(uint256 tokenId) external virtual override whenNotPaused onlyRole(ACCEPTER_ROLE) {
-    _burnTitle(tokenId);
+  function burn(
+    uint256 tokenId,
+    bytes calldata _remark
+  ) external virtual override whenNotPaused onlyRole(ACCEPTER_ROLE) remarkLengthLimit(_remark) {
+    _burnTitle(tokenId, _remark);
   }
 
   /**
    * @dev Internal function to burn a token.
    * @param tokenId The ID of the token to burn.
    */
-  function _burnTitle(uint256 tokenId) internal virtual {
-    address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
-    ITitleEscrow(titleEscrow).shred();
+  function _burnTitle(uint256 tokenId, bytes calldata _remark) internal virtual {
+    address titleEscrow = titleEscrowFactory().getEscrowAddress(address(this), tokenId);
+    ITitleEscrow(titleEscrow).shred(_remark);
 
     // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
-    _registryTransferTo(BURN_ADDRESS, tokenId);
+    _registryTransferTo(BURN_ADDRESS, tokenId, "");
   }
 
   /**
@@ -48,7 +51,7 @@ abstract contract TradeTrustTokenBurnable is TradeTrustSBT, RegistryAccess, ITra
    */
   function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override {
     if (to == BURN_ADDRESS && ownerOf(tokenId) != address(this)) {
-      revert TokenNotSurrendered();
+      revert TokenNotReturnedToIssuer();
     }
     super._beforeTokenTransfer(from, to, tokenId);
   }
