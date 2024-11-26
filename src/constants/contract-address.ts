@@ -17,8 +17,6 @@ export const contractAddress = {
     [ChainId.PolygonAmoy]: "0x8bbCc8F707DE9ca637f83182215E3BfC53f3e9e1",
     [ChainId.XDC]: "0x9310396503A188E91dfc98fFE90459c25765E639",
     [ChainId.XDCApothem]: "0xca70f36aeeda435c1048fd372bf286a41ac538be",
-    [ChainId.HederaTestnet]: "0x5B5F8d94782be18E22420f3276D5ef5a1bc65C53",
-    [ChainId.HederaMainnet]: "0x335ae7ef2a70952d3f7cd4b76f5597067f61157e",
     [ChainId.Stability]: "0x96cc41e7007Dee20eB409586E2e8206d5053219B",
     [ChainId.StabilityTestnet]: "0xAac003619FA8C7008C73704a550aA2bF20951dbb",
   },
