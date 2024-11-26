@@ -7,6 +7,7 @@ const ChainId = {
   XDCApothem: 51,
   Stability: 101010,
   StabilityTestnet: 20180427,
+  Astron: 1338,
 };
 
 export const contractAddress = {
