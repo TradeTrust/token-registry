@@ -6,7 +6,7 @@ export const computeInterfaceId = (functionSignatures: string[] = []) => {
   const INTERFACE_ID_LENGTH = 4;
 
   const interfaceIdBuffer = functionSignatures
-    .map((signature) => id(signature))
+    .map((signature) => (ethers as any).id(signature))
     .map(
       (h) => Buffer.from(h.substring(2), "hex").slice(0, 4) // bytes4()
     )
