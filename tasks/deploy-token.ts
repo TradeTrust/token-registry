@@ -54,7 +54,7 @@ task(TASK_DEPLOY_TOKEN)
         const deployerContract = (await ethers.getContractFactory("TDocDeployer")).attach(
           deployerContractAddress
         ) as unknown as TDocDeployer;
-        let initParam = encodeInitParams({
+        const initParam = encodeInitParams({
           name,
           symbol,
           deployer: deployerAddress,
