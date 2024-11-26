@@ -1,5 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import "@typechain/hardhat";
+import "hardhat-gas-reporter";
 import { randomBytes } from "crypto";
 import dotenv from "dotenv";
 import "hardhat-watcher";
@@ -67,6 +68,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     coinmarketcap: COINMARKETCAP_API_KEY,
     currency: "USD",
+    enabled: true,
   },
   etherscan: {
     apiKey: {
