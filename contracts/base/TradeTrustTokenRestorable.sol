@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "./TradeTrustSBT.sol";
-import "./RegistryAccess.sol";
-import "../interfaces/ITradeTrustTokenRestorable.sol";
+import { TradeTrustSBT, ITitleEscrow, SBTUpgradeable } from "./TradeTrustSBT.sol";
+import { RegistryAccess } from "./RegistryAccess.sol";
+import { ITradeTrustTokenRestorable } from "../interfaces/ITradeTrustTokenRestorable.sol";
 
 /**
  * @title TradeTrustTokenRestorable
@@ -22,16 +22,19 @@ abstract contract TradeTrustTokenRestorable is TradeTrustSBT, RegistryAccess, IT
   /**
    * @dev See {ITradeTrustTokenRestorable-restore}.
    */
-  function restore(uint256 tokenId) external virtual override whenNotPaused onlyRole(RESTORER_ROLE) returns (address) {
+  function restore(
+    uint256 tokenId,
+    bytes calldata _remark
+  ) external virtual override whenNotPaused onlyRole(RESTORER_ROLE) remarkLengthLimit(_remark) returns (address) {
     if (!_exists(tokenId)) {
       revert InvalidTokenId();
     }
     if (ownerOf(tokenId) != address(this)) {
-      revert TokenNotSurrendered();
+      revert TokenNotReturnedToIssuer();
     }
 
-    address titleEscrow = titleEscrowFactory().getAddress(address(this), tokenId);
-    _registryTransferTo(titleEscrow, tokenId);
+    address titleEscrow = titleEscrowFactory().getEscrowAddress(address(this), tokenId);
+    _registryTransferTo(titleEscrow, tokenId, _remark);
 
     return titleEscrow;
   }

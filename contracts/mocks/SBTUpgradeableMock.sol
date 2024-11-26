@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "../base/SBTUpgradeable.sol";
+import { SBTUpgradeable } from "../base/SBTUpgradeable.sol";
 
 contract SBTUpgradeableMock is SBTUpgradeable {
   constructor(string memory name, string memory symbol) initializer {
@@ -20,11 +20,7 @@ contract SBTUpgradeableMock is SBTUpgradeable {
     _safeMint(to, tokenId);
   }
 
-  function safeMintWithDataInternal(
-    address to,
-    uint256 tokenId,
-    bytes memory data
-  ) public {
+  function safeMintWithDataInternal(address to, uint256 tokenId, bytes memory data) public {
     _safeMint(to, tokenId, data);
   }
 

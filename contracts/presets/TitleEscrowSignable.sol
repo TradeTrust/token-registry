@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "../TitleEscrow.sol";
-import "../utils/SigHelper.sol";
+import { TitleEscrow } from "../TitleEscrow.sol";
+import { SigHelper } from "../utils/SigHelper.sol";
 import { BeneficiaryTransferEndorsement } from "../lib/TitleEscrowStructs.sol";
-import "../interfaces/ITitleEscrowSignable.sol";
-import "../interfaces/TitleEscrowSignableErrors.sol";
+import { ITitleEscrowSignable } from "../interfaces/ITitleEscrowSignable.sol";
+import { TitleEscrowSignableErrors } from "../interfaces/TitleEscrowSignableErrors.sol";
 
 /**
  * @title TitleEscrowSignable
@@ -25,7 +25,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
 
   function __TitleEscrowSignable_init(address _registry, uint256 _tokenId) internal virtual onlyInitializing {
     super.__TitleEscrow_init(_registry, _tokenId);
-    __SigHelper_init(name, "1");
+    super.__SigHelper_init(name, "1");
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
@@ -35,15 +35,10 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
   /**
    * @dev See {ITitleEscrowSignable-transferBeneficiaryWithSig}.
    */
-  function transferBeneficiaryWithSig(BeneficiaryTransferEndorsement memory endorsement, Sig memory sig)
-    public
-    virtual
-    override
-    whenNotPaused
-    whenActive
-    onlyBeneficiary
-    whenHoldingToken
-  {
+  function transferBeneficiaryWithSig(
+    BeneficiaryTransferEndorsement memory endorsement,
+    Sig memory sig
+  ) public virtual override whenNotPaused whenActive onlyBeneficiary whenHoldingToken {
     if (endorsement.deadline < block.timestamp) {
       revert SignatureExpired(block.timestamp);
     }
@@ -71,19 +66,15 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     }
 
     ++nonces[holder];
-    _setBeneficiary(endorsement.nominee);
+    _setBeneficiary(endorsement.nominee, "0x0");
   }
 
   /**
    * @dev See {ITitleEscrowSignable-cancelBeneficiaryTransfer}.
    */
-  function cancelBeneficiaryTransfer(BeneficiaryTransferEndorsement memory endorsement)
-    public
-    virtual
-    override
-    whenNotPaused
-    whenActive
-  {
+  function cancelBeneficiaryTransfer(
+    BeneficiaryTransferEndorsement memory endorsement
+  ) public virtual override whenNotPaused whenActive {
     if (msg.sender != endorsement.holder) {
       revert CallerNotEndorser();
     }
@@ -110,8 +101,8 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
       );
   }
 
-  function _setHolder(address newHolder) internal virtual override {
+  function _setHolder(address newHolder, bytes memory _remark) internal virtual override {
     ++nonces[holder];
-    super._setHolder(newHolder);
+    super._setHolder(newHolder, _remark);
   }
 }

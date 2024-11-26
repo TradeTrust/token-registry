@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 interface TitleEscrowErrors {
   error CallerNotBeneficiary();
@@ -30,5 +30,9 @@ interface TitleEscrowErrors {
 
   error RecipientAlreadyHolder();
 
-  error TokenNotSurrendered();
+  error TokenNotReturnedToIssuer();
+
+  error RemarkLengthExceeded();
+
+  error DualRoleRejectionRequired();
 }

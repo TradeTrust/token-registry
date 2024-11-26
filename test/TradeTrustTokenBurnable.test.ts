@@ -10,6 +10,7 @@ import {
   getTitleEscrowContract,
   impersonateAccount,
   TestUsers,
+  txnHexRemarks,
 } from "./helpers";
 
 describe("TradeTrustTokenBurnable", async () => {
@@ -50,7 +51,12 @@ describe("TradeTrustTokenBurnable", async () => {
 
     registryContractAsAdmin = registryContract.connect(users.carrier);
 
-    await registryContractAsAdmin.mint(users.beneficiary.address, users.beneficiary.address, tokenId);
+    await registryContractAsAdmin.mint(
+      users.beneficiary.address,
+      users.beneficiary.address,
+      tokenId,
+      txnHexRemarks.mintRemark
+    );
     titleEscrowContract = await getTitleEscrowContract(registryContract, tokenId);
   });
 
@@ -62,15 +68,15 @@ describe("TradeTrustTokenBurnable", async () => {
     expect(res).to.be.true;
   });
 
-  describe("When token has been surrendered", () => {
+  describe("When token has been returned to issuer", () => {
     beforeEach(async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender();
+      await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
     });
 
     it("should shred the correct title escrow", async () => {
       const initialActive = await titleEscrowContract.active();
 
-      await registryContractAsAdmin.burn(tokenId);
+      await registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
       const currentActive = await titleEscrowContract.active();
 
       expect(initialActive).to.be.true;
@@ -78,7 +84,7 @@ describe("TradeTrustTokenBurnable", async () => {
     });
 
     it("should transfer token to burn address", async () => {
-      await registryContractAsAdmin.burn(tokenId);
+      await registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
       const res = await registryContract.ownerOf(tokenId);
 
@@ -86,25 +92,27 @@ describe("TradeTrustTokenBurnable", async () => {
     });
 
     it("should not allow burning a burnt token", async () => {
-      await registryContractAsAdmin.burn(tokenId);
+      await registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
-      const tx = registryContractAsAdmin.burn(tokenId);
+      const tx = registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
       await expect(tx).to.be.reverted;
     });
 
     it("should emit Transfer event with correct values", async () => {
-      const tx = await registryContractAsAdmin.burn(tokenId);
+      const tx = await registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
-      expect(tx).to.emit(registryContract, "Transfer").withArgs(registryContract.address, defaultAddress.Burn, tokenId);
+      await expect(tx)
+        .to.emit(registryContract, "Transfer")
+        .withArgs(registryContract.target, defaultAddress.Burn, tokenId);
     });
   });
 
-  describe("When token has not been surrendered", () => {
+  describe("When token has not been returned to issuer", () => {
     it("should revert when burn token", async () => {
-      const tx = registryContractAsAdmin.burn(tokenId);
+      const tx = registryContractAsAdmin.burn(tokenId, txnHexRemarks.burnRemark);
 
-      await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotSurrendered");
+      await expect(tx).to.be.revertedWithCustomError(registryContractAsAdmin, "TokenNotReturnedToIssuer");
     });
 
     it("should revert before transfer when forcefully sent to burn address", async () => {
@@ -120,15 +128,18 @@ describe("TradeTrustTokenBurnable", async () => {
         );
 
       const [titleEscrowFactoryContract, registryContractMock] = await loadFixture(deployMockTokenFixturesRunner);
-      const tokenRecipientAddress = await titleEscrowFactoryContract.getAddress(registryContractMock.address, tokenId);
+      const tokenRecipientAddress = await titleEscrowFactoryContract.getEscrowAddress(
+        await registryContractMock.getAddress(),
+        tokenId
+      );
       const tokenRecipientSigner = await impersonateAccount({ address: tokenRecipientAddress });
       await registryContractMock.mintInternal(tokenRecipientAddress, tokenId);
 
       const tx = registryContractMock
         .connect(tokenRecipientSigner)
-        .transferFrom(tokenRecipientAddress, defaultAddress.Burn, tokenId);
+        .transferFrom(tokenRecipientAddress, defaultAddress.Burn, tokenId, txnHexRemarks.burnRemark);
 
-      await expect(tx).to.be.revertedWithCustomError(registryContractMock, "TokenNotSurrendered");
+      await expect(tx).to.be.revertedWithCustomError(registryContractMock, "TokenNotReturnedToIssuer");
     });
   });
 });

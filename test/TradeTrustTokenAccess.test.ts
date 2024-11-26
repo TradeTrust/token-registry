@@ -1,12 +1,12 @@
+import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { TitleEscrow, TradeTrustToken } from "@tradetrust/contracts";
 import faker from "faker";
 import { ethers } from "hardhat";
 import { expect } from ".";
 import { roleHash } from "../src/constants";
 import { deployTokenFixture, mintTokenFixture } from "./fixtures";
-import { getTestUsers, TestUsers, toAccessControlRevertMessage } from "./helpers";
+import { getTestUsers, TestUsers, txnHexRemarks } from "./helpers";
 
 describe("TradeTrustToken Access Control Behaviour", async () => {
   let users: TestUsers;
@@ -113,7 +113,7 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
     let fakeMinterAdminRole: string;
 
     beforeEach(async () => {
-      fakeMinterAdminRole = ethers.utils.id("FAKE_MINTER_ADMIN_ROLE");
+      fakeMinterAdminRole = ethers.id("FAKE_MINTER_ADMIN_ROLE");
     });
 
     it("should allow admin to set role admin", async () => {
@@ -127,7 +127,9 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
     it("should not allow a non-admin to set role admin", async () => {
       const tx = registryContractAsMinter.setRoleAdmin(roleHash.MinterRole, fakeMinterAdminRole);
 
-      await expect(tx).to.be.revertedWith(toAccessControlRevertMessage(userMinter.address, roleHash.DefaultAdmin));
+      await expect(tx)
+        .to.be.revertedWithCustomError(registryContract, "AccessControlUnauthorizedAccount")
+        .withArgs(userMinter.address, roleHash.DefaultAdmin);
     });
   });
 
@@ -136,58 +138,68 @@ describe("TradeTrustToken Access Control Behaviour", async () => {
       it("should allow a minter to mint new tokens", async () => {
         const newTokenId = faker.datatype.hexaDecimal(64);
 
-        const tx = registryContractAsMinter.mint(users.beneficiary.address, users.holder.address, newTokenId);
+        const tx = registryContractAsMinter.mint(
+          users.beneficiary.address,
+          users.holder.address,
+          newTokenId,
+          txnHexRemarks.mintRemark
+        );
 
         await expect(tx).to.not.be.reverted;
       });
 
       it("should not allow a non-minter to mint new tokens", async () => {
-        const tx = registryContractAsNoRole.mint(users.beneficiary.address, users.holder.address, tokenId);
-
-        await expect(tx).to.be.revertedWith(
-          toAccessControlRevertMessage(users.beneficiary.address, roleHash.MinterRole)
+        const tx = registryContractAsNoRole.mint(
+          users.beneficiary.address,
+          users.holder.address,
+          tokenId,
+          txnHexRemarks.mintRemark
         );
+
+        await expect(tx)
+          .to.be.revertedWithCustomError(registryContract, "AccessControlUnauthorizedAccount")
+          .withArgs(users.beneficiary.address, roleHash.MinterRole);
       });
     });
   });
 
   describe("Restorer Role", () => {
     beforeEach(async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender();
+      await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
     });
 
     it("should allow a restorer to restore tokens", async () => {
-      const tx = registryContractAsRestorer.restore(tokenId);
+      const tx = registryContractAsRestorer.restore(tokenId, txnHexRemarks.restorerRemark);
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow a non-restorer to restore tokens", async () => {
-      const tx = registryContractAsNoRole.restore(tokenId);
+      const tx = registryContractAsNoRole.restore(tokenId, txnHexRemarks.restorerRemark);
 
-      await expect(tx).to.be.revertedWith(
-        toAccessControlRevertMessage(users.beneficiary.address, roleHash.RestorerRole)
-      );
+      await expect(tx)
+        .to.be.revertedWithCustomError(registryContract, "AccessControlUnauthorizedAccount")
+        .withArgs(users.beneficiary.address, roleHash.RestorerRole);
     });
   });
 
   describe("Accepter Role", () => {
     beforeEach(async () => {
-      await titleEscrowContract.connect(users.beneficiary).surrender();
+      await titleEscrowContract.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
     });
 
     it("should allow an accepter to burn tokens", async () => {
-      const tx = registryContractAsAccepter.burn(tokenId);
+      const tx = registryContractAsAccepter.burn(tokenId, txnHexRemarks.burnRemark);
 
       await expect(tx).to.not.be.reverted;
     });
 
     it("should not allow a non-accepter to burn tokens", async () => {
-      const tx = registryContractAsNoRole.burn(tokenId);
+      const tx = registryContractAsNoRole.burn(tokenId, txnHexRemarks.burnRemark);
 
-      await expect(tx).to.be.revertedWith(
-        toAccessControlRevertMessage(users.beneficiary.address, roleHash.AccepterRole)
-      );
+      await expect(tx)
+        .to.be.revertedWithCustomError(registryContract, "AccessControlUnauthorizedAccount")
+        .withArgs(users.beneficiary.address, roleHash.AccepterRole);
     });
   });
 });

@@ -16,10 +16,10 @@ export const deployContract = async <TContract extends Contract>({
   const contractFactory = await ethers.getContractFactory(contractName);
   const contract = (await contractFactory.connect(deployer).deploy(...params)) as TContract;
 
-  const tx = contract.deployTransaction;
-  console.log(`[Transaction] Pending ${tx.hash}`);
+  const tx = contract.deploymentTransaction();
+  console.log(`[Transaction] Pending ${tx?.hash}`);
 
-  await contract.deployed();
+  await contract.deploymentTransaction();
   console.log(`[Address] Deployed to ${contract.address}`);
 
   return contract;

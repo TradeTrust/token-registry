@@ -1,12 +1,14 @@
 import { ethers } from "ethers";
 
-const { utils } = ethers;
+if (ethers.version.includes("/5")) {
+  (ethers as any).id = (ethers as any).utils.id;
+}
 
 export const computeInterfaceId = (functionSignatures: string[] = []) => {
   const INTERFACE_ID_LENGTH = 4;
 
   const interfaceIdBuffer = functionSignatures
-    .map((signature) => utils.id(signature))
+    .map((signature) => (ethers as any).id(signature))
     .map(
       (h) => Buffer.from(h.substring(2), "hex").slice(0, 4) // bytes4()
     )

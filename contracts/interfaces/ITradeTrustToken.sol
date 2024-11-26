@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "./ITradeTrustSBT.sol";
-import "./ITradeTrustTokenRestorable.sol";
-import "./ITradeTrustTokenBurnable.sol";
-import "./ITradeTrustTokenMintable.sol";
+import { ITradeTrustSBT, ITitleEscrowFactory } from "./ITradeTrustSBT.sol";
+import { ITradeTrustTokenRestorable } from "./ITradeTrustTokenRestorable.sol";
+import { ITradeTrustTokenBurnable } from "./ITradeTrustTokenBurnable.sol";
+import { ITradeTrustTokenMintable } from "./ITradeTrustTokenMintable.sol";
 
 interface ITradeTrustToken is
   ITradeTrustTokenMintable,

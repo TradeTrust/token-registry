@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
-import "./TradeTrustSBT.sol";
-import "./RegistryAccess.sol";
-import "../interfaces/ITradeTrustTokenMintable.sol";
+import { TradeTrustSBT, ITitleEscrow, SBTUpgradeable } from "./TradeTrustSBT.sol";
+import { RegistryAccess } from "./RegistryAccess.sol";
+import { ITradeTrustTokenMintable } from "../interfaces/ITradeTrustTokenMintable.sol";
 
 /**
  * @title TradeTrustTokenMintable
@@ -25,9 +25,10 @@ abstract contract TradeTrustTokenMintable is TradeTrustSBT, RegistryAccess, ITra
   function mint(
     address beneficiary,
     address holder,
-    uint256 tokenId
+    uint256 tokenId,
+    bytes calldata _remark
   ) external virtual override whenNotPaused onlyRole(MINTER_ROLE) returns (address) {
-    return _mintTitle(beneficiary, holder, tokenId);
+    return _mintTitle(beneficiary, holder, tokenId, _remark);
   }
 
   /**
@@ -37,13 +38,18 @@ abstract contract TradeTrustTokenMintable is TradeTrustSBT, RegistryAccess, ITra
    * @param tokenId The ID of the token to mint.
    * @return The address of the corresponding TitleEscrow.
    */
-  function _mintTitle(address beneficiary, address holder, uint256 tokenId) internal virtual returns (address) {
+  function _mintTitle(
+    address beneficiary,
+    address holder,
+    uint256 tokenId,
+    bytes calldata _remark
+  ) internal virtual remarkLengthLimit(_remark) returns (address) {
     if (_exists(tokenId)) {
       revert TokenExists();
     }
 
     address newTitleEscrow = titleEscrowFactory().create(tokenId);
-    _safeMint(newTitleEscrow, tokenId, abi.encode(beneficiary, holder));
+    _safeMint(newTitleEscrow, tokenId, abi.encode(beneficiary, holder, _remark));
 
     return newTitleEscrow;
   }
