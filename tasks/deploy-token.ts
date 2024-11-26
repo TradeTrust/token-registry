@@ -59,6 +59,7 @@ task(TASK_DEPLOY_TOKEN)
           symbol,
           deployer: deployerAddress,
         });
+
         const tx = await deployerContract.deploy(implAddress, initParam);
         console.log(`[Transaction] Pending ${tx.hash}`);
         const receipt = await tx.wait();

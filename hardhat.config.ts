@@ -1,5 +1,6 @@
 import "@nomicfoundation/hardhat-toolbox";
 import "@typechain/hardhat";
+import "hardhat-gas-reporter";
 import { randomBytes } from "crypto";
 import dotenv from "dotenv";
 import "hardhat-watcher";
@@ -40,7 +41,7 @@ if (IS_CI_ENV) {
 
 const config: HardhatUserConfig = {
   solidity: {
-    compilers: [{ version: "0.8.27" }],
+    compilers: [{ version: "0.8.22" }],
 
     settings: {
       optimizer: {
@@ -67,6 +68,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     coinmarketcap: COINMARKETCAP_API_KEY,
     currency: "USD",
+    enabled: true,
   },
   etherscan: {
     apiKey: {
@@ -78,6 +80,14 @@ const config: HardhatUserConfig = {
        * Polygon
        */
       polygon: POLYGONSCAN_API_KEY!,
+      /**
+       * polygon amoy
+       */
+      polygonAmoy: POLYGONSCAN_API_KEY!,
+      /**
+       * stability testnet
+       */
+      stabilitytestnet: STABILITY_API_KEY!,
     },
   },
   networks: {
@@ -128,7 +138,8 @@ const config: HardhatUserConfig = {
     },
     amoy: {
       ...networkConfig,
-      url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
+      url: "https://rpc-amoy.polygon.technology",
+      // url: `https://polygon-amoy.infura.io/v3/${INFURA_APP_ID}`,
     },
     /**
      * Development
