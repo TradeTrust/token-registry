@@ -8,14 +8,11 @@ export const isSupportedTitleEscrowFactory = async (factoryAddress: string, prov
     ["function implementation() view returns (address)"],
     provider ?? ethers.getDefaultProvider()
   ) as unknown as TitleEscrowFactory;
-  console.log("support tescrow");
   const implAddr = await titleEscrowFactoryContract.implementation();
-  console.log("support tescrow2");
   const implContract = new ethers.Contract(
     implAddr,
     ["function supportsInterface(bytes4 interfaceId) view returns (bool)"],
     provider ?? ethers.getDefaultProvider()
   ) as unknown as TitleEscrow;
-  console.log("support tescrow3");
   return implContract.supportsInterface(contractInterfaceId.TitleEscrow);
 };
