@@ -2,7 +2,7 @@ const fs = require("fs");
 const { glob } = require("glob");
 
 const addTsNoCheck = async () => {
-  const files = glob.sync(__dirname + '/..' + '/src/contracts/**/*.{ts,d.ts}', { ignore: 'node_modules/**' });
+  const files = glob.sync(`${__dirname  }/..` + `/src/contracts/**/*.{ts,d.ts}`, { ignore: 'node_modules/**' });
   files.forEach((file) => {
 
     fs.readFile(file, 'utf8', (err, data) => {
