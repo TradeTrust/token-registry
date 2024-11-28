@@ -1,6 +1,6 @@
 {
   "name": "@tradetrust-tt/token-registry",
-  "version": "5.0.0-alpha",
+  "version": "5.0.0",
   "release": {
     "branches": [
       "master",
@@ -22,7 +22,7 @@
   "author": "GovTech",
   "license": "Apache-2.0",
   "scripts": {
-    "build:sol": "TS_NODE_TRANSPILE_ONLY=1 hardhat compile",
+    "build:sol": "TS_NODE_TRANSPILE_ONLY=1 hardhat compile && node scripts/addTsNoCheck.js",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",
     "build:js": "tsc && npm run build:js:copy-src",
     "build:js:copy-types": "mkdir -p ./dist/contracts && cp -a ./src/contracts/* ./dist/contracts",
