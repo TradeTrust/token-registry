@@ -2,12 +2,11 @@ const fs = require("fs");
 const { glob } = require("glob");
 
 const addTsNoCheck = async () => {
-  const files = glob.sync(`${__dirname  }/..` + `/src/contracts/**/*.{ts,d.ts}`, { ignore: 'node_modules/**' });
+  const files = glob.sync(`${__dirname}/..` + `/src/contracts/**/*.{ts,d.ts}`, { ignore: 'node_modules/**' });
   files.forEach((file) => {
-
-    fs.readFile(file, 'utf8', (err, data) => {
+    fs.readFile(file, "utf8", (err, data) => {
       if (err) {
-        console.error('err', err);
+        console.error("err", err);
         return;
       }
 
@@ -19,10 +18,9 @@ const addTsNoCheck = async () => {
 // @ts-nocheck: skippping typechecking for this file`
       );
 
-      fs.writeFile(file, data, 'utf8', (err) => {
-        if (err) {
-          console.error(err);
-          return;
+      fs.writeFile(file, data, "utf8", (err2) => {
+        if (err2) {
+          console.error("err", err2);
         }
       });
     });
