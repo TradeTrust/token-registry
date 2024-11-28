@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { glob } = require('glob');
+const { glob } = require("glob");
 
 const addTsNoCheck = async () => {
   const files = glob.sync(__dirname + '/..' + '/src/contracts/**/*.{ts,d.ts}', { ignore: 'node_modules/**' });
