@@ -3,8 +3,8 @@
   "version": "4.0.0",
   "release": {
     "branches": [
-      "master",
-      "v4"
+      { "name": "master", "range": ">=5.0.0" },
+      { "name": "v4", "range": ">=4.0.0 <5.0.0" }
     ],
     "tagFormat": "v${version}"
   },
