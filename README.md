@@ -354,8 +354,6 @@ Here's a list of network names currently pre-configured:
 - `amoy` (Polygon Amoy)
 - `xdc` (XDC Network Mainnet)
 - `xdcapothem` (XDC Apothem TestNet)
-- `hederamainet` (Hedera Network Mainnet)
-- `hederatestnet` (Hedera Network TestNet)
 - `stabilitytestnet` (Stability TestNet)
 - `stability` (Stability Global Trust Network)
 - `astron` (astron Network MainNet)

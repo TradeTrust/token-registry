@@ -1,0 +1,14 @@
+{
+  "branches": [
+    { "name": "master", "range": ">=5.0.0" },
+    { "name": "v4", "range": ">=4.0.0 <5.0.0" },
+    { "name": "beta", "prerelease": true }
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    "@semantic-release/npm",
+    "@semantic-release/github"
+  ]
+}
