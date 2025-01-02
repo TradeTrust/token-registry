@@ -1,4 +1,6 @@
-import { ethers } from "ethers";
+import { ethers as packedEthers } from "ethers";
+
+const ethers = { ...packedEthers };
 
 export interface Params {
   name: string;
