@@ -1,10 +1,15 @@
 {
   "name": "@tradetrust-tt/token-registry",
-  "version": "5.0.0",
+  "version": "5.1.1",
   "release": {
     "branches": [
-      { "name": "master" },
-      { "name": "v4", "range": "4.x.x" }
+      {
+        "name": "master"
+      },
+      {
+        "name": "v4",
+        "range": "4.x.x"
+      }
     ],
     "tagFormat": "v${version}"
   },
