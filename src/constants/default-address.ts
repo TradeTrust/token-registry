@@ -1,4 +1,6 @@
-import { ethers } from "ethers";
+import { ethers as packedEthers } from "ethers";
+
+const ethers = { ...packedEthers };
 
 if (ethers.version.includes("/5")) {
   (ethers as any).ZeroAddress = (ethers as any)?.constants?.AddressZero;
