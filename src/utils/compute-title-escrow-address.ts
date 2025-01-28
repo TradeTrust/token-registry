@@ -1,10 +1,21 @@
-import { ethers } from "ethers";
+import { ethers as packedEthers } from "ethers";
 
 interface Params {
   implementationAddress: string;
   factoryAddress: string;
   registryAddress: string;
   tokenId: string;
+}
+
+const ethers = { ...packedEthers };
+
+if (ethers.version.startsWith("6.")) {
+  (ethers as any).utils = {
+    keccak256: (ethers as any).keccak256,
+    solidityKeccak256: (ethers as any).solidityPackedKeccak256,
+    solidityPack: (ethers as any).solidityPacked,
+    getCreate2Address: (ethers as any).getCreate2Address,
+  };
 }
 
 export const computeTitleEscrowAddress = (params: Params) => {
