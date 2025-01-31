@@ -17,6 +17,7 @@ const {
   ETHERSCAN_API_KEY,
   POLYGONSCAN_API_KEY,
   STABILITY_API_KEY,
+  STABILITY_TESTNET_API_KEY,
   ASTRONSCAN_API_KEY,
 } = process.env;
 const IS_CI_ENV = process.env.NODE_ENV === "ci";
@@ -86,10 +87,6 @@ const config: HardhatUserConfig = {
        */
       polygonAmoy: POLYGONSCAN_API_KEY!,
       /**
-       * stability testnet
-       */
-      stabilitytestnet: STABILITY_API_KEY!,
-      /**
        * Astron
        */
       astron: ASTRONSCAN_API_KEY!,
@@ -128,12 +125,12 @@ const config: HardhatUserConfig = {
     },
     stabilitytestnet: {
       ...networkConfig,
-      url: "https://free.testnet.stabilityprotocol.com",
+      url: `https://rpc.testnet.stabilityprotocol.com/zgt/${STABILITY_TESTNET_API_KEY}`,
     },
     stability: {
       ...networkConfig,
       // To get a API key, visit https://portal.stabilityprotocol.com
-      url: `https://gtn.stabilityprotocol.com/zgt/${STABILITY_API_KEY}`,
+      url: `https://rpc.stabilityprotocol.com/zgt/${STABILITY_API_KEY}`,
     },
     /**
      * Polygon
