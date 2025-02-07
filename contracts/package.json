@@ -1,5 +1,0 @@
-{
-  "name": "@govtechsg/token-registry/contracts",
-  "private": true,
-  "main": "../dist/contracts/index.js"
-}
