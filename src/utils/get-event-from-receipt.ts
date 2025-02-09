@@ -25,8 +25,9 @@ export const getEventFromReceipt = <T extends any>(receipt: any, topic: string, 
 
     if (iface) return iface.parseLog(event) as unknown as T;
     return event as T;
-  } else {
-    const resLog = receipt.logs.find((log: any) => iface.parseLog(log)?.name === topic);
-    return iface.parseLog(resLog as any) as T;
   }
+
+  // Ethers V6
+  const resLog = receipt.logs.find((log: any) => iface.parseLog(log)?.name === topic);
+  return iface.parseLog(resLog as any) as T;
 };
