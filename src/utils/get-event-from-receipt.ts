@@ -8,8 +8,27 @@ if (ethers.version.includes("/5")) {
 }
 
 /**
- * Ethers v6, Get event from receipt.logs
- * Ethers v5, Get event from receipt.events
+ * Ethers v6, Get event from receipt.logs.
+ * Ethers v5, Get event from receipt.events.
+ *
+ * @example ethers v5
+ * ```
+ * getEventFromReceipt<any>(
+ *     receipt,
+ *     (deployerContract.interface as any).getEventTopic("Deployment"),
+ *     deployerContract.interface
+ * ).args.deployed;
+ *
+ * ```
+ *
+ * @example ethers v6
+ * ```
+ * getEventFromReceipt<any>(
+ *     receipt,
+ *     "Deployment",
+ *     deployerContract.interface
+ * ).args.deployed;
+ * ```
  *
  * @param receipt {TransactionReceipt | ContractReceipt}
  * @param topic {string}
