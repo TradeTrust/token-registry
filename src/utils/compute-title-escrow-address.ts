@@ -18,7 +18,7 @@ if (ethers.version.includes("/5")) {
 
 /**
  * @deprecated not be used with W3C VC
- */ 
+ */
 export const computeTitleEscrowAddress = (params: Params) => {
   const { implementationAddress, factoryAddress, registryAddress, tokenId } = params;
   const initCodeHash = (ethers as any).keccak256(
