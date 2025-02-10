@@ -16,6 +16,9 @@ if (ethers.version.includes("/5")) {
   (ethers as any).getCreate2Address = (ethers as any).utils.getCreate2Address;
 }
 
+/**
+ * @deprecated not be used with W3C VC
+ */
 export const computeTitleEscrowAddress = (params: Params) => {
   const { implementationAddress, factoryAddress, registryAddress, tokenId } = params;
   const initCodeHash = (ethers as any).keccak256(
