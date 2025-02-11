@@ -117,11 +117,11 @@ const config: HardhatUserConfig = {
     },
     xdc: {
       ...networkConfig,
-      url: "https://erpc.xinfin.network",
+      url: "https://rpc.ankr.com/xdc",
     },
     xdcapothem: {
       ...networkConfig,
-      url: "https://erpc.apothem.network",
+      url: "https://rpc.ankr.com/xdc_testnet",
     },
     stabilitytestnet: {
       ...networkConfig,
