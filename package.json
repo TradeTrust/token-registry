@@ -32,14 +32,10 @@
       "require": "./dist/index.js"
     },
     "./contracts": {
-      "types": "./dist/contracts/index.js",
-      "import": "./dist/contracts/index.js",
-      "require": "./dist/contracts/index.js"
+      "default": "./dist/contracts/index.js"
     },
     "./contracts/common": {
-      "types": "./dist/contracts/common.js",
-      "import": "./dist/contracts/common.js",
-      "require": "./dist/contracts/common.js"
+      "default": "./dist/contracts/common.js"
     }
   },
   "scripts": {
