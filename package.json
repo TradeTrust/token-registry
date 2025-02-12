@@ -7,6 +7,10 @@
         "name": "master"
       },
       {
+        "name": "beta",
+        "prerelease": "beta"
+      },
+      {
         "name": "v4",
         "range": "4.x.x"
       }
@@ -14,8 +18,7 @@
     "tagFormat": "v${version}"
   },
   "files": [
-    "dist",
-    "contracts"
+    "dist"
   ],
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
