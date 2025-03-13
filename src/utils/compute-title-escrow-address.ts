@@ -1,6 +1,6 @@
 import { ethers as packedEthers } from "ethers";
 
-interface Params {
+export interface Params {
   implementationAddress: string;
   factoryAddress: string;
   registryAddress: string;
