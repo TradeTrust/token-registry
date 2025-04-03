@@ -21,7 +21,7 @@ export const contractAddress = {
     [ChainId.XDCApothem]: "0xca70f36aeeda435c1048fd372bf286a41ac538be",
     [ChainId.Stability]: "0x96cc41e7007Dee20eB409586E2e8206d5053219B",
     [ChainId.StabilityTestnet]: "0xAac003619FA8C7008C73704a550aA2bF20951dbb",
-    [ChainId.AstronTestnet]: "0x13Cb37F583a186D5E856522F39E0FB0b7858F7B9",
+    [ChainId.AstronTestnet]: "0x1782421524a0c89a03a874B4A9B6f150707d5352",
   },
   Deployer: {
     [ChainId.Ethereum]: "0xEc6fD701743cEdf504873F5E5E807586f437A500",
