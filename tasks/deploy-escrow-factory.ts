@@ -22,7 +22,7 @@ task(TASK_DEPLOY_ESCROW_FACTORY)
       });
       const factoryDeployTx = titleEscrowFactoryContract.deploymentTransaction();
       console.log(`[Transaction] Pending ${factoryDeployTx?.hash}`);
-      await titleEscrowFactoryContract.deploymentTransaction();
+      await titleEscrowFactoryContract.waitForDeployment();
       const factoryAddress = titleEscrowFactoryContract.target;
       console.log(`[Status] Deployed to ${factoryAddress}`);
 
