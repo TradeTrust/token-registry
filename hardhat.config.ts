@@ -21,6 +21,7 @@ const {
   POLYGONSCAN_API_KEY,
   STABILITY_API_KEY,
   ASTRONSCAN_API_KEY,
+  ASTRON_TESTNET_API_KEY
 } = process.env;
 const IS_CI_ENV = process.env.NODE_ENV === "ci";
 
@@ -86,6 +87,10 @@ const config: HardhatUserConfig = {
        * Astron
        */
       astron: ASTRONSCAN_API_KEY!,
+      /**
+       * Stability
+       */
+      astrontestnet: ASTRON_TESTNET_API_KEY!,
     },
     customChains: [{
         /**
@@ -97,7 +102,15 @@ const config: HardhatUserConfig = {
               apiURL: "https://astronscanl2.bitfactory.cn/api",
               browserURL: "https://astronscanl2.bitfactory.cn",
           },
-      }],
+      },{
+        network:"astrontestnet",
+        chainId:21002,
+        urls: {
+            apiURL: "https://dev-astronscanl2.bitfactory.cn/api",
+            browserURL: "https://dev-astronscanl2.bitfactory.cn",
+        },
+      }
+    ],
   },
   networks: {
     /**
@@ -148,6 +161,10 @@ const config: HardhatUserConfig = {
         ...networkConfig,
         url: "https://astronlayer2.bitfactory.cn/rpc/",
      },
+     astrontestnet: {
+      ...networkConfig,
+      url: `https://dev-astronlayer2.bitfactory.cn/auth/${ASTRON_TESTNET_API_KEY}`,
+   },
     /**
      * Development
      */
