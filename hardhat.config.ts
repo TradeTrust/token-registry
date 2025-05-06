@@ -163,6 +163,9 @@ const config: HardhatUserConfig = {
       ...networkConfig,
       url: "https://astronlayer2.bitfactory.cn/rpc/",
     },
+    /**
+     * Astron Testnet
+     */
     astrontestnet: {
       ...networkConfig,
       url: `https://dev-astronlayer2.bitfactory.cn/auth/${ASTRON_TESTNET_API_KEY}`,
