@@ -96,28 +96,30 @@ const config: HardhatUserConfig = {
        */
       astrontestnet: ASTRON_TESTNET_API_KEY!,
     },
-    customChains: [{
+    customChains: [
+      {
         /**
          * Astron
          */
-          network: "astron",
-          chainId: 1338,
-          urls: {
-              apiURL: "https://astronscanl2.bitfactory.cn/api",
-              browserURL: "https://astronscanl2.bitfactory.cn",
-          },
+        network: "astron",
+        chainId: 1338,
+        urls: {
+          apiURL: "https://astronscanl2.bitfactory.cn/api",
+          browserURL: "https://astronscanl2.bitfactory.cn",
+        },
       },
       {
         /**
          * Astron testnet
          */
-          network: "astrontestnet",
-          chainId: 21002,
-          urls: {
-              apiURL: "https://dev-astronscanl2.bitfactory.cn/api",
-              browserURL: "https://dev-astronscanl2.bitfactory.cn",
-          },
-      }],
+        network: "astrontestnet",
+        chainId: 21002,
+        urls: {
+          apiURL: "https://dev-astronscanl2.bitfactory.cn/api",
+          browserURL: "https://dev-astronscanl2.bitfactory.cn",
+        },
+      },
+    ],
   },
   networks: {
     /**
@@ -166,16 +168,16 @@ const config: HardhatUserConfig = {
      * Astron
      */
     astron: {
-        ...networkConfig,
-        url: "https://astronlayer2.bitfactory.cn/rpc/",
-     },
+      ...networkConfig,
+      url: "https://astronlayer2.bitfactory.cn/rpc/",
+    },
     /**
-     * Astron
+     * Astron testnet
      */
     astrontestnet: {
-        ...networkConfig,
-        url: `https://dev-astronlayer2.bitfactory.cn/auth/${ASTRON_TESTNET_API_KEY}`,
-     },
+      ...networkConfig,
+      url: `https://dev-astronlayer2.bitfactory.cn/auth/${ASTRON_TESTNET_API_KEY}`,
+    },
     /**
      * Development
      */
