@@ -21,7 +21,7 @@ export const contractAddress = {
     [ChainId.XDCApothem]: "0xca70f36aeeda435c1048fd372bf286a41ac538be",
     [ChainId.Stability]: "0x96cc41e7007Dee20eB409586E2e8206d5053219B",
     [ChainId.StabilityTestnet]: "0xAac003619FA8C7008C73704a550aA2bF20951dbb",
-    [ChainId.AstronTestnet]: "0x1782421524a0c89a03a874B4A9B6f150707d5352",
+    [ChainId.AstronTestnet]: "0x812A0E71c61A42C8d3d449BdfF51834f85686C73",
   },
   Deployer: {
     [ChainId.Ethereum]: "0xEc6fD701743cEdf504873F5E5E807586f437A500",
@@ -32,7 +32,7 @@ export const contractAddress = {
     [ChainId.XDC]: "0x9EFE3127e4F3f4e4CF83132F05BE11a097e0f9Ca",
     [ChainId.XDCApothem]: "0x20284AFe0B36545611dCF90Bb8128FC52e24247F",
     [ChainId.PolygonAmoy]: "0xfcafea839e576967b96ad1FBFB52b5CA26cd1D25",
-    [ChainId.AstronTestnet]: "0x0A4363FA27b3D2116ef8893630CE29FC1258104d",
+    [ChainId.AstronTestnet]: "0x1043B46Ad9072fB784492d94F8d25eF679B7AAf8",
   },
   TokenImplementation: {
     [ChainId.Ethereum]: "0x1583A4Eb50Bdde67F44A506a16c6d90C1E0A46d3",
@@ -43,6 +43,6 @@ export const contractAddress = {
     [ChainId.Stability]: "0x9093AD686C92572750d7399484131F0b3E02b62A",
     [ChainId.XDC]: "0xCdF35cA8e01f5693B23135C7a92B8FefeFd0bDd0",
     [ChainId.XDCApothem]: "0xcc72c1b3f7875fda22bcdb147d462d7da64efc55",
-    [ChainId.AstronTestnet]: "0xDf9D1C3127C840aD07f23b522048BC47Da3e162C",
+    [ChainId.AstronTestnet]: "0xA0Da221B3cd3e863425E1F1D34B9307D295a9d03",
   },
 };
