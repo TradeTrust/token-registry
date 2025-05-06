@@ -179,13 +179,6 @@ const config: HardhatUserConfig = {
       url: `https://dev-astronlayer2.bitfactory.cn/auth/${ASTRON_TESTNET_API_KEY}`,
     },
     /**
-     * Astron
-     */
-    astrontestnet: {
-      ...networkConfig,
-      url: `https://dev-astronlayer2.bitfactory.cn/auth/${ASTRON_TESTNET_API_KEY}`,
-    },
-    /**
      * Development
      */
     hardhat: {
