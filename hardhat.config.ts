@@ -88,7 +88,7 @@ const config: HardhatUserConfig = {
        */
       astron: ASTRONSCAN_API_KEY!,
       /**
-       * Stability
+       * Astron Testnet
        */
       astrontestnet: ASTRON_TESTNET_API_KEY!,
     },
@@ -104,6 +104,9 @@ const config: HardhatUserConfig = {
           browserURL: "https://astronscanl2.bitfactory.cn",
         },
       },
+      /**
+       * Astron Testnet
+       */
       {
         network: "astrontestnet",
         chainId: 21002,
