@@ -17,6 +17,7 @@ const {
   ETHERSCAN_API_KEY,
   POLYGONSCAN_API_KEY,
   STABILITY_API_KEY,
+  STABILITY_TESTNET_API_KEY,
   ASTRONSCAN_API_KEY,
   ASTRON_TESTNET_API_KEY,
 } = process.env;
@@ -87,10 +88,6 @@ const config: HardhatUserConfig = {
        */
       polygonAmoy: POLYGONSCAN_API_KEY!,
       /**
-       * stability testnet
-       */
-      stabilitytestnet: STABILITY_API_KEY!,
-      /**
        * Astron
        */
       astron: ASTRONSCAN_API_KEY!,
@@ -112,6 +109,9 @@ const config: HardhatUserConfig = {
         },
       },
       {
+        /**
+         * Astron testnet
+         */
         network: "astrontestnet",
         chainId: 21002,
         urls: {
@@ -135,20 +135,20 @@ const config: HardhatUserConfig = {
     },
     xdc: {
       ...networkConfig,
-      url: "https://erpc.xinfin.network",
+      url: "https://rpc.ankr.com/xdc",
     },
     xdcapothem: {
       ...networkConfig,
-      url: "https://erpc.apothem.network",
+      url: "https://rpc.ankr.com/xdc_testnet",
     },
     stabilitytestnet: {
       ...networkConfig,
-      url: "https://free.testnet.stabilityprotocol.com",
+      url: `https://rpc.testnet.stabilityprotocol.com/zgt/${STABILITY_TESTNET_API_KEY}`,
     },
     stability: {
       ...networkConfig,
       // To get a API key, visit https://portal.stabilityprotocol.com
-      url: `https://gtn.stabilityprotocol.com/zgt/${STABILITY_API_KEY}`,
+      url: `https://rpc.stabilityprotocol.com/zgt/${STABILITY_API_KEY}`,
     },
     /**
      * Polygon
@@ -173,6 +173,13 @@ const config: HardhatUserConfig = {
     },
     /**
      * Astron testnet
+     */
+    astrontestnet: {
+      ...networkConfig,
+      url: `https://dev-astronlayer2.bitfactory.cn/auth/${ASTRON_TESTNET_API_KEY}`,
+    },
+    /**
+     * Astron
      */
     astrontestnet: {
       ...networkConfig,

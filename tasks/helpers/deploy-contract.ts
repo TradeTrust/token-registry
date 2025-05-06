@@ -20,7 +20,7 @@ export const deployContract = async <TContract extends Contract>({
   console.log(`[Transaction] Pending ${tx?.hash}`);
 
   await contract.deploymentTransaction();
-  console.log(`[Address] Deployed to ${contract.address}`);
+  console.log(`[Address] Deployed to ${contract.target}`);
 
   return contract;
 };

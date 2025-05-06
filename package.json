@@ -1,10 +1,15 @@
 {
   "name": "@tradetrust-tt/token-registry",
-  "version": "5.0.0",
+  "version": "5.1.1",
   "release": {
     "branches": [
-      { "name": "master" },
-      { "name": "v4", "range": "4.x.x" }
+      {
+        "name": "master"
+      },
+      {
+        "name": "v4",
+        "range": "4.x.x"
+      }
     ],
     "tagFormat": "v${version}"
   },
@@ -17,6 +22,23 @@
   "repository": "git@github.com:TradeTrust/token-registry.git",
   "author": "GovTech",
   "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts/index.js",
+      "import": "./dist/contracts/index.js",
+      "require": "./dist/contracts/index.js"
+    },
+    "./contracts/common": {
+      "types": "./dist/contracts/common.js",
+      "import": "./dist/contracts/common.js",
+      "require": "./dist/contracts/common.js"
+    }
+  },
   "scripts": {
     "build:sol": "TS_NODE_TRANSPILE_ONLY=1 hardhat compile && node scripts/addTsNoCheck.js",
     "build:js:copy-src": "babel src -d dist --ignore src/**/*.spec.ts,src/**/*.test.ts -x .js,.ts,.tsx --copy-files",

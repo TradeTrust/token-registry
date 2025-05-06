@@ -34,7 +34,7 @@ task(TASK_DEPLOY_TOKEN_IMPL)
         });
       }
 
-      console.log(`[Status] ✅ Completed deploying token implementation at ${registryImplContract.address}`);
+      console.log(`[Status] ✅ Completed deploying token implementation at ${registryImplContract.target}`);
     } catch (err: any) {
       console.log("[Status] ❌ An error occurred while deploying token implementation");
       console.error(err.error?.message ?? err.message);

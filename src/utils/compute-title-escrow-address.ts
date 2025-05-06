@@ -1,11 +1,13 @@
-import { ethers } from "ethers";
+import { ethers as packedEthers } from "ethers";
 
-interface Params {
+export interface ComputeTitleEscrowAddressParams {
   implementationAddress: string;
   factoryAddress: string;
   registryAddress: string;
   tokenId: string;
 }
+
+const ethers = { ...packedEthers };
 
 if (ethers.version.includes("/5")) {
   (ethers as any).keccak256 = (ethers as any).utils.keccak256;
@@ -14,7 +16,10 @@ if (ethers.version.includes("/5")) {
   (ethers as any).getCreate2Address = (ethers as any).utils.getCreate2Address;
 }
 
-export const computeTitleEscrowAddress = (params: Params) => {
+/**
+ * @deprecated not be used with W3C VC
+ */
+export const computeTitleEscrowAddress = (params: ComputeTitleEscrowAddressParams) => {
   const { implementationAddress, factoryAddress, registryAddress, tokenId } = params;
   const initCodeHash = (ethers as any).keccak256(
     `0x3d602d80600a3d3981f3363d3d373d3d3d363d73${implementationAddress.substring(2)}5af43d82803e903d91602b57fd5bf3`
