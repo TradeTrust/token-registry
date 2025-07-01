@@ -357,7 +357,7 @@ tasks (which internally uses the same plugin), you will need to include your cor
 
 - For Ethereum, set `ETHERSCAN_API_KEY`.
 - For Polygon, set `POLYGONSCAN_API_KEY`.
-- For Astron, set `ASTRONSCAN_API_KEY`.
+- For Astron, set `ASTRON_API_KEY`.
 - For Astrontestnet, set `ASTRON_TESTNET_API_KEY`.
 
 ## Network Configuration
