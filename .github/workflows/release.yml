@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: 18.x
       - run: npm ci
-      - run: npm run build
+      - run: npm run build:prod
       - uses: codfish/semantic-release-action@v2
         id: semantic
         env:

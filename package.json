@@ -15,7 +15,14 @@
   },
   "files": [
     "dist",
-    "contracts"
+    "contracts/base",
+    "contracts/interfaces",
+    "contracts/presets",
+    "contracts/utils",
+    "contracts/lib",
+    "contracts/TitleEscrow.sol",
+    "contracts/TitleEscrowFactory.sol",
+    "contracts/TradeTrustToken.sol"
   ],
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -45,8 +52,10 @@
     "build:js": "tsc && npm run build:js:copy-src",
     "build:js:copy-types": "mkdir -p ./dist/contracts && cp -a ./src/contracts/* ./dist/contracts",
     "build:artifacts:copy": "mkdir -p ./dist/artifacts && cp -a ./artifacts/contracts/. ./dist/artifacts && rm -f ./dist/artifacts/**/*.dbg.json",
+    "build:artifacts:copy:prod": "npm run build:artifacts:copy && rm -rf ./dist/artifacts/contracts/mocks",
     "build:arrange": "rm -r ./dist/types/test && rm -r ./dist/types/tasks && rm -r ./dist/types/src/contracts && cp -a ./dist/types/src/* ./dist/types && rm -r ./dist/types/src",
     "build": "npm run clean:build && npm run build:sol && npm run build:js && npm run build:js:copy-types && npm run build:artifacts:copy && npm run build:arrange",
+    "build:prod": "npm run clean:build && npm run build:sol && npm run build:js && npm run build:js:copy-types && npm run build:artifacts:copy:prod && npm run build:arrange && npm run ci:assert:no-mocks",
     "clean:build": "TS_NODE_TRANSPILE_ONLY=1 hardhat clean && rm -rf ./dist && rm -rf ./src/contracts",
     "commit": "git-cz",
     "commit:retry": "npm run commit -- --retry",
@@ -59,9 +68,11 @@
     "test": "TS_NODE_TRANSPILE_ONLY=1 hardhat test",
     "test:watch": "TS_NODE_TRANSPILE_ONLY=1 hardhat watch test",
     "prepare": "npm run build",
+    "prepack": "npm run build:prod",
     "semantic-release": "semantic-release",
     "precoverage": "npm run clean:build && npm run build:sol",
-    "coverage": "hardhat coverage"
+    "coverage": "hardhat coverage",
+    "ci:assert:no-mocks": "node scripts/assertNoMocks.js"
   },
   "jest": {
     "globalSetup": "./jest/setup.ts",
