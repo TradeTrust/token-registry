@@ -1,4 +1,5 @@
 import "@nomicfoundation/hardhat-toolbox";
+import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import { randomBytes } from "crypto";
@@ -177,6 +178,14 @@ const config: HardhatUserConfig = {
     astrontestnet: {
       ...networkConfig,
       url: `https://dev-astronlayer2.bitfactory.cn/auth/${ASTRON_TESTNET_API_KEY}`,
+    },
+
+    /**
+     * XRPL EVM Testnet
+     */
+    xrplEvmTestnet: {
+      accounts: [DEPLOYER_PK!],
+      url: "https://rpc.testnet.xrplevm.org",
     },
     /**
      * Development
