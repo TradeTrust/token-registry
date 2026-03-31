@@ -10,6 +10,7 @@ const ChainId = {
   Astron: 1338,
   AstronTestnet: 21002,
   XRPLTestnet: 1_449_000,
+  ArcTestnet: 5042002,
 };
 
 export const contractAddress = {
@@ -25,6 +26,7 @@ export const contractAddress = {
     [ChainId.Astron]: "0xa1fCAE62b69D85BfBb5B447f038123A1e4d8f6eC",
     [ChainId.AstronTestnet]: "0x812A0E71c61A42C8d3d449BdfF51834f85686C73",
     [ChainId.XRPLTestnet]: "0x22890b4A1e76B96F1EB8715442DD5Fc4C0B7651a",
+    [ChainId.ArcTestnet]: "0xeEca11d64cec3b0A969F49B9F9a99A0966bCF8Dc",
   },
   Deployer: {
     [ChainId.Ethereum]: "0xEc6fD701743cEdf504873F5E5E807586f437A500",
@@ -38,6 +40,7 @@ export const contractAddress = {
     [ChainId.Astron]: "0x79ED245fFecdAF8C87BFE35ccF6A7b9FE9024240",
     [ChainId.AstronTestnet]: "0x1043B46Ad9072fB784492d94F8d25eF679B7AAf8",
     [ChainId.XRPLTestnet]: "0xDf2A8d7A03C997a62fC23B296d03b9467FB51D89",
+    [ChainId.ArcTestnet]: "0x118D3dc11EE06F7BF39FEf822894b572e110eC70",
   },
   TokenImplementation: {
     [ChainId.Ethereum]: "0x1583A4Eb50Bdde67F44A506a16c6d90C1E0A46d3",
@@ -51,5 +54,6 @@ export const contractAddress = {
     [ChainId.Astron]: "0x025aF5b49f1755C536d6965093C88d85A7Ec3300",
     [ChainId.AstronTestnet]: "0xA0Da221B3cd3e863425E1F1D34B9307D295a9d03",
     [ChainId.XRPLTestnet]: "0xe876Ba83ccb2326d70E0b5739179195A38982030",
+    [ChainId.ArcTestnet]: "0xFF267c9DFD1E48972460ac57a589B331DfaD4A79",
   },
 };
