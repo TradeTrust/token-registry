@@ -187,6 +187,15 @@ const config: HardhatUserConfig = {
       accounts: [DEPLOYER_PK!],
       url: "https://rpc.testnet.xrplevm.org",
     },
+
+    /**
+     * Arc Testnet
+     */
+    arcTestnet: {
+      accounts: [DEPLOYER_PK!],
+      url: "https://rpc.testnet.arc.network",
+    },
+
     /**
      * Development
      */
