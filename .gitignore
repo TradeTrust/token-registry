@@ -15,4 +15,3 @@ yarn-error.log
 /coverage
 coverage.json
 .openzeppelin/
-config.bat
