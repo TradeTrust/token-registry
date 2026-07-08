@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.20;
 
+import { ITitleEscrow } from "./ITitleEscrow.sol";
+
 interface TitleEscrowErrors {
   error CallerNotBeneficiary();
 
@@ -35,4 +37,8 @@ interface TitleEscrowErrors {
   error RemarkLengthExceeded();
 
   error DualRoleRejectionRequired();
+
+  error OwnerHolderMustDiffer();
+
+  error InvalidBillOfExchangeStatus(ITitleEscrow.Status currentStatus, ITitleEscrow.Status requiredStatus);
 }

@@ -9,6 +9,15 @@ import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Rec
  * @dev Inherits from IERC721Receiver.
  */
 interface ITitleEscrow is IERC721Receiver {
+  /// @notice Lifecycle status for a TitleEscrow. Starts at Issued for every token and only ever
+  /// advances via acceptBillOfExchange/rejectBillOfExchange/dischargeBillOfExchange below.
+  enum Status {
+    Issued,
+    Accepted,
+    Rejected,
+    Discharged
+  }
+
   event TokenReceived(
     address indexed beneficiary,
     address indexed holder,
@@ -63,6 +72,9 @@ interface ITitleEscrow is IERC721Receiver {
     uint256 tokenId,
     bytes remark
   );
+  event BillOfExchangeAccepted(address indexed holder, address registry, uint256 tokenId, bytes remark);
+  event BillOfExchangeRejected(address indexed holder, address registry, uint256 tokenId, bytes remark);
+  event BillOfExchangeDischarged(address indexed beneficiary, address registry, uint256 tokenId, bytes remark);
 
   /**
    * @notice Allows the beneficiary to nominate a new beneficiary

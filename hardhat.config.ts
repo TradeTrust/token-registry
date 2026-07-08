@@ -57,6 +57,26 @@ const config: HardhatUserConfig = {
         },
       },
     },
+
+    // TitleEscrowSignable was already close to the EIP-170 24576-byte limit; the eBOE
+    // fields/branches on the shared TitleEscrow base pushed it over. Lower `runs` here
+    // only (favouring size over per-call gas) rather than for every contract.
+    overrides: {
+      "contracts/presets/TitleEscrowSignable.sol": {
+        version: "0.8.22",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1,
+          },
+          outputSelection: {
+            "*": {
+              "*": ["storageLayout"],
+            },
+          },
+        },
+      },
+    },
   },
   typechain: {
     outDir: "src/contracts",
