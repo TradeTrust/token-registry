@@ -68,12 +68,6 @@ describe("Bill of Exchange (eBOE)", async () => {
     return titleEscrow;
   };
 
-  const mintRejected = async (id: string = tokenId): Promise<TitleEscrow> => {
-    const titleEscrow = await mint(users.beneficiary, users.holder, boeRemark(), id);
-    await titleEscrow.connect(users.holder).rejectBillOfExchange(boeRemark());
-    return titleEscrow;
-  };
-
   const mintRejectedDiverged = async (id: string = tokenId): Promise<TitleEscrow> => {
     const titleEscrow = await mintDiverged(id);
     await titleEscrow.connect(users.holder).rejectBillOfExchange(boeRemark());
@@ -859,7 +853,7 @@ describe("Bill of Exchange (eBOE)", async () => {
         name: "TradeTrust Title Escrow",
         version: "1",
         chainId,
-        verifyingContract: signableEscrow.target,
+        verifyingContract: signableEscrow.target as string,
       };
       const beneficiaryTransferTypes = {
         BeneficiaryTransfer: [
