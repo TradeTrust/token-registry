@@ -1,5 +1,11 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { TitleEscrow, TitleEscrowFactoryGetterMock, TitleEscrowSignable, TradeTrustToken, TradeTrustTokenMock } from "@tradetrust/contracts";
+import {
+  TitleEscrow,
+  TitleEscrowFactoryGetterMock,
+  TitleEscrowSignable,
+  TradeTrustToken,
+  TradeTrustTokenMock,
+} from "@tradetrust/contracts";
 import faker from "faker";
 import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
@@ -303,12 +309,14 @@ describe("Bill of Exchange (eBOE)", async () => {
       await registryContractAsAdmin.pause(txnHexRemarks.pauseRemark);
       expect(await issuedEscrow.status()).to.equal(Status.Issued);
 
-      await expect(
-        issuedEscrow.connect(users.holder).acceptBillOfExchange(boeRemark())
-      ).to.be.revertedWithCustomError(issuedEscrow, "RegistryContractPaused");
-      await expect(
-        issuedEscrow.connect(users.holder).rejectBillOfExchange(boeRemark())
-      ).to.be.revertedWithCustomError(issuedEscrow, "RegistryContractPaused");
+      await expect(issuedEscrow.connect(users.holder).acceptBillOfExchange(boeRemark())).to.be.revertedWithCustomError(
+        issuedEscrow,
+        "RegistryContractPaused"
+      );
+      await expect(issuedEscrow.connect(users.holder).rejectBillOfExchange(boeRemark())).to.be.revertedWithCustomError(
+        issuedEscrow,
+        "RegistryContractPaused"
+      );
 
       await registryContractAsAdmin.unpause(txnHexRemarks.unPauseRemark);
       await issuedEscrow.connect(users.holder).acceptBillOfExchange(boeRemark());
@@ -335,9 +343,10 @@ describe("Bill of Exchange (eBOE)", async () => {
       await registryContractAsAdmin.burn(tokenId, boeRemark());
       expect(await titleEscrow.active()).to.be.false;
 
-      await expect(
-        titleEscrow.connect(users.holder).acceptBillOfExchange(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "InactiveTitleEscrow");
+      await expect(titleEscrow.connect(users.holder).acceptBillOfExchange(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "InactiveTitleEscrow"
+      );
     });
 
     it("should revert BOE functions when the escrow is not holding the token", async () => {
@@ -355,12 +364,14 @@ describe("Bill of Exchange (eBOE)", async () => {
       const issuedEscrow = await mintDiverged(tokenId);
       const acceptedEscrow = await mintAndAccept(freshTokenId());
 
-      await expect(
-        issuedEscrow.connect(users.holder).acceptBillOfExchange(longRemark())
-      ).to.be.revertedWithCustomError(issuedEscrow, "RemarkLengthExceeded");
-      await expect(
-        issuedEscrow.connect(users.holder).rejectBillOfExchange(longRemark())
-      ).to.be.revertedWithCustomError(issuedEscrow, "RemarkLengthExceeded");
+      await expect(issuedEscrow.connect(users.holder).acceptBillOfExchange(longRemark())).to.be.revertedWithCustomError(
+        issuedEscrow,
+        "RemarkLengthExceeded"
+      );
+      await expect(issuedEscrow.connect(users.holder).rejectBillOfExchange(longRemark())).to.be.revertedWithCustomError(
+        issuedEscrow,
+        "RemarkLengthExceeded"
+      );
       await expect(
         acceptedEscrow.connect(users.beneficiary).dischargeBillOfExchange(longRemark())
       ).to.be.revertedWithCustomError(acceptedEscrow, "RemarkLengthExceeded");
@@ -384,12 +395,14 @@ describe("Bill of Exchange (eBOE)", async () => {
       const issuedEscrow = await mint(users.beneficiary, users.holder, boeRemark(), freshTokenId());
       const acceptedEscrow = await mintAndAccept(freshTokenId());
 
-      await expect(
-        issuedEscrow.connect(thirdParty).acceptBillOfExchange(boeRemark())
-      ).to.be.revertedWithCustomError(issuedEscrow, "CallerNotHolder");
-      await expect(
-        issuedEscrow.connect(thirdParty).rejectBillOfExchange(boeRemark())
-      ).to.be.revertedWithCustomError(issuedEscrow, "CallerNotHolder");
+      await expect(issuedEscrow.connect(thirdParty).acceptBillOfExchange(boeRemark())).to.be.revertedWithCustomError(
+        issuedEscrow,
+        "CallerNotHolder"
+      );
+      await expect(issuedEscrow.connect(thirdParty).rejectBillOfExchange(boeRemark())).to.be.revertedWithCustomError(
+        issuedEscrow,
+        "CallerNotHolder"
+      );
       await expect(
         acceptedEscrow.connect(thirdParty).dischargeBillOfExchange(boeRemark())
       ).to.be.revertedWithCustomError(acceptedEscrow, "CallerNotBeneficiary");
@@ -566,42 +579,47 @@ describe("Bill of Exchange (eBOE)", async () => {
     it("should revert returnToIssuer while Issued with owner != holder", async () => {
       const titleEscrow = await mintDiverged();
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).returnToIssuer(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "CallerNotHolder");
+      await expect(titleEscrow.connect(users.beneficiary).returnToIssuer(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "CallerNotHolder"
+      );
     });
 
     it("should revert returnToIssuer while Accepted with owner != holder", async () => {
       const titleEscrow = await mintAndAccept();
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).returnToIssuer(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "CallerNotHolder");
+      await expect(titleEscrow.connect(users.beneficiary).returnToIssuer(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "CallerNotHolder"
+      );
     });
 
     it("should revert returnToIssuer while Rejected before role reconvergence", async () => {
       const titleEscrow = await mintRejectedDiverged();
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).returnToIssuer(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "CallerNotHolder");
+      await expect(titleEscrow.connect(users.beneficiary).returnToIssuer(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "CallerNotHolder"
+      );
     });
 
     it("should revert returnToIssuer while Discharged before role reconvergence", async () => {
       const titleEscrow = await mintDischarged();
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).returnToIssuer(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "CallerNotHolder");
+      await expect(titleEscrow.connect(users.beneficiary).returnToIssuer(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "CallerNotHolder"
+      );
     });
 
     it("should revert rejectTransferHolder after rejectBillOfExchange when prevHolder is zero", async () => {
       const titleEscrow = await mint(users.beneficiary, users.holder, boeRemark());
       await titleEscrow.connect(users.holder).rejectBillOfExchange(boeRemark());
 
-      await expect(
-        titleEscrow.connect(users.holder).rejectTransferHolder(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "InvalidTransferToZeroAddress");
+      await expect(titleEscrow.connect(users.holder).rejectTransferHolder(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "InvalidTransferToZeroAddress"
+      );
     });
 
     it("should block BOE functions after Rejected burn while keeping the terminal status readable", async () => {
@@ -612,9 +630,10 @@ describe("Bill of Exchange (eBOE)", async () => {
 
       expect(await titleEscrow.status()).to.equal(Status.Rejected);
       expect(await titleEscrow.active()).to.be.false;
-      await expect(
-        titleEscrow.connect(users.holder).acceptBillOfExchange(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "InactiveTitleEscrow");
+      await expect(titleEscrow.connect(users.holder).acceptBillOfExchange(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "InactiveTitleEscrow"
+      );
     });
 
     it("should block BOE functions after Discharged burn while keeping the terminal status readable", async () => {
@@ -718,12 +737,14 @@ describe("Bill of Exchange (eBOE)", async () => {
     it("discharged terminal: BOE functions revert but circulation remains possible on-chain", async () => {
       const titleEscrow = await mintDischarged();
 
-      await expect(
-        titleEscrow.connect(users.holder).acceptBillOfExchange(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "InvalidBillOfExchangeStatus");
-      await expect(
-        titleEscrow.connect(users.holder).rejectBillOfExchange(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "InvalidBillOfExchangeStatus");
+      await expect(titleEscrow.connect(users.holder).acceptBillOfExchange(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "InvalidBillOfExchangeStatus"
+      );
+      await expect(titleEscrow.connect(users.holder).rejectBillOfExchange(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "InvalidBillOfExchangeStatus"
+      );
       await expect(
         titleEscrow.connect(users.beneficiary).dischargeBillOfExchange(boeRemark())
       ).to.be.revertedWithCustomError(titleEscrow, "InvalidBillOfExchangeStatus");
@@ -822,12 +843,9 @@ describe("Bill of Exchange (eBOE)", async () => {
         ["address", "address", "bytes"],
         [users.beneficiary.address, users.holder.address, boeRemark()]
       );
-      await signableEscrow.connect(registrySigner as Signer).onERC721Received(
-        ethers.ZeroAddress,
-        ethers.ZeroAddress,
-        signableTokenId,
-        data
-      );
+      await signableEscrow
+        .connect(registrySigner as Signer)
+        .onERC721Received(ethers.ZeroAddress, ethers.ZeroAddress, signableTokenId, data);
       await signableRegistry.connect(users.carrier).mintInternal(signableEscrow.target, signableTokenId);
     });
 
