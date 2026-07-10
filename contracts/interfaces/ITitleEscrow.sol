@@ -10,7 +10,7 @@ import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Rec
  */
 interface ITitleEscrow is IERC721Receiver {
   /// @notice Lifecycle status for a TitleEscrow. Starts at Issued for every token and only ever
-  /// advances via acceptBillOfExchange/rejectBillOfExchange/dischargeBillOfExchange below.
+  /// advances via accept/reject/discharge below.
   enum Status {
     Issued,
     Accepted,
@@ -72,9 +72,13 @@ interface ITitleEscrow is IERC721Receiver {
     uint256 tokenId,
     bytes remark
   );
-  event BillOfExchangeAccepted(address indexed holder, address registry, uint256 tokenId, bytes remark);
-  event BillOfExchangeRejected(address indexed holder, address registry, uint256 tokenId, bytes remark);
-  event BillOfExchangeDischarged(address indexed beneficiary, address registry, uint256 tokenId, bytes remark);
+  event StatusAccepted(address indexed holder, address registry, uint256 tokenId, bytes remark);
+  event StatusRejected(address indexed holder, address registry, uint256 tokenId, bytes remark);
+  event StatusDischarged(address indexed beneficiary, address registry, uint256 tokenId, bytes remark);
+
+  function accept(bytes calldata _remark) external;
+  function reject(bytes calldata _remark) external;
+  function discharge(bytes calldata _remark) external;
 
   /**
    * @notice Allows the beneficiary to nominate a new beneficiary
@@ -135,6 +139,8 @@ interface ITitleEscrow is IERC721Receiver {
   function registry() external view returns (address);
 
   function tokenId() external view returns (uint256);
+
+  function status() external view returns (Status);
 
   /**
    * @notice Check if the TitleEscrow is currently holding a token

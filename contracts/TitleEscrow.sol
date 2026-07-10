@@ -379,14 +379,14 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
   }
 
   /**
-   * @notice Advances the instrument's status, shared by acceptBillOfExchange, rejectBillOfExchange,
-   * and dischargeBillOfExchange.
+   * @notice Advances the instrument's status, shared by accept, reject,
+   * and discharge.
    * @param requiredStatus The status this transition must start from
    * @param newStatus The status to advance to
    */
-  function _transitionBillOfExchangeStatus(Status requiredStatus, Status newStatus, bytes calldata _remark) internal {
+  function _transitionStatus(Status requiredStatus, Status newStatus, bytes calldata _remark) internal {
     if (beneficiary == holder) revert OwnerHolderMustDiffer();
-    if (status != requiredStatus) revert InvalidBillOfExchangeStatus(status, requiredStatus);
+    if (status != requiredStatus) revert InvalidStatusTransition(status, requiredStatus);
     status = newStatus;
     remark = _remark;
   }
@@ -397,11 +397,11 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    * TitleEscrow carries `status`, so this is callable regardless of how the token is used.
    * Existing transfer/reject/nominate functions above are completely unmodified by this feature.
    */
-  function acceptBillOfExchange(
+  function accept(
     bytes calldata _remark
   ) external virtual whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(_remark) {
-    _transitionBillOfExchangeStatus(Status.Issued, Status.Accepted, _remark);
-    emit BillOfExchangeAccepted(holder, registry, tokenId, _remark);
+    _transitionStatus(Status.Issued, Status.Accepted, _remark);
+    emit StatusAccepted(holder, registry, tokenId, _remark);
   }
 
   /**
@@ -409,21 +409,21 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    * @dev Status-only — does not revert holder/beneficiary roles; use the existing
    * rejectTransferHolder for that, unchanged and independent of this.
    */
-  function rejectBillOfExchange(
+  function reject(
     bytes calldata _remark
   ) external virtual whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(_remark) {
-    _transitionBillOfExchangeStatus(Status.Issued, Status.Rejected, _remark);
-    emit BillOfExchangeRejected(holder, registry, tokenId, _remark);
+    _transitionStatus(Status.Issued, Status.Rejected, _remark);
+    emit StatusRejected(holder, registry, tokenId, _remark);
   }
 
   /**
    * @notice Owner discharges the instrument, moving status from Accepted to Discharged.
    * @dev Status-only, same treatment as accept/reject above.
    */
-  function dischargeBillOfExchange(
+  function discharge(
     bytes calldata _remark
   ) external virtual whenNotPaused whenActive onlyBeneficiary whenHoldingToken remarkLengthLimit(_remark) {
-    _transitionBillOfExchangeStatus(Status.Accepted, Status.Discharged, _remark);
-    emit BillOfExchangeDischarged(beneficiary, registry, tokenId, _remark);
+    _transitionStatus(Status.Accepted, Status.Discharged, _remark);
+    emit StatusDischarged(beneficiary, registry, tokenId, _remark);
   }
 }

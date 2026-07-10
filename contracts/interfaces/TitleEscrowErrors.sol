@@ -40,5 +40,5 @@ interface TitleEscrowErrors {
 
   error OwnerHolderMustDiffer();
 
-  error InvalidBillOfExchangeStatus(ITitleEscrow.Status currentStatus, ITitleEscrow.Status requiredStatus);
+  error InvalidStatusTransition(ITitleEscrow.Status currentStatus, ITitleEscrow.Status requiredStatus);
 }
