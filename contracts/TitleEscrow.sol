@@ -28,7 +28,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   bytes public remark;
 
-  Status public status;
+  Status public override status;
 
   constructor() initializer {}
 
@@ -399,7 +399,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    */
   function accept(
     bytes calldata _remark
-  ) external virtual whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(_remark) {
+  ) external virtual override whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(_remark) {
     _transitionStatus(Status.Issued, Status.Accepted, _remark);
     emit StatusAccepted(holder, registry, tokenId, _remark);
   }
@@ -411,7 +411,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    */
   function reject(
     bytes calldata _remark
-  ) external virtual whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(_remark) {
+  ) external virtual override whenNotPaused whenActive onlyHolder whenHoldingToken remarkLengthLimit(_remark) {
     _transitionStatus(Status.Issued, Status.Rejected, _remark);
     emit StatusRejected(holder, registry, tokenId, _remark);
   }
@@ -422,7 +422,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
    */
   function discharge(
     bytes calldata _remark
-  ) external virtual whenNotPaused whenActive onlyBeneficiary whenHoldingToken remarkLengthLimit(_remark) {
+  ) external virtual override whenNotPaused whenActive onlyBeneficiary whenHoldingToken remarkLengthLimit(_remark) {
     _transitionStatus(Status.Accepted, Status.Discharged, _remark);
     emit StatusDischarged(beneficiary, registry, tokenId, _remark);
   }

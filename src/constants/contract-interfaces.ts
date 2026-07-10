@@ -19,9 +19,13 @@ export const contractInterfaces = {
     "nominee()",
     "registry()",
     "tokenId()",
+    "status()",
     "isHoldingToken()",
     "returnToIssuer(bytes)",
     "shred(bytes)",
+    "accept(bytes)",
+    "reject(bytes)",
+    "discharge(bytes)",
   ],
   TitleEscrowSignable: [
     "transferBeneficiaryWithSig((address,address,address,address,uint256,uint256,uint256),(bytes32,bytes32,uint8))",
