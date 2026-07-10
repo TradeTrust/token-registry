@@ -120,17 +120,19 @@ describe("Bill of Exchange (eBOE)", async () => {
     it("should revert if beneficiary == holder", async () => {
       const titleEscrow = await mint(users.beneficiary, users.beneficiary, boeRemark());
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).accept(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "OwnerHolderMustDiffer");
+      await expect(titleEscrow.connect(users.beneficiary).accept(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "OwnerHolderMustDiffer"
+      );
     });
 
     it("should revert if called by non-holder", async () => {
       const titleEscrow = await mint(users.beneficiary, users.holder, boeRemark());
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).accept(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "CallerNotHolder");
+      await expect(titleEscrow.connect(users.beneficiary).accept(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "CallerNotHolder"
+      );
     });
 
     it("should succeed with owner != holder at mint without a prior transferHolder (direct presentment)", async () => {
@@ -169,17 +171,19 @@ describe("Bill of Exchange (eBOE)", async () => {
     it("should revert if beneficiary == holder", async () => {
       const titleEscrow = await mint(users.beneficiary, users.beneficiary, boeRemark());
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).reject(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "OwnerHolderMustDiffer");
+      await expect(titleEscrow.connect(users.beneficiary).reject(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "OwnerHolderMustDiffer"
+      );
     });
 
     it("should revert if called by non-holder", async () => {
       const titleEscrow = await mint(users.beneficiary, users.holder, boeRemark());
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).reject(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "CallerNotHolder");
+      await expect(titleEscrow.connect(users.beneficiary).reject(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "CallerNotHolder"
+      );
     });
 
     it("should succeed with owner != holder at mint without a prior transferHolder (no prevHolder needed)", async () => {
@@ -218,17 +222,19 @@ describe("Bill of Exchange (eBOE)", async () => {
     it("should revert if beneficiary == holder", async () => {
       const titleEscrow = await mint(users.beneficiary, users.beneficiary, boeRemark());
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "OwnerHolderMustDiffer");
+      await expect(titleEscrow.connect(users.beneficiary).discharge(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "OwnerHolderMustDiffer"
+      );
     });
 
     it("should revert if called by non-beneficiary", async () => {
       const titleEscrow = await mint(users.beneficiary, users.holder, boeRemark());
 
-      await expect(
-        titleEscrow.connect(users.holder).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "CallerNotBeneficiary");
+      await expect(titleEscrow.connect(users.holder).discharge(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "CallerNotBeneficiary"
+      );
     });
 
     it("should succeed and set status Discharged from Accepted", async () => {
@@ -246,18 +252,20 @@ describe("Bill of Exchange (eBOE)", async () => {
     it("should revert if status is Issued (not yet accepted)", async () => {
       const titleEscrow = await mintDiverged();
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "InvalidStatusTransition");
+      await expect(titleEscrow.connect(users.beneficiary).discharge(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "InvalidStatusTransition"
+      );
     });
 
     it("should revert if status is Rejected - discharge never closes a rejected bill", async () => {
       const titleEscrow = await mintRejectedDiverged();
       expect(await titleEscrow.status()).to.equal(Status.Rejected);
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "InvalidStatusTransition");
+      await expect(titleEscrow.connect(users.beneficiary).discharge(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "InvalidStatusTransition"
+      );
     });
   });
 
@@ -322,9 +330,10 @@ describe("Bill of Exchange (eBOE)", async () => {
       await issuedEscrow.connect(users.holder).accept(boeRemark());
       await registryContractAsAdmin.pause(txnHexRemarks.pauseRemark);
 
-      await expect(
-        issuedEscrow.connect(users.beneficiary).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(issuedEscrow, "RegistryContractPaused");
+      await expect(issuedEscrow.connect(users.beneficiary).discharge(boeRemark())).to.be.revertedWithCustomError(
+        issuedEscrow,
+        "RegistryContractPaused"
+      );
     });
 
     it("should allow BOE functions again after the registry is unpaused", async () => {
@@ -355,9 +364,10 @@ describe("Bill of Exchange (eBOE)", async () => {
       await titleEscrow.connect(users.beneficiary).returnToIssuer(boeRemark());
       expect(await titleEscrow.isHoldingToken()).to.be.false;
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).accept(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "TitleEscrowNotHoldingToken");
+      await expect(titleEscrow.connect(users.beneficiary).accept(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "TitleEscrowNotHoldingToken"
+      );
     });
 
     it("should revert accept, reject, and discharge when remark length exceeds 120 bytes", async () => {
@@ -372,9 +382,10 @@ describe("Bill of Exchange (eBOE)", async () => {
         issuedEscrow,
         "RemarkLengthExceeded"
       );
-      await expect(
-        acceptedEscrow.connect(users.beneficiary).discharge(longRemark())
-      ).to.be.revertedWithCustomError(acceptedEscrow, "RemarkLengthExceeded");
+      await expect(acceptedEscrow.connect(users.beneficiary).discharge(longRemark())).to.be.revertedWithCustomError(
+        acceptedEscrow,
+        "RemarkLengthExceeded"
+      );
     });
 
     it("should accept empty remark 0x on accept, reject, and discharge", async () => {
@@ -403,9 +414,10 @@ describe("Bill of Exchange (eBOE)", async () => {
         issuedEscrow,
         "CallerNotHolder"
       );
-      await expect(
-        acceptedEscrow.connect(thirdParty).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(acceptedEscrow, "CallerNotBeneficiary");
+      await expect(acceptedEscrow.connect(thirdParty).discharge(boeRemark())).to.be.revertedWithCustomError(
+        acceptedEscrow,
+        "CallerNotBeneficiary"
+      );
     });
 
     it("should overwrite remark on successful accept, reject, and discharge", async () => {
@@ -431,32 +443,37 @@ describe("Bill of Exchange (eBOE)", async () => {
       const titleEscrow = await mintDiverged();
       await reconvergeToBeneficiary(titleEscrow);
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).accept(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "OwnerHolderMustDiffer");
+      await expect(titleEscrow.connect(users.beneficiary).accept(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "OwnerHolderMustDiffer"
+      );
     });
 
     it("should block accept, reject, and discharge while owner and holder are the same", async () => {
       const titleEscrow = await mint(users.beneficiary, users.beneficiary, boeRemark());
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).accept(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "OwnerHolderMustDiffer");
-      await expect(
-        titleEscrow.connect(users.beneficiary).reject(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "OwnerHolderMustDiffer");
-      await expect(
-        titleEscrow.connect(users.beneficiary).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "OwnerHolderMustDiffer");
+      await expect(titleEscrow.connect(users.beneficiary).accept(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "OwnerHolderMustDiffer"
+      );
+      await expect(titleEscrow.connect(users.beneficiary).reject(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "OwnerHolderMustDiffer"
+      );
+      await expect(titleEscrow.connect(users.beneficiary).discharge(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "OwnerHolderMustDiffer"
+      );
     });
 
     it("should revert discharge after accept when transferHolder reconverges roles onto the owner", async () => {
       const titleEscrow = await mintAndAccept();
       await titleEscrow.connect(users.holder).transferHolder(users.beneficiary.address, boeRemark());
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "OwnerHolderMustDiffer");
+      await expect(titleEscrow.connect(users.beneficiary).discharge(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "OwnerHolderMustDiffer"
+      );
     });
 
     it("should allow a new owner to discharge after financing endorsement while Accepted", async () => {
@@ -645,9 +662,10 @@ describe("Bill of Exchange (eBOE)", async () => {
 
       expect(await titleEscrow.status()).to.equal(Status.Discharged);
       expect(await titleEscrow.active()).to.be.false;
-      await expect(
-        titleEscrow.connect(users.beneficiary).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "InactiveTitleEscrow");
+      await expect(titleEscrow.connect(users.beneficiary).discharge(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "InactiveTitleEscrow"
+      );
     });
 
     it("should restore after returnToIssuer without burn and keep status Issued on the same escrow", async () => {
@@ -729,9 +747,10 @@ describe("Bill of Exchange (eBOE)", async () => {
       expect(await titleEscrow.beneficiary()).to.equal(users.beneficiary.address);
       expect(await titleEscrow.holder()).to.equal(users.beneficiary.address);
 
-      await expect(
-        titleEscrow.connect(users.beneficiary).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "OwnerHolderMustDiffer");
+      await expect(titleEscrow.connect(users.beneficiary).discharge(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "OwnerHolderMustDiffer"
+      );
     });
 
     it("discharged terminal: BOE functions revert but circulation remains possible on-chain", async () => {
@@ -745,9 +764,10 @@ describe("Bill of Exchange (eBOE)", async () => {
         titleEscrow,
         "InvalidStatusTransition"
       );
-      await expect(
-        titleEscrow.connect(users.beneficiary).discharge(boeRemark())
-      ).to.be.revertedWithCustomError(titleEscrow, "InvalidStatusTransition");
+      await expect(titleEscrow.connect(users.beneficiary).discharge(boeRemark())).to.be.revertedWithCustomError(
+        titleEscrow,
+        "InvalidStatusTransition"
+      );
 
       await titleEscrow.connect(users.beneficiary).nominate(thirdParty.address, boeRemark());
       await titleEscrow.connect(users.holder).transferBeneficiary(thirdParty.address, boeRemark());
