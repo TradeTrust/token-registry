@@ -22,7 +22,11 @@
     "contracts/lib",
     "contracts/TitleEscrow.sol",
     "contracts/TitleEscrowFactory.sol",
-    "contracts/TradeTrustToken.sol"
+    "contracts/TradeTrustToken.sol",
+    "contracts/ObligationEscrow.sol",
+    "contracts/ObligationEscrowFactory.sol",
+    "contracts/ObligationToken.sol",
+    "contracts/ObligationRegistryFactory.sol"
   ],
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
