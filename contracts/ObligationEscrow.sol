@@ -6,7 +6,6 @@ import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IObligationEscrow } from "./interfaces/IObligationEscrow.sol";
 import { ITrustVCToken } from "./interfaces/ITrustVCToken.sol";
-import { ITitleEscrow } from "./interfaces/ITitleEscrow.sol";
 import { ITradeTrustToken } from "./interfaces/ITradeTrustToken.sol";
 import { ObligationEscrowErrors } from "./interfaces/ObligationEscrowErrors.sol";
 
@@ -121,7 +120,7 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
    * @dev See {ERC165-supportsInterface}.
    */
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-    return interfaceId == type(IObligationEscrow).interfaceId || interfaceId == type(ITitleEscrow).interfaceId;
+    return interfaceId == type(IObligationEscrow).interfaceId || interfaceId == type(IERC165).interfaceId;
   }
 
   /**
@@ -459,7 +458,7 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
    */
   function _setBeneficiary(address newBeneficiary, bytes memory _remark) internal virtual {
     emit BeneficiaryTransfer(beneficiary, newBeneficiary, registry, tokenId, _remark);
-    if (nominee != address(0)) _setNominee(address(0), "0x");
+    if (nominee != address(0)) _setNominee(address(0), "");
     beneficiary = newBeneficiary;
   }
 

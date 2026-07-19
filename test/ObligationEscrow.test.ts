@@ -78,10 +78,6 @@ describe("ObligationEscrow", async () => {
     it("should support IObligationEscrow interface", async () => {
       expect(await escrow.supportsInterface(contractInterfaceId.ObligationEscrow)).to.be.true;
     });
-
-    it("should support classic ITitleEscrow interface (backwards compatibility)", async () => {
-      expect(await escrow.supportsInterface(contractInterfaceId.TitleEscrow)).to.be.true;
-    });
   });
 
   describe("General Behaviours", () => {

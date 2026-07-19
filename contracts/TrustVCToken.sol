@@ -77,7 +77,7 @@ contract TrustVCToken is
   function burnFromEscrow(uint256 tokenId, bytes calldata remark) external override whenNotPaused remarkLengthLimit(remark) {
     address escrow = titleEscrowFactory().getEscrowAddress(address(this), tokenId);
     if (msg.sender != escrow) revert CallerNotEscrow();
-    _registryTransferTo(BURN_ADDRESS, tokenId, "");
+    _registryTransferTo(BURN_ADDRESS, tokenId, remark);
   }
 
   function _authorizeUpgrade(address) internal view override onlyOwner {}
