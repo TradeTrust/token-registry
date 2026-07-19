@@ -1,11 +1,11 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { ObligationEscrow, ObligationEscrowFactory, ObligationToken } from "@tradetrust/contracts";
+import { ObligationEscrow, ObligationEscrowFactory, TradeTrustObligationToken } from "@tradetrust/contracts";
 import { Contract, Signer } from "ethers";
 import faker from "faker";
 import { ethers } from "hardhat";
 import { expect } from ".";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
-import { deployObligationEscrowFixture, deployObligationTokenFixture } from "./fixtures";
+import { deployObligationEscrowFixture, deployTradeTrustObligationTokenFixture } from "./fixtures";
 import { deployImplProxy } from "./fixtures/deploy-impl-proxy.fixture";
 import { getTestUsers, impersonateAccount, TestUsers, txnHexRemarks } from "./helpers";
 
@@ -39,7 +39,7 @@ describe("ObligationEscrow", async () => {
     tokenId = faker.datatype.hexaDecimal(64);
   });
 
-  const getEscrowContract = async (obligationToken: ObligationToken, id: string): Promise<ObligationEscrow> => {
+  const getEscrowContract = async (obligationToken: TradeTrustObligationToken, id: string): Promise<ObligationEscrow> => {
     const factoryAddr = await obligationToken.obligationEscrowFactory();
     const factory = (await ethers.getContractFactory("ObligationEscrowFactory")).attach(
       factoryAddr
@@ -49,7 +49,7 @@ describe("ObligationEscrow", async () => {
   };
 
   const mint = async (
-    obligationToken: ObligationToken,
+    obligationToken: TradeTrustObligationToken,
     beneficiary: SignerWithAddress,
     holder: SignerWithAddress,
     id: string
@@ -63,12 +63,12 @@ describe("ObligationEscrow", async () => {
   };
 
   describe("ERC165 Support", () => {
-    let obligationToken: ObligationToken;
+    let obligationToken: TradeTrustObligationToken;
     let escrow: ObligationEscrow;
 
     // eslint-disable-next-line no-undef
     before(async () => {
-      ({ obligationToken } = await deployObligationTokenFixture({ deployer: users.carrier }));
+      ({ obligationToken } = await deployTradeTrustObligationTokenFixture({ deployer: users.carrier }));
     });
 
     beforeEach(async () => {
@@ -154,7 +154,7 @@ describe("ObligationEscrow", async () => {
 
   describe("IERC721Receiver Behaviour", () => {
     let implContractSrc: ObligationEscrow;
-    let fakeRegistry: ObligationToken;
+    let fakeRegistry: TradeTrustObligationToken;
     let fakeRegistryWallet: Signer;
     let implContract: ObligationEscrow;
     let fakeAddress: string;
@@ -165,7 +165,7 @@ describe("ObligationEscrow", async () => {
     });
 
     beforeEach(async () => {
-      ({ obligationToken: fakeRegistry } = await deployObligationTokenFixture({ deployer: users.carrier }));
+      ({ obligationToken: fakeRegistry } = await deployTradeTrustObligationTokenFixture({ deployer: users.carrier }));
       fakeRegistryWallet = await impersonateAccount({ address: await fakeRegistry.getAddress() });
       fakeAddress = ethers.getAddress(faker.finance.ethereumAddress());
 
@@ -307,13 +307,13 @@ describe("ObligationEscrow", async () => {
     });
   });
 
-  describe("Operational behaviours (via a real ObligationToken)", () => {
-    let obligationToken: ObligationToken;
+  describe("Operational behaviours (via a real TradeTrustObligationToken)", () => {
+    let obligationToken: TradeTrustObligationToken;
     let escrow: ObligationEscrow;
 
     // eslint-disable-next-line no-undef
     before(async () => {
-      ({ obligationToken } = await deployObligationTokenFixture({ deployer: users.carrier }));
+      ({ obligationToken } = await deployTradeTrustObligationTokenFixture({ deployer: users.carrier }));
     });
 
     describe("Status lifecycle (accept/reject/discharge)", () => {

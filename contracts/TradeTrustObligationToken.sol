@@ -4,19 +4,19 @@ pragma solidity ^0.8.20;
 import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { TradeTrustTokenBase, ITitleEscrowFactory } from "./base/TradeTrustTokenBase.sol";
-import { IObligationToken } from "./interfaces/IObligationToken.sol";
-import { ObligationTokenErrors } from "./interfaces/ObligationTokenErrors.sol";
+import { ITradeTrustObligationToken } from "./interfaces/ITradeTrustObligationToken.sol";
+import { TradeTrustObligationTokenErrors } from "./interfaces/TradeTrustObligationTokenErrors.sol";
 
 /**
- * @title ObligationToken
+ * @title TradeTrustObligationToken
  * @notice Upgradeable SBT registry for obligation titles; status lifecycle lives on ObligationEscrow.
  */
-contract ObligationToken is
+contract TradeTrustObligationToken is
   TradeTrustTokenBase,
   Ownable2StepUpgradeable,
   UUPSUpgradeable,
-  IObligationToken,
-  ObligationTokenErrors
+  ITradeTrustObligationToken,
+  TradeTrustObligationTokenErrors
 {
   address private _obligationEscrowFactory;
   uint256 private _genesis;
@@ -58,7 +58,7 @@ contract ObligationToken is
   }
 
   /**
-   * @dev See {IObligationToken-obligationEscrowFactory}.
+   * @dev See {ITradeTrustObligationToken-obligationEscrowFactory}.
    */
   function obligationEscrowFactory() external view override returns (address) {
     return _obligationEscrowFactory;
@@ -72,7 +72,7 @@ contract ObligationToken is
   }
 
   /**
-   * @dev See {IObligationToken-burnFromEscrow}.
+   * @dev See {ITradeTrustObligationToken-burnFromEscrow}.
    */
   function burnFromEscrow(uint256 tokenId, bytes calldata remark) external override whenNotPaused remarkLengthLimit(remark) {
     address escrow = titleEscrowFactory().getEscrowAddress(address(this), tokenId);

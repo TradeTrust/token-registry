@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 /**
  * @title IObligationRegistryFactory
- * @notice Deploys ObligationToken UUPS proxies bound to an ObligationEscrowFactory.
+ * @notice Deploys TradeTrustObligationToken UUPS proxies bound to an ObligationEscrowFactory.
  */
 interface IObligationRegistryFactory {
   event ObligationRegistryDeployed(
@@ -19,7 +19,7 @@ interface IObligationRegistryFactory {
   function obligationEscrowFactory() external view returns (address);
 
   /**
-   * @notice Deploys an ObligationToken proxy.
+   * @notice Deploys a TradeTrustObligationToken proxy.
    * @param name Token name.
    * @param symbol Token symbol.
    * @param owner Admin / UUPS owner (receives registry roles).

@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 /**
- * @title IObligationToken
+ * @title ITradeTrustObligationToken
  * @notice Thin SBT registry for obligation titles; lifecycle lives on ObligationEscrow.
  */
-interface IObligationToken {
+interface ITradeTrustObligationToken {
   function obligationEscrowFactory() external view returns (address);
 
   /**

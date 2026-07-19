@@ -5,7 +5,7 @@ import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable
 import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IObligationEscrow } from "./interfaces/IObligationEscrow.sol";
-import { IObligationToken } from "./interfaces/IObligationToken.sol";
+import { ITradeTrustObligationToken } from "./interfaces/ITradeTrustObligationToken.sol";
 import { ITitleEscrow } from "./interfaces/ITitleEscrow.sol";
 import { ITradeTrustToken } from "./interfaces/ITradeTrustToken.sol";
 import { ObligationEscrowErrors } from "./interfaces/ObligationEscrowErrors.sol";
@@ -424,7 +424,7 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
     prevBeneficiary = address(0);
     prevHolder = address(0);
     _deactivate(_remark, reason);
-    IObligationToken(registry).burnFromEscrow(tokenId, _remark);
+    ITradeTrustObligationToken(registry).burnFromEscrow(tokenId, _remark);
   }
 
   function _deactivate(bytes calldata _remark, TerminationReason reason) private {
