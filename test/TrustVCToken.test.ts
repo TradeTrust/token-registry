@@ -1,10 +1,10 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
-import { ObligationEscrow, ObligationEscrowFactory, TradeTrustObligationToken } from "@tradetrust/contracts";
+import { ObligationEscrow, ObligationEscrowFactory, TrustVCToken } from "@tradetrust/contracts";
 import { expect } from "chai";
 import faker from "faker";
 import { ethers } from "hardhat";
 import { defaultAddress, roleHash } from "../src/constants";
-import { deployTradeTrustObligationTokenFixture } from "./fixtures";
+import { deployTrustVCTokenFixture } from "./fixtures";
 import { getTestUsers, impersonateAccount, TestUsers, txnHexRemarks } from "./helpers";
 
 enum Status {
@@ -16,9 +16,9 @@ enum Status {
 
 const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 
-describe("TradeTrustObligationToken", () => {
+describe("TrustVCToken", () => {
   let users: TestUsers;
-  let obligationToken: TradeTrustObligationToken;
+  let obligationToken: TrustVCToken;
   let tokenId: string;
 
   const getEscrow = async (id: string): Promise<ObligationEscrow> => {
@@ -43,7 +43,7 @@ describe("TradeTrustObligationToken", () => {
   });
 
   beforeEach(async () => {
-    ({ obligationToken } = await deployTradeTrustObligationTokenFixture({ deployer: users.carrier }));
+    ({ obligationToken } = await deployTrustVCTokenFixture({ deployer: users.carrier }));
     tokenId = faker.datatype.hexaDecimal(64);
   });
 
@@ -130,7 +130,7 @@ describe("TradeTrustObligationToken", () => {
       admin: string,
       obligationEscrowFactoryAddress: string
     ): Promise<Promise<unknown>> => {
-      const implementation = await (await ethers.getContractFactory("TradeTrustObligationToken")).deploy();
+      const implementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
       const initData = implementation.interface.encodeFunctionData("initialize", [
         "Test Registry",
         "TST",
@@ -142,7 +142,7 @@ describe("TradeTrustObligationToken", () => {
     };
 
     it("should revert with ZeroAddress when admin is the zero address", async () => {
-      const implementation = await (await ethers.getContractFactory("TradeTrustObligationToken")).deploy();
+      const implementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
 
       await expect(deployObligationTokenProxy(defaultAddress.Zero, escrowFactoryAddress)).to.be.revertedWithCustomError(
         implementation,
@@ -151,7 +151,7 @@ describe("TradeTrustObligationToken", () => {
     });
 
     it("should revert with ZeroAddress when obligationEscrowFactory is the zero address", async () => {
-      const implementation = await (await ethers.getContractFactory("TradeTrustObligationToken")).deploy();
+      const implementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
 
       await expect(
         deployObligationTokenProxy(users.carrier.address, defaultAddress.Zero)
@@ -159,7 +159,7 @@ describe("TradeTrustObligationToken", () => {
     });
 
     it("should revert with InvalidObligationEscrowFactory when the address has no code", async () => {
-      const implementation = await (await ethers.getContractFactory("TradeTrustObligationToken")).deploy();
+      const implementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
       const [eoa] = users.others;
 
       await expect(deployObligationTokenProxy(users.carrier.address, eoa.address)).to.be.revertedWithCustomError(
@@ -204,7 +204,7 @@ describe("TradeTrustObligationToken", () => {
   describe("UUPS upgrade", () => {
     it("should revert when a non-owner attempts to upgrade", async () => {
       const [notOwner] = users.others;
-      const newImplementation = await (await ethers.getContractFactory("TradeTrustObligationToken")).deploy();
+      const newImplementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
 
       const tx = obligationToken.connect(notOwner).upgradeToAndCall(await newImplementation.getAddress(), "0x");
 
@@ -216,7 +216,7 @@ describe("TradeTrustObligationToken", () => {
       const escrowFactoryBefore = await obligationToken.obligationEscrowFactory();
       const genesisBefore = await obligationToken.genesis();
 
-      const newImplementation = await (await ethers.getContractFactory("TradeTrustObligationToken")).deploy();
+      const newImplementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
       await obligationToken.connect(users.carrier).upgradeToAndCall(await newImplementation.getAddress(), "0x");
 
       expect(await obligationToken.obligationEscrowFactory()).to.equal(escrowFactoryBefore);

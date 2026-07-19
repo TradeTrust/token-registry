@@ -1,13 +1,13 @@
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   ObligationEscrowFactory,
-  TradeTrustObligationToken,
+  TrustVCToken,
   ObligationRegistryFactory,
 } from "@tradetrust/contracts";
 import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
-export const deployTradeTrustObligationTokenFixture = async ({
+export const deployTrustVCTokenFixture = async ({
   deployer,
   name = "Obligation Registry",
   symbol = "STR",
@@ -20,7 +20,7 @@ export const deployTradeTrustObligationTokenFixture = async ({
 }): Promise<{
   factory: ObligationRegistryFactory;
   obligationEscrowFactory: ObligationEscrowFactory;
-  obligationToken: TradeTrustObligationToken;
+  obligationToken: TrustVCToken;
 }> => {
   const factoryFactory = await ethers.getContractFactory("ObligationRegistryFactory");
   const factory = (await factoryFactory.connect(deployer).deploy()) as unknown as ObligationRegistryFactory;
@@ -28,7 +28,7 @@ export const deployTradeTrustObligationTokenFixture = async ({
   const ownerAddress = owner ?? (await (deployer as SignerWithAddress).getAddress());
   const tx = await factory.connect(deployer).deploy(name, symbol, ownerAddress);
   const receipt = await tx.wait();
-  if (!receipt) throw new Error("TradeTrustObligationToken deploy receipt is null");
+  if (!receipt) throw new Error("TrustVCToken deploy receipt is null");
 
   const event = receipt.logs
     .map((log) => {
@@ -45,9 +45,9 @@ export const deployTradeTrustObligationTokenFixture = async ({
   const obligationTokenAddress = event.args.obligationRegistry as string;
   const obligationEscrowFactoryAddress = await factory.obligationEscrowFactory();
 
-  const obligationToken = (await ethers.getContractFactory("TradeTrustObligationToken")).attach(
+  const obligationToken = (await ethers.getContractFactory("TrustVCToken")).attach(
     obligationTokenAddress
-  ) as unknown as TradeTrustObligationToken;
+  ) as unknown as TrustVCToken;
   const obligationEscrowFactory = (await ethers.getContractFactory("ObligationEscrowFactory")).attach(
     obligationEscrowFactoryAddress
   ) as unknown as ObligationEscrowFactory;

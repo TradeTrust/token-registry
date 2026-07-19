@@ -1,7 +1,7 @@
 import {
   ObligationEscrow,
   ObligationEscrowFactory,
-  TradeTrustObligationToken,
+  TrustVCToken,
   ObligationRegistryFactory,
 } from "@tradetrust/contracts";
 import { TransactionReceipt } from "ethers";
@@ -20,7 +20,7 @@ describe("ObligationRegistryFactory", () => {
     users = await getTestUsers();
   });
 
-  it("should deploy shared infrastructure and produce usable TradeTrustObligationToken proxies", async () => {
+  it("should deploy shared infrastructure and produce usable TrustVCToken proxies", async () => {
     const factory = (await (await ethers.getContractFactory("ObligationRegistryFactory"))
       .connect(users.carrier)
       .deploy()) as unknown as ObligationRegistryFactory;
@@ -40,9 +40,9 @@ describe("ObligationRegistryFactory", () => {
       .to.emit(factory, "ObligationRegistryDeployed")
       .withArgs(obligationTokenAddress, obligationEscrowFactoryAddress, owner, "Obligation Registry", "STR");
 
-    const obligationToken = (await ethers.getContractFactory("TradeTrustObligationToken")).attach(
+    const obligationToken = (await ethers.getContractFactory("TrustVCToken")).attach(
       obligationTokenAddress
-    ) as unknown as TradeTrustObligationToken;
+    ) as unknown as TrustVCToken;
 
     expect(await obligationToken.owner()).to.equal(owner);
     expect(await obligationToken.hasRole(roleHash.DefaultAdmin, owner)).to.be.true;
@@ -90,12 +90,12 @@ describe("ObligationRegistryFactory", () => {
     const secondTokenAddress = getEventFromReceipt<any>(secondReceipt, "ObligationRegistryDeployed", factory.interface)
       .args.obligationRegistry;
 
-    const firstToken = (await ethers.getContractFactory("TradeTrustObligationToken")).attach(
+    const firstToken = (await ethers.getContractFactory("TrustVCToken")).attach(
       firstTokenAddress
-    ) as unknown as TradeTrustObligationToken;
-    const secondToken = (await ethers.getContractFactory("TradeTrustObligationToken")).attach(
+    ) as unknown as TrustVCToken;
+    const secondToken = (await ethers.getContractFactory("TrustVCToken")).attach(
       secondTokenAddress
-    ) as unknown as TradeTrustObligationToken;
+    ) as unknown as TrustVCToken;
 
     expect(firstTokenAddress).to.not.equal(secondTokenAddress);
     expect(await firstToken.obligationEscrowFactory()).to.equal(await factory.obligationEscrowFactory());
