@@ -25,8 +25,7 @@
     "contracts/TradeTrustToken.sol",
     "contracts/ObligationEscrow.sol",
     "contracts/ObligationEscrowFactory.sol",
-    "contracts/TrustVCToken.sol",
-    "contracts/ObligationRegistryFactory.sol"
+    "contracts/TrustVCToken.sol"
   ],
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",

@@ -1,53 +1,42 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.20;
 
-import { Ownable2StepUpgradeable } from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
-import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { TradeTrustTokenBase, ITitleEscrowFactory } from "./base/TradeTrustTokenBase.sol";
 import { ITrustVCToken } from "./interfaces/ITrustVCToken.sol";
 import { TrustVCTokenErrors } from "./interfaces/TrustVCTokenErrors.sol";
 
 /**
  * @title TrustVCToken
- * @notice Upgradeable SBT registry for obligation titles; status lifecycle lives on ObligationEscrow.
+ * @notice SBT registry for obligation titles (classic TradeTrustToken deploy shape).
+ * @dev Status lifecycle lives on ObligationEscrow (same pattern as TradeTrustToken + TitleEscrowFactory).
  */
-contract TrustVCToken is
-  TradeTrustTokenBase,
-  Ownable2StepUpgradeable,
-  UUPSUpgradeable,
-  ITrustVCToken,
-  TrustVCTokenErrors
-{
-  address private _obligationEscrowFactory;
-  uint256 private _genesis;
-
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
+contract TrustVCToken is TradeTrustTokenBase, ITrustVCToken, TrustVCTokenErrors {
+  address internal immutable _obligationEscrowFactory;
+  uint256 internal immutable _genesis;
 
   /**
-   * @notice Initializes the UUPS proxy.
-   * @param name Token name.
-   * @param symbol Token symbol.
-   * @param admin Registry admin (roles + Ownable for upgrades).
-   * @param obligationEscrowFactory_ ObligationEscrowFactory address.
+   * @notice Creates a new TrustVCToken contract.
+   * @param name The name of the token.
+   * @param symbol The symbol of the token.
+   * @param obligationEscrowFactory_ The ObligationEscrowFactory address.
    */
-  function initialize(
-    string memory name,
-    string memory symbol,
-    address admin,
-    address obligationEscrowFactory_
-  ) external initializer {
-    if (admin == address(0) || obligationEscrowFactory_ == address(0)) revert ZeroAddress();
+  constructor(string memory name, string memory symbol, address obligationEscrowFactory_) {
+    if (obligationEscrowFactory_ == address(0)) revert ZeroAddress();
     if (obligationEscrowFactory_.code.length == 0) revert InvalidObligationEscrowFactory();
-
-    __TradeTrustTokenBase_init(name, symbol, admin);
-    __Ownable_init(admin);
-    __UUPSUpgradeable_init();
 
     _genesis = block.number;
     _obligationEscrowFactory = obligationEscrowFactory_;
+    initialize(name, symbol, _msgSender());
+  }
+
+  /**
+   * @notice Initializes roles/admin (mirrors TradeTrustToken).
+   * @param name The name of the token.
+   * @param symbol The symbol of the token.
+   * @param admin The address of the admin.
+   */
+  function initialize(string memory name, string memory symbol, address admin) internal initializer {
+    __TradeTrustTokenBase_init(name, symbol, admin);
   }
 
   /**
@@ -79,11 +68,4 @@ contract TrustVCToken is
     if (msg.sender != escrow) revert CallerNotEscrow();
     _registryTransferTo(BURN_ADDRESS, tokenId, remark);
   }
-
-  function _authorizeUpgrade(address) internal view override onlyOwner {}
-
-  /**
-   * @dev Storage gap for upgrades.
-   */
-  uint256[48] private __gap;
 }

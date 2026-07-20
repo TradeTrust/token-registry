@@ -16,3 +16,4 @@ yarn-error.log
 /coverage
 coverage.json
 .openzeppelin/
+.deps

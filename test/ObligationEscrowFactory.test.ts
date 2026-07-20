@@ -3,7 +3,6 @@ import {
   ObligationEscrow,
   ObligationEscrowFactory,
   ObligationEscrowFactoryCallerMock,
-  TitleEscrowMock,
 } from "@tradetrust/contracts";
 import { ContractTransactionResponse, TransactionReceipt } from "ethers";
 import faker from "faker";
@@ -11,7 +10,7 @@ import { ethers } from "hardhat";
 import { expect } from ".";
 import { contractInterfaceId, defaultAddress } from "../src/constants";
 import { computeObligationEscrowAddress, getEventFromReceipt } from "../src/utils";
-import { deployObligationEscrowFactoryFixture, deployTitleEscrowMockFixture } from "./fixtures";
+import { deployObligationEscrowFactoryFixture } from "./fixtures";
 import { createDeployFixtureRunner, getTestUsers, TestUsers, txnHexRemarks } from "./helpers";
 
 describe("ObligationEscrowFactory", async () => {
@@ -88,71 +87,6 @@ describe("ObligationEscrowFactory", async () => {
     });
   });
 
-  describe("Ownership / beacon upgrade", () => {
-    it("should set the owner to the address passed to the constructor, not msg.sender of a deploying contract", async () => {
-      expect(await obligationEscrowFactory.owner()).to.equal(users.carrier.address);
-    });
-
-    it("should revert upgradeEscrowImplementation when called by a non-owner", async () => {
-      const [notOwner] = users.others;
-      const newImplementation = await (await ethers.getContractFactory("ObligationEscrow")).deploy();
-
-      const tx = obligationEscrowFactory
-        .connect(notOwner)
-        .upgradeEscrowImplementation(await newImplementation.getAddress());
-
-      await expect(tx).to.be.revertedWithCustomError(obligationEscrowFactory, "OwnableUnauthorizedAccount");
-    });
-
-    it("should allow the owner to upgrade the shared escrow implementation", async () => {
-      const newImplementation = await (await ethers.getContractFactory("ObligationEscrow")).deploy();
-      const newImplementationAddress = await newImplementation.getAddress();
-
-      await obligationEscrowFactory.connect(users.carrier).upgradeEscrowImplementation(newImplementationAddress);
-
-      expect(await obligationEscrowFactory.implementation()).to.equal(newImplementationAddress);
-    });
-
-    it("should revert upgradeEscrowImplementation when newImplementation has no code (EOA)", async () => {
-      const [eoa] = users.others;
-
-      const tx = obligationEscrowFactory.connect(users.carrier).upgradeEscrowImplementation(eoa.address);
-
-      await expect(tx)
-        .to.be.revertedWithCustomError(obligationEscrowFactory, "InvalidEscrowImplementation")
-        .withArgs(eoa.address);
-    });
-
-    it("should revert upgradeEscrowImplementation when newImplementation doesn't support IObligationEscrow", async () => {
-      const incompatibleImplementation: TitleEscrowMock = await deployTitleEscrowMockFixture({
-        deployer: users.carrier,
-      });
-      const incompatibleAddress = await incompatibleImplementation.getAddress();
-
-      const tx = obligationEscrowFactory.connect(users.carrier).upgradeEscrowImplementation(incompatibleAddress);
-
-      await expect(tx)
-        .to.be.revertedWithCustomError(obligationEscrowFactory, "InvalidEscrowImplementation")
-        .withArgs(incompatibleAddress);
-    });
-
-    it("should respect Ownable2Step ownership when gating upgradeEscrowImplementation", async () => {
-      const [newOwner] = users.others;
-      await obligationEscrowFactory.connect(users.carrier).transferOwnership(newOwner.address);
-      await obligationEscrowFactory.connect(newOwner).acceptOwnership();
-
-      const newImplementation = await (await ethers.getContractFactory("ObligationEscrow")).deploy();
-      const newImplementationAddress = await newImplementation.getAddress();
-
-      await expect(
-        obligationEscrowFactory.connect(users.carrier).upgradeEscrowImplementation(newImplementationAddress)
-      ).to.be.revertedWithCustomError(obligationEscrowFactory, "OwnableUnauthorizedAccount");
-
-      await obligationEscrowFactory.connect(newOwner).upgradeEscrowImplementation(newImplementationAddress);
-      expect(await obligationEscrowFactory.implementation()).to.equal(newImplementationAddress);
-    });
-  });
-
   describe("Create Obligation Escrow Contract", () => {
     let tokenId: string;
     let obligationEscrowFactoryCallerMock: ObligationEscrowFactoryCallerMock;
@@ -223,12 +157,12 @@ describe("ObligationEscrowFactory", async () => {
     it("should return the correct obligation escrow address", async () => {
       const fakeRegistryAddress = faker.finance.ethereumAddress();
       const tokenId = faker.datatype.hexaDecimal(64);
-      const beaconAddress = await obligationEscrowFactory.beacon();
+      const implementationAddress = await obligationEscrowFactory.implementation();
 
       const expectedAddress = computeObligationEscrowAddress({
+        implementationAddress,
         registryAddress: fakeRegistryAddress,
         tokenId,
-        beaconAddress,
         factoryAddress: obligationEscrowFactory.target as string,
       });
 

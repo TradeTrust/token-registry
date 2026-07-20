@@ -6,10 +6,8 @@ interface IObligationEscrowFactory {
 
   function implementation() external view returns (address);
 
-  function beacon() external view returns (address);
-
   /**
-   * @notice Creates a new beacon proxy of the ObligationEscrow contract and initializes it.
+   * @notice Creates a new clone of the ObligationEscrow contract and initializes it.
    * @dev The function will revert if it is called by an EOA.
    * @param tokenId The ID of the token.
    * @return The address of the newly created ObligationEscrow contract.
@@ -23,10 +21,4 @@ interface IObligationEscrowFactory {
    * @return The address of the ObligationEscrow contract.
    */
   function getEscrowAddress(address tokenRegistry, uint256 tokenId) external view returns (address);
-
-  /**
-   * @notice Upgrades the shared ObligationEscrow implementation for all beacon proxies.
-   * @param newImplementation The new implementation address.
-   */
-  function upgradeEscrowImplementation(address newImplementation) external;
 }

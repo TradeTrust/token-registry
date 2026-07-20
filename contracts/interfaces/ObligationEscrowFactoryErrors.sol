@@ -3,6 +3,4 @@ pragma solidity ^0.8.20;
 
 interface ObligationEscrowFactoryErrors {
   error CreateCallerNotContract();
-
-  error InvalidEscrowImplementation(address newImplementation);
 }

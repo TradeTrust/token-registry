@@ -102,70 +102,50 @@ describe("TrustVCToken", () => {
     expect(await escrow.holder()).to.equal(users.beneficiary.address);
   });
 
+  it("should set the deployer as default admin", async () => {
+    expect(await obligationToken.hasRole(roleHash.DefaultAdmin, users.carrier.address)).to.be.true;
+  });
+
   describe("Reads", () => {
     it("should return the correct obligationEscrowFactory address", async () => {
       const escrowFactoryAddress = await obligationToken.obligationEscrowFactory();
       expect(escrowFactoryAddress).to.not.equal(defaultAddress.Zero);
 
-      const escrowFactory = await ethers.getContractAt("ObligationEscrowFactory", escrowFactoryAddress);
-      expect(await (escrowFactory as unknown as ObligationEscrowFactory).beacon()).to.not.equal(defaultAddress.Zero);
+      const escrowFactory = (await ethers.getContractAt(
+        "ObligationEscrowFactory",
+        escrowFactoryAddress
+      )) as unknown as ObligationEscrowFactory;
+      expect(await escrowFactory.implementation()).to.not.equal(defaultAddress.Zero);
     });
 
     it("should return the same address for titleEscrowFactory() and obligationEscrowFactory()", async () => {
       expect(await obligationToken.titleEscrowFactory()).to.equal(await obligationToken.obligationEscrowFactory());
     });
+
+    it("should return the initialisation block as genesis", async () => {
+      const deployTx = obligationToken.deploymentTransaction();
+      const receipt = await deployTx!.wait();
+
+      expect(await obligationToken.genesis()).to.equal(receipt!.blockNumber);
+    });
   });
 
-  describe("initialize validation", () => {
-    let escrowFactoryAddress: string;
-
-    beforeEach(async () => {
-      const escrowFactory = await (
-        await ethers.getContractFactory("ObligationEscrowFactory")
-      ).deploy(users.carrier.address);
-      escrowFactoryAddress = await escrowFactory.getAddress();
-    });
-
-    const deployObligationTokenProxy = async (
-      admin: string,
-      obligationEscrowFactoryAddress: string
-    ): Promise<Promise<unknown>> => {
-      const implementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
-      const initData = implementation.interface.encodeFunctionData("initialize", [
-        "Test Registry",
-        "TST",
-        admin,
-        obligationEscrowFactoryAddress,
-      ]);
-      const ProxyFactory = await ethers.getContractFactory("ERC1967Proxy");
-      return ProxyFactory.connect(users.carrier).deploy(await implementation.getAddress(), initData);
-    };
-
-    it("should revert with ZeroAddress when admin is the zero address", async () => {
-      const implementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
-
-      await expect(deployObligationTokenProxy(defaultAddress.Zero, escrowFactoryAddress)).to.be.revertedWithCustomError(
-        implementation,
-        "ZeroAddress"
-      );
-    });
-
+  describe("Constructor validation", () => {
     it("should revert with ZeroAddress when obligationEscrowFactory is the zero address", async () => {
-      const implementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
+      const TrustVCTokenFactory = await ethers.getContractFactory("TrustVCToken");
 
       await expect(
-        deployObligationTokenProxy(users.carrier.address, defaultAddress.Zero)
-      ).to.be.revertedWithCustomError(implementation, "ZeroAddress");
+        TrustVCTokenFactory.connect(users.carrier).deploy("Test", "TST", defaultAddress.Zero)
+      ).to.be.revertedWithCustomError(TrustVCTokenFactory, "ZeroAddress");
     });
 
     it("should revert with InvalidObligationEscrowFactory when the address has no code", async () => {
-      const implementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
+      const TrustVCTokenFactory = await ethers.getContractFactory("TrustVCToken");
       const [eoa] = users.others;
 
-      await expect(deployObligationTokenProxy(users.carrier.address, eoa.address)).to.be.revertedWithCustomError(
-        implementation,
-        "InvalidObligationEscrowFactory"
-      );
+      await expect(
+        TrustVCTokenFactory.connect(users.carrier).deploy("Test", "TST", eoa.address)
+      ).to.be.revertedWithCustomError(TrustVCTokenFactory, "InvalidObligationEscrowFactory");
     });
   });
 
@@ -198,31 +178,6 @@ describe("TrustVCToken", () => {
 
       const tx = obligationToken.connect(escrowWallet).burnFromEscrow(tokenId, exceededLengthRemark);
       await expect(tx).to.be.revertedWithCustomError(obligationToken, "RemarkLengthExceeded");
-    });
-  });
-
-  describe("UUPS upgrade", () => {
-    it("should revert when a non-owner attempts to upgrade", async () => {
-      const [notOwner] = users.others;
-      const newImplementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
-
-      const tx = obligationToken.connect(notOwner).upgradeToAndCall(await newImplementation.getAddress(), "0x");
-
-      await expect(tx).to.be.revertedWithCustomError(obligationToken, "OwnableUnauthorizedAccount");
-    });
-
-    it("should allow the owner to upgrade and preserve existing storage", async () => {
-      await mint(users.beneficiary, users.holder, tokenId);
-      const escrowFactoryBefore = await obligationToken.obligationEscrowFactory();
-      const genesisBefore = await obligationToken.genesis();
-
-      const newImplementation = await (await ethers.getContractFactory("TrustVCToken")).deploy();
-      await obligationToken.connect(users.carrier).upgradeToAndCall(await newImplementation.getAddress(), "0x");
-
-      expect(await obligationToken.obligationEscrowFactory()).to.equal(escrowFactoryBefore);
-      expect(await obligationToken.genesis()).to.equal(genesisBefore);
-      expect(await obligationToken.hasRole(roleHash.DefaultAdmin, users.carrier.address)).to.be.true;
-      expect(await obligationToken.ownerOf(tokenId)).to.not.equal(defaultAddress.Zero);
     });
   });
 });

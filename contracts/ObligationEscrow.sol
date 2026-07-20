@@ -35,9 +35,7 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
   Status private _status;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
+  constructor() initializer {}
 
   /**
    * @dev Modifier to make a function callable only by the beneficiary.
@@ -170,7 +168,7 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
     _assertRegistered();
     if (msg.sender != beneficiary) revert CallerNotBeneficiary();
     _assertHoldingToken();
-    _transition(Status.Accepted, Status.Discharged);
+    _setStatus(Status.Accepted, Status.Discharged);
     remark = _remark;
     emit StatusDischarged(tokenId, beneficiary, _remark);
     _terminateAndBurn(_remark, TerminationReason.Discharged);
@@ -410,6 +408,10 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
 
   function _transition(Status requiredStatus, Status newStatus) private {
     if (beneficiary == holder) revert OwnerHolderMustDiffer();
+    _setStatus(requiredStatus, newStatus);
+  }
+
+  function _setStatus(Status requiredStatus, Status newStatus) private {
     Status current = _status;
     if (current != requiredStatus) revert InvalidStatusTransition(current, requiredStatus);
     _status = newStatus;

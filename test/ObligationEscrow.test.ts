@@ -412,7 +412,7 @@ describe("ObligationEscrow", async () => {
         await expect(tx).to.be.revertedWithCustomError(escrow, "CallerNotBeneficiary");
       });
 
-      it("should revert accept/reject/discharge when beneficiary equals holder", async () => {
+      it("should revert accept/reject when beneficiary equals holder", async () => {
         const dualTokenId = faker.datatype.hexaDecimal(64);
         const dualEscrow = await mint(obligationToken, users.beneficiary, users.beneficiary, dualTokenId);
 
@@ -422,6 +422,15 @@ describe("ObligationEscrow", async () => {
         await expect(
           dualEscrow.connect(users.beneficiary).reject(txnHexRemarks.mintRemark)
         ).to.be.revertedWithCustomError(dualEscrow, "OwnerHolderMustDiffer");
+      });
+
+      it("should allow the beneficiary to discharge when beneficiary equals holder (only beneficiary check)", async () => {
+        await escrow.connect(users.holder).accept(txnHexRemarks.mintRemark);
+        await escrow.connect(users.holder).transferHolder(users.beneficiary.address, txnHexRemarks.mintRemark);
+
+        const tx = escrow.connect(users.beneficiary).discharge(txnHexRemarks.mintRemark);
+        await expect(tx).to.not.be.reverted;
+        expect(await escrow.status()).to.equal(Status.Discharged);
       });
 
       it("should revert accept while the registry is paused", async () => {
