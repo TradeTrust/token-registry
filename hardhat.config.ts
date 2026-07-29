@@ -54,12 +54,7 @@ const config: HardhatUserConfig = {
           },
           outputSelection: {
             "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "storageLayout",
-              ],
+              "*": ["abi", "evm.bytecode", "evm.deployedBytecode", "storageLayout"],
             },
           },
         },
