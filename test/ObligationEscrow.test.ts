@@ -11,19 +11,19 @@ import { getTestUsers, impersonateAccount, TestUsers, txnHexRemarks } from "./he
 
 const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 
-enum Status {
-  Issued = 0,
-  Accepted = 1,
-  Rejected = 2,
-  Discharged = 3,
-}
+const Status = {
+  Issued: 0,
+  Accepted: 1,
+  Rejected: 2,
+  Discharged: 3,
+} as const;
 
-enum TerminationReason {
-  None = 0,
-  ReturnToIssuer = 1,
-  Rejected = 2,
-  Discharged = 3,
-}
+const TerminationReason = {
+  None: 0,
+  ReturnToIssuer: 1,
+  Rejected: 2,
+  Discharged: 3,
+} as const;
 
 describe("ObligationEscrow", async () => {
   let users: TestUsers;

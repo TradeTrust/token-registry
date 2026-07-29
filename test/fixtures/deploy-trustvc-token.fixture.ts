@@ -18,9 +18,7 @@ export const deployTrustVCTokenFixture = async ({
 }> => {
   const obligationEscrowFactory = await deployObligationEscrowFactoryFixture({ deployer });
 
-  const obligationToken = (await (
-    await ethers.getContractFactory("TrustVCToken")
-  )
+  const obligationToken = (await (await ethers.getContractFactory("TrustVCToken"))
     .connect(deployer)
     .deploy(name, symbol, await obligationEscrowFactory.getAddress())) as unknown as TrustVCToken;
 

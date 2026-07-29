@@ -1,9 +1,5 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import {
-  ObligationEscrow,
-  ObligationEscrowFactory,
-  ObligationEscrowFactoryCallerMock,
-} from "@tradetrust/contracts";
+import { ObligationEscrow, ObligationEscrowFactory, ObligationEscrowFactoryCallerMock } from "@tradetrust/contracts";
 import { ContractTransactionResponse, TransactionReceipt } from "ethers";
 import faker from "faker";
 import { ethers } from "hardhat";

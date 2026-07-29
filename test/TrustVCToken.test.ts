@@ -7,12 +7,12 @@ import { defaultAddress, roleHash } from "../src/constants";
 import { deployTrustVCTokenFixture } from "./fixtures";
 import { getTestUsers, impersonateAccount, TestUsers, txnHexRemarks } from "./helpers";
 
-enum Status {
-  Issued = 0,
-  Accepted = 1,
-  Rejected = 2,
-  Discharged = 3,
-}
+const Status = {
+  Issued: 0,
+  Accepted: 1,
+  Rejected: 2,
+  Discharged: 3,
+} as const;
 
 const BURN_ADDRESS = "0x000000000000000000000000000000000000dEaD";
 
