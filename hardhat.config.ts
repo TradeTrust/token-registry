@@ -48,6 +48,10 @@ const config: HardhatUserConfig = {
       {
         version: "0.8.22",
         settings: {
+    compilers: [
+      {
+        version: "0.8.22",
+        settings: {
           optimizer: {
             enabled: true,
             runs: 200,
@@ -59,7 +63,7 @@ const config: HardhatUserConfig = {
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "storageLayout",
-              ]
+              ],
             },
           },
         },
