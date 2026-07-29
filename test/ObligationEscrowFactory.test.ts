@@ -62,7 +62,7 @@ describe("ObligationEscrowFactory", async () => {
       expect(registry).to.equal(defaultAddress.Zero);
       expect(beneficiary).to.equal(defaultAddress.Zero);
       expect(holder).to.equal(defaultAddress.Zero);
-      expect(tokenId).to.equal(ethers.ZeroHash);
+      expect(tokenId).to.equal(0n);
     });
 
     it("should not allow initialising implementation externally", async () => {
