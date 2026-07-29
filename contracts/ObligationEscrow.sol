@@ -106,9 +106,10 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
   }
 
   /**
-   * @notice Initializes the ObligationEscrow contract with the registry address and the tokenId
+   * `@notice` Initializes the ObligationEscrow contract with the registry address and the tokenId
    */
   function __ObligationEscrow_init(address _registry, uint256 _tokenId) internal virtual onlyInitializing {
+    if (_registry == address(0) || _registry.code.length == 0) revert InvalidRegistry(_registry);
     registry = _registry;
     tokenId = _tokenId;
     active = true;
