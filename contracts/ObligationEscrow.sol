@@ -199,6 +199,7 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
       if (_beneficiary == address(0) || _holder == address(0)) {
         revert InvalidTokenTransferToZeroAddressOwners(_beneficiary, _holder);
       }
+      if (_remark.length > 120) revert RemarkLengthExceeded();
       _setBeneficiary(_beneficiary, "");
       _setHolder(_holder, "");
       remark = _remark;
