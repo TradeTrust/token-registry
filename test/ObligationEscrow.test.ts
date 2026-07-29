@@ -97,7 +97,7 @@ describe("ObligationEscrow", async () => {
   describe("Initialisation (fresh clone)", () => {
     let implContract: ObligationEscrow;
     let cloneContract: ObligationEscrow;
-    let fakeRegistryAddress: string;
+    let registryAddress: string;
 
     // eslint-disable-next-line no-undef
     before(async () => {
@@ -105,16 +105,17 @@ describe("ObligationEscrow", async () => {
     });
 
     beforeEach(async () => {
+      const { obligationToken } = await deployTrustVCTokenFixture({ deployer: users.carrier });
+      registryAddress = await obligationToken.getAddress();
       cloneContract = await deployImplProxy<ObligationEscrow & Contract>({
         implementation: implContract as ObligationEscrow & Contract,
         deployer: users.carrier,
       });
-      fakeRegistryAddress = ethers.getAddress(faker.finance.ethereumAddress());
-      await cloneContract.initialize(fakeRegistryAddress, tokenId);
+      await cloneContract.initialize(registryAddress, tokenId);
     });
 
     it("should set the correct registry address", async () => {
-      expect(await cloneContract.registry()).to.equal(fakeRegistryAddress);
+      expect(await cloneContract.registry()).to.equal(registryAddress);
     });
 
     it("should set active to true", async () => {
@@ -143,7 +144,7 @@ describe("ObligationEscrow", async () => {
     });
 
     it("should not allow re-initialisation", async () => {
-      const tx = cloneContract.initialize(fakeRegistryAddress, tokenId);
+      const tx = cloneContract.initialize(registryAddress, tokenId);
       await expect(tx).to.be.revertedWithCustomError(cloneContract, "InvalidInitialization");
     });
   });
