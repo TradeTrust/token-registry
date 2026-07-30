@@ -6,3 +6,6 @@ export { deployTradeTrustTokenStandardFixture } from "./deploy-registry-impl.fix
 export { deployTDocDeployerFixture } from "./deploy-impl-deployer.fixture";
 export type { DeployTokenFixtureRunner } from "./deploy-token-fixture-runner";
 export { deployTitleEscrowMockFixture } from "./deploy-title-escrow-mock.fixture";
+export { deployTrustVCTokenFixture } from "./deploy-trustvc-token.fixture";
+export { deployObligationEscrowFactoryFixture } from "./deploy-obligation-escrow-factory.fixture";
+export { deployObligationEscrowFixture } from "./deploy-obligation-escrow.fixture";

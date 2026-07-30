@@ -1,6 +1,6 @@
 {
   "name": "@tradetrust-tt/token-registry",
-  "version": "5.1.1",
+  "version": "5.5.2-beta.1",
   "release": {
     "branches": [
       {
@@ -9,6 +9,11 @@
       {
         "name": "v4",
         "range": "4.x.x"
+      },
+      {
+        "name": "beta-boe",
+        "prerelease": "beta",
+        "channel": "beta"
       }
     ],
     "tagFormat": "v${version}"
@@ -22,7 +27,10 @@
     "contracts/lib",
     "contracts/TitleEscrow.sol",
     "contracts/TitleEscrowFactory.sol",
-    "contracts/TradeTrustToken.sol"
+    "contracts/TradeTrustToken.sol",
+    "contracts/ObligationEscrow.sol",
+    "contracts/ObligationEscrowFactory.sol",
+    "contracts/TrustVCToken.sol"
   ],
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",

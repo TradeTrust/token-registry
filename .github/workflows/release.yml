@@ -4,6 +4,7 @@ on:
       - master
       - beta
       - feat/remarks-and-rejection
+      - beta-boe
       - +([0-9])?(.{+([0-9]),x}).x
 
 env:

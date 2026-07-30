@@ -44,19 +44,22 @@ if (IS_CI_ENV) {
 
 const config: HardhatUserConfig = {
   solidity: {
-    compilers: [{ version: "0.8.22" }],
-
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200,
-      },
-      outputSelection: {
-        "*": {
-          "*": ["storageLayout"],
+    compilers: [
+      {
+        version: "0.8.22",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+          outputSelection: {
+            "*": {
+              "*": ["abi", "evm.bytecode", "evm.deployedBytecode", "storageLayout"],
+            },
+          },
         },
       },
-    },
+    ],
   },
   typechain: {
     outDir: "src/contracts",
