@@ -4,7 +4,7 @@
 </h1>
 
 <p align="center">
-    <a href="https://tradetrust.io">TradeTrust</a> Electronic Bill of Lading (eBL)
+    <a href="https://tradetrust.io">TradeTrust</a> Electronic Title Records (eBL) &amp; Obligation Titles (BoE)
 </p>
 
 <p align="center"> 
@@ -14,8 +14,19 @@
   <img src="https://img.shields.io/github/license/open-attestation/token-registry" />
 </p>
 
-The Electronic Bill of Lading (eBL) is a digital document that can be used to prove the ownership of goods. It is a standardised document that is accepted by all major shipping lines and customs authorities. The [Token Registry](https://github.com/TradeTrust/token-registry) repository contains both the smart contract
-code for token registry (in `/contracts`) as well as the node package for using this library (in `/src`).
+This repository provides on-chain title custody for TradeTrust transferable records. It includes:
+
+- **Electronic Bill of Lading (eBL) / Electronic Title Record (ETR):** `TradeTrustToken` + `TitleEscrow` (+ `TitleEscrowFactory`)
+- **Bill of Exchange (BoE) / Obligation titles:** `TrustVCToken` + `ObligationEscrow` (+ `ObligationEscrowFactory`)
+
+The [Token Registry](https://github.com/TradeTrust/token-registry) repository contains both the smart contract code (in `/contracts`) and the Node package for using this library (in `/src`).
+
+| Use case | Token registry | Escrow | Factory |
+| -------- | -------------- | ------ | ------- |
+| eBL / ETR | `TradeTrustToken` | `TitleEscrow` | `TitleEscrowFactory` |
+| BoE / Obligation | `TrustVCToken` | `ObligationEscrow` | `ObligationEscrowFactory` |
+
+Both paths use a Soulbound Token (SBT) minted to a deterministic escrow clone that holds beneficiary/holder ownership. Obligation escrows add an on-chain status lifecycle (`Issued` → `Accepted` / `Rejected` / `Discharged`) on top of the same custody model.
 
 ## Table of Contents
 
@@ -32,6 +43,17 @@ code for token registry (in `/contracts`) as well as the node package for using 
     - [Reject Transfers of Beneficiary/Holder](#reject-transfers-of-beneficiaryholder)
     - [Return ETR Document to Issuer](#return-etr-document-to-issuer)
     - [Accessing the Current Owners](#accessing-the-current-owners)
+  - [TrustVCToken](#trustvctoken)
+    - [Connect to existing obligation registry](#connect-to-existing-obligation-registry)
+    - [Issuing an Obligation Title](#issuing-an-obligation-title)
+    - [Restoring / Burning an Obligation Title](#restoring--burning-an-obligation-title)
+  - [Obligation Escrow](#obligation-escrow)
+    - [Connect to Obligation Escrow](#connect-to-obligation-escrow)
+    - [Status Lifecycle](#status-lifecycle)
+    - [Transfer of Beneficiary/Holder](#transfer-of-beneficiaryholder-1)
+    - [Reject Transfers of Beneficiary/Holder](#reject-transfers-of-beneficiaryholder-1)
+    - [Return Obligation Title to Issuer](#return-obligation-title-to-issuer)
+    - [Accessing Status and Owners](#accessing-status-and-owners)
   - [Provider \& Signer](#provider--signer)
   - [Roles and Access](#roles-and-access)
     - [Grant a role to a user](#grant-a-role-to-a-user)
@@ -44,6 +66,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
       - [Using an existing Title Escrow Factory](#using-an-existing-title-escrow-factory)
     - [Title Escrow Factory](#title-escrow-factory)
       - [Deploy a new Title Escrow Factory](#deploy-a-new-title-escrow-factory)
+    - [Obligation Registry (TrustVCToken)](#obligation-registry-trustvctoken)
   - [Verification](#verification)
   - [Network Configuration](#network-configuration)
 - [Configuration](#configuration)
@@ -180,6 +203,132 @@ const currentHolder = await connectedEscrow.holder();
 const nominatedBeneficiary = await connectedEscrow.nominee();
 ```
 
+## TrustVCToken
+
+`TrustVCToken` is the SBT registry for **obligation titles** (for example Bill of Exchange). It follows the same mint / restore / burn shape as `TradeTrustToken`, but uses `ObligationEscrowFactory` instead of `TitleEscrowFactory`. Status lifecycle (`accept` / `reject` / `discharge`) lives on the escrow, not on the token.
+
+> [!NOTE]
+> `TrustVCToken` still exposes `titleEscrowFactory()` for compatibility with shared base contracts; that address is the obligation escrow factory. Prefer `obligationEscrowFactory()` when working with BoE titles.
+
+### Connect to existing obligation registry
+
+```ts
+import { TrustVCToken__factory } from "@tradetrust-tt/token-registry/contracts";
+
+const connectedObligationRegistry = TrustVCToken__factory.connect(obligationRegistryAddress, signer);
+```
+
+### Issuing an Obligation Title
+
+```ts
+await connectedObligationRegistry.mint(beneficiaryAddress, holderAddress, tokenId, remarks);
+```
+
+Minting creates (or reuses) a deterministic `ObligationEscrow` clone and transfers the SBT into that escrow. On first receipt, the escrow sets beneficiary/holder and status to `Issued`.
+
+### Restoring / Burning an Obligation Title
+
+```ts
+await connectedObligationRegistry.restore(tokenId, remarks);
+await connectedObligationRegistry.burn(tokenId, remarks);
+```
+
+> [!NOTE]
+> Reject and discharge on `ObligationEscrow` call `burnFromEscrow` on the registry (escrow-only). Issuer-side `burn` / `restore` follow the same registry roles as `TradeTrustToken`.
+
+## Obligation Escrow
+
+`ObligationEscrow` manages custody of an obligation title between a **`beneficiary`** and **`holder`**, and tracks status through the obligation lifecycle.
+
+During minting, `TrustVCToken` creates and assigns an `ObligationEscrow` as the owner of that token — the same pattern as `TitleEscrow` for eBL.
+
+> [!IMPORTANT]
+> A `remark` field is used for contract operations (optional; pass `"0x"` when empty). Remark length is limited to **120** characters; encryption is recommended.
+
+### Connect to Obligation Escrow
+
+```ts
+import { ObligationEscrow__factory, ObligationEscrowFactory__factory } from "@tradetrust-tt/token-registry/contracts";
+import { utils } from "@tradetrust-tt/token-registry";
+
+// From a known escrow address
+const connectedObligationEscrow = ObligationEscrow__factory.connect(obligationEscrowAddress, signer);
+
+// Or resolve the deterministic address from the factory
+const factoryAddress = await connectedObligationRegistry.obligationEscrowFactory();
+const factory = ObligationEscrowFactory__factory.connect(factoryAddress, signer);
+const escrowAddress = await factory.getEscrowAddress(obligationRegistryAddress, tokenId);
+
+// Off-chain prediction (same CREATE2 scheme as the factory)
+const implementationAddress = await factory.implementation();
+const predicted = utils.computeObligationEscrowAddress({
+  implementationAddress,
+  factoryAddress,
+  registryAddress: obligationRegistryAddress,
+  tokenId,
+});
+```
+
+### Status Lifecycle
+
+```solidity
+enum Status { Issued, Accepted, Rejected, Discharged }
+
+function status() external view returns (Status);
+function isRegistered() external view returns (bool);
+
+function accept(bytes calldata remark) external;    // holder, from Issued → Accepted
+function reject(bytes calldata remark) external;    // holder, from Issued → Rejected (terminates + burns)
+function discharge(bytes calldata remark) external; // beneficiary, from Accepted → Discharged (terminates + burns)
+```
+
+| Action | Caller | From | To | Effect |
+| ------ | ------ | ---- | -- | ------ |
+| `accept` | holder | `Issued` | `Accepted` | Title remains active |
+| `reject` | holder | `Issued` | `Rejected` | Terminates escrow and burns token |
+| `discharge` | beneficiary | `Accepted` | `Discharged` | Terminates escrow and burns token |
+
+### Transfer of Beneficiary/Holder
+
+Transfer APIs match `TitleEscrow`:
+
+```solidity
+function transferBeneficiary(address nominee, bytes calldata remark) external;
+function transferHolder(address newHolder, bytes calldata remark) external;
+function transferOwners(address nominee, address newHolder, bytes calldata remark) external;
+function nominate(address nominee, bytes calldata remark) external;
+```
+
+### Reject Transfers of Beneficiary/Holder
+
+```solidity
+function rejectTransferBeneficiary(bytes calldata _remark) external;
+function rejectTransferHolder(bytes calldata _remark) external;
+function rejectTransferOwners(bytes calldata _remark) external;
+```
+
+Rejection rules are the same as Title Escrow: reject as the next action after appointment, and use `rejectTransferOwners` when you are both beneficiary and holder.
+
+### Return Obligation Title to Issuer
+
+```solidity
+function returnToIssuer(bytes calldata remark) external;
+```
+
+Requires both beneficiary and holder (when dual roles apply). Sets `terminationReason` to `ReturnToIssuer` after shred by the registry.
+
+### Accessing Status and Owners
+
+```ts
+const currentStatus = await connectedObligationEscrow.status();
+const registered = await connectedObligationEscrow.isRegistered();
+const reason = await connectedObligationEscrow.terminationReason();
+
+const currentBeneficiary = await connectedObligationEscrow.beneficiary();
+const currentHolder = await connectedObligationEscrow.holder();
+const nominatedBeneficiary = await connectedObligationEscrow.nominee();
+```
+
 ## Provider & Signer
 
 Different ways to get provider or signer:
@@ -204,12 +353,18 @@ signerFromMnemonic.connect(provider);
 
 Roles are useful for granting users to access certain functions only. Currently, here are the designated roles meant for the different key operations.
 
+> [!IMPORTANT]
+> Role management applies to the **token registries** (`TradeTrustToken` and `TrustVCToken`), not to the escrows.
+> `TitleEscrow` and `ObligationEscrow` control access via **beneficiary** / **holder** only.
+
 | Role           | Access                                     |
 | -------------- | ------------------------------------------ |
 | `DefaultAdmin` | Able to perform all operations             |
 | `MinterRole`   | Able to mint new tokens                    |
 | `AccepterRole` | Able to accept a token returned to issuer  |
 | `RestorerRole` | Able to restore a token returned to issuer |
+
+`TrustVCToken` inherits the same `RegistryAccess` roles as `TradeTrustToken`. Use `grantRole` / `revokeRole` / `setRoleAdmin` on either registry the same way.
 
 A trusted user can be granted multiple roles by the admin user to perform different operations.
 The following functions can be called on the token contract by the admin user to grant and revoke roles to and from users.
@@ -350,6 +505,26 @@ npx hardhat deploy:factory --network amoy
 👆 This will deploy a new Title Escrow factory on the _Amoyy_ network without verifying the contract.
 To verify the contract, pass in the `--verify` flag.
 
+### Obligation Registry (TrustVCToken)
+
+Hardhat tasks `deploy:token` / `deploy:factory` currently target the eBL stack (`TradeTrustToken` / `TitleEscrowFactory`).
+
+For BoE, deploy `ObligationEscrowFactory` first, then `TrustVCToken` with that factory address:
+
+```ts
+import { ethers } from "hardhat";
+
+const escrowFactory = await (await ethers.getContractFactory("ObligationEscrowFactory")).deploy();
+await escrowFactory.waitForDeployment();
+
+const token = await (
+  await ethers.getContractFactory("TrustVCToken")
+).deploy("My Obligation Registry", "MOR", await escrowFactory.getAddress());
+await token.waitForDeployment();
+```
+
+The deployer becomes the default admin (same role model as `TradeTrustToken`).
+
 ## Verification
 
 When verifying the contracts through either the Hardhat's verify plugin or passing the `--verify` flag to the deployment
@@ -357,7 +532,8 @@ tasks (which internally uses the same plugin), you will need to include your cor
 
 - For Ethereum, set `ETHERSCAN_API_KEY`.
 - For Polygon, set `POLYGONSCAN_API_KEY`.
-- For Astron, set `ASTRONSCAN_API_KEY`.
+- For Astron, set `ASTRON_API_KEY`.
+- For Astrontestnet, set `ASTRON_TESTNET_API_KEY`.
 
 ## Network Configuration
 
@@ -372,6 +548,7 @@ Here's a list of network names currently pre-configured:
 - `stabilitytestnet` (Stability TestNet)
 - `stability` (Stability Global Trust Network)
 - `astron` (astron Network MainNet)
+- `astrontestnet` (astron Network TestNet)
 
 > [!TIP]
 > 💡 You can configure existing and add other networks you wish to deploy to in the `hardhat.config.ts` file.
@@ -391,6 +568,7 @@ POLYGONSCAN_API_KEY=
 COINMARKETCAP_API_KEY=
 STABILITY_API_KEY=
 ASTRONSCAN_API_KEY=
+ASTRON_TESTNET_API_KEY=
 
 # Deployer Private Key
 DEPLOYER_PK=

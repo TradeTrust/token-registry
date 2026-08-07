@@ -1,6 +1,6 @@
 import { ethers as packedEthers } from "ethers";
 
-export interface ComputeTitleEscrowAddressParams {
+export interface ComputeObligationEscrowAddressParams {
   implementationAddress: string;
   factoryAddress: string;
   registryAddress: string;
@@ -17,9 +17,10 @@ if (ethers.version.includes("/5")) {
 }
 
 /**
- * @deprecated not be used with W3C VC
+ * Computes the deterministic EIP-1167 clone address for an ObligationEscrow,
+ * mirroring ObligationEscrowFactory.getEscrowAddress (same scheme as TitleEscrowFactory).
  */
-export const computeTitleEscrowAddress = (params: ComputeTitleEscrowAddressParams) => {
+export const computeObligationEscrowAddress = (params: ComputeObligationEscrowAddressParams) => {
   const { implementationAddress, factoryAddress, registryAddress, tokenId } = params;
   const initCodeHash = (ethers as any).keccak256(
     `0x3d602d80600a3d3981f3363d3d373d3d3d363d73${implementationAddress.substring(2)}5af43d82803e903d91602b57fd5bf3`
