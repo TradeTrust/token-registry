@@ -45,6 +45,8 @@ export const contractInterfaces = {
     "registry()",
     "tokenId()",
     "terminationReason()",
+    "mintBlock()",
+    "shredBlock()",
     "isHoldingToken()",
     "returnToIssuer(bytes)",
     "shred(bytes)",

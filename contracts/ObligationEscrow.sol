@@ -34,6 +34,9 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
   bool private _registered;
   Status private _status;
 
+  uint256 public override mintBlock;
+  uint256 public override shredBlock;
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
@@ -206,6 +209,7 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
       isMinting = true;
       _registered = true;
       _status = Status.Issued;
+      mintBlock = block.number;
       emit StatusInitialized(tokenId, registry);
     } else remark = data;
 
@@ -436,6 +440,7 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
     active = false;
     remark = _remark;
     terminationReason = reason;
+    shredBlock = block.number;
     emit Shred(registry, tokenId, reason, _remark);
   }
 
@@ -478,5 +483,5 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
   /**
    * @dev Storage gap for upgrades.
    */
-  uint256[44] private __gap;
+  uint256[42] private __gap;
 }

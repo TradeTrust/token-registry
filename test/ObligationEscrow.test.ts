@@ -62,6 +62,23 @@ describe("ObligationEscrow", async () => {
     return getEscrowContract(obligationToken, id);
   };
 
+  const mintWithReceipt = async (
+    obligationToken: TrustVCToken,
+    beneficiary: SignerWithAddress,
+    holder: SignerWithAddress,
+    id: string
+  ): Promise<{ escrow: ObligationEscrow; mintBlockNumber: number }> => {
+    const receipt = await (
+      await obligationToken
+        .connect(users.carrier)
+        .mint(beneficiary.address, holder.address, id, txnHexRemarks.mintRemark)
+    ).wait();
+    return {
+      escrow: await getEscrowContract(obligationToken, id),
+      mintBlockNumber: receipt!.blockNumber,
+    };
+  };
+
   describe("ERC165 Support", () => {
     let obligationToken: TrustVCToken;
     let escrow: ObligationEscrow;
@@ -138,6 +155,11 @@ describe("ObligationEscrow", async () => {
       expect(await cloneContract.terminationReason()).to.equal(TerminationReason.None);
     });
 
+    it("should leave mintBlock and shredBlock at zero before mint", async () => {
+      expect(await cloneContract.mintBlock()).to.equal(0);
+      expect(await cloneContract.shredBlock()).to.equal(0);
+    });
+
     it("should not be registered and revert status()", async () => {
       expect(await cloneContract.isRegistered()).to.be.false;
       await expect(cloneContract.status()).to.be.revertedWithCustomError(cloneContract, "NotRegistered");
@@ -208,10 +230,12 @@ describe("ObligationEscrow", async () => {
 
       it("should register the escrow and set status to Issued", async () => {
         const tx = implContract.connect(fakeRegistryWallet).onERC721Received(fakeAddress, fakeAddress, tokenId, data);
-        await tx;
+        const receipt = await (await tx).wait();
 
         expect(await implContract.isRegistered()).to.be.true;
         expect(await implContract.status()).to.equal(Status.Issued);
+        expect(await implContract.mintBlock()).to.equal(receipt!.blockNumber);
+        expect(await implContract.shredBlock()).to.equal(0);
         await expect(tx)
           .to.emit(implContract, "StatusInitialized")
           .withArgs(tokenId, await fakeRegistry.getAddress());
@@ -323,6 +347,17 @@ describe("ObligationEscrow", async () => {
         expect(await escrow.isRegistered()).to.be.true;
       });
 
+      it("should record mintBlock on mint and leave shredBlock at zero", async () => {
+        const { escrow: mintedEscrow, mintBlockNumber } = await mintWithReceipt(
+          obligationToken,
+          users.beneficiary,
+          users.holder,
+          faker.datatype.hexaDecimal(64)
+        );
+        expect(await mintedEscrow.mintBlock()).to.equal(mintBlockNumber);
+        expect(await mintedEscrow.shredBlock()).to.equal(0);
+      });
+
       it("should not allow remark length to exceed limit on accept/reject/discharge", async () => {
         await expect(escrow.connect(users.holder).accept(exceededLengthRemark)).to.be.revertedWithCustomError(
           escrow,
@@ -358,7 +393,9 @@ describe("ObligationEscrow", async () => {
       });
 
       it("should allow the holder to reject an Issued title and auto-shred it", async () => {
+        const mintBlock = await escrow.mintBlock();
         const tx = escrow.connect(users.holder).reject(txnHexRemarks.mintRemark);
+        const receipt = await (await tx).wait();
 
         await expect(tx)
           .to.emit(escrow, "StatusRejected")
@@ -372,6 +409,8 @@ describe("ObligationEscrow", async () => {
         expect(await escrow.beneficiary()).to.equal(defaultAddress.Zero);
         expect(await escrow.holder()).to.equal(defaultAddress.Zero);
         expect(await obligationToken.ownerOf(tokenId)).to.equal(BURN_ADDRESS);
+        expect(await escrow.shredBlock()).to.equal(receipt!.blockNumber);
+        expect(await escrow.mintBlock()).to.equal(mintBlock);
       });
 
       it("should not allow non-holder to reject", async () => {
@@ -395,8 +434,10 @@ describe("ObligationEscrow", async () => {
       });
 
       it("should allow the beneficiary to discharge an Accepted title and auto-shred it", async () => {
+        const mintBlock = await escrow.mintBlock();
         await escrow.connect(users.holder).accept(txnHexRemarks.mintRemark);
         const tx = escrow.connect(users.beneficiary).discharge(txnHexRemarks.mintRemark);
+        const receipt = await (await tx).wait();
 
         await expect(tx)
           .to.emit(escrow, "StatusDischarged")
@@ -405,6 +446,8 @@ describe("ObligationEscrow", async () => {
         expect(await escrow.active()).to.be.false;
         expect(await escrow.terminationReason()).to.equal(TerminationReason.Discharged);
         expect(await obligationToken.ownerOf(tokenId)).to.equal(BURN_ADDRESS);
+        expect(await escrow.shredBlock()).to.equal(receipt!.blockNumber);
+        expect(await escrow.mintBlock()).to.equal(mintBlock);
       });
 
       it("should not allow non-beneficiary to discharge", async () => {
@@ -804,9 +847,11 @@ describe("ObligationEscrow", async () => {
       });
 
       it("should shred via burn() and set terminationReason to ReturnToIssuer", async () => {
+        const mintBlock = await dualEscrow.mintBlock();
         await dualEscrow.connect(users.beneficiary).returnToIssuer(txnHexRemarks.returnToIssuerRemark);
 
         const tx = obligationToken.connect(users.carrier).burn(await dualEscrow.tokenId(), txnHexRemarks.burnRemark);
+        const receipt = await (await tx).wait();
 
         await expect(tx)
           .to.emit(dualEscrow, "Shred")
@@ -820,6 +865,8 @@ describe("ObligationEscrow", async () => {
         expect(await dualEscrow.terminationReason()).to.equal(TerminationReason.ReturnToIssuer);
         expect(await dualEscrow.beneficiary()).to.equal(defaultAddress.Zero);
         expect(await dualEscrow.holder()).to.equal(defaultAddress.Zero);
+        expect(await dualEscrow.shredBlock()).to.equal(receipt!.blockNumber);
+        expect(await dualEscrow.mintBlock()).to.equal(mintBlock);
       });
     });
 
