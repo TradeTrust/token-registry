@@ -158,6 +158,16 @@ interface IObligationEscrow is IERC721Receiver {
   function terminationReason() external view returns (TerminationReason);
 
   /**
+   * @notice Block number when the document was minted into this escrow
+   */
+  function mintBlock() external view returns (uint256);
+
+  /**
+   * @notice Block number when the escrow was shredded / deactivated (0 if still active)
+   */
+  function shredBlock() external view returns (uint256);
+
+  /**
    * @notice Check if the TitleEscrow is currently holding a token
    * @return A boolean indicating whether the contract is holding a token
    */
