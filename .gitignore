@@ -1,7 +1,6 @@
 node_modules
 set_config_folder_dir
 yarn-error.log
-.env
 *.iml
 .idea
 /src/contracts
@@ -16,3 +15,4 @@ yarn-error.log
 /coverage
 coverage.json
 .openzeppelin/
+config.bat
