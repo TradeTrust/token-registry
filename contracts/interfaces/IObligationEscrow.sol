@@ -60,7 +60,14 @@ interface IObligationEscrow is IERC721Receiver {
     bytes remark
   );
   event ReturnToIssuer(address indexed caller, address registry, uint256 tokenId, bytes remark);
-  event Shred(address registry, uint256 tokenId, TerminationReason reason, bytes remark);
+  event Shred(
+    address registry,
+    uint256 tokenId,
+    TerminationReason reason,
+    address lastBeneficiary,
+    address lastHolder,
+    bytes remark
+  );
   event RejectTransferOwners(
     address indexed fromBeneficiary,
     address indexed toBeneficiary,
@@ -156,6 +163,16 @@ interface IObligationEscrow is IERC721Receiver {
   function tokenId() external view returns (uint256);
 
   function terminationReason() external view returns (TerminationReason);
+
+  /**
+   * @notice Last beneficiary before shred / deactivate (source of truth after burn)
+   */
+  function lastBeneficiary() external view returns (address);
+
+  /**
+   * @notice Last holder before shred / deactivate (source of truth after burn)
+   */
+  function lastHolder() external view returns (address);
 
   /**
    * @notice Block number when the document was minted into this escrow

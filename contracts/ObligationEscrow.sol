@@ -37,6 +37,10 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
   uint256 public override mintBlock;
   uint256 public override shredBlock;
 
+  // Appended for upgrades — do not insert earlier or existing clone slots shift.
+  address public override lastBeneficiary;
+  address public override lastHolder;
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() initializer {}
 
@@ -435,13 +439,15 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
   }
 
   function _deactivate(bytes calldata _remark, TerminationReason reason) private {
+    lastBeneficiary = beneficiary;
+    lastHolder = holder;
     _setBeneficiary(address(0), "");
     _setHolder(address(0), "");
     active = false;
     remark = _remark;
     terminationReason = reason;
     shredBlock = block.number;
-    emit Shred(registry, tokenId, reason, _remark);
+    emit Shred(registry, tokenId, reason, lastBeneficiary, lastHolder, _remark);
   }
 
   /**
@@ -483,5 +489,5 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
   /**
    * @dev Storage gap for upgrades.
    */
-  uint256[42] private __gap;
+  uint256[40] private __gap;
 }
