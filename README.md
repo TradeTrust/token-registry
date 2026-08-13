@@ -44,6 +44,7 @@ code for token registry (in `/contracts`) as well as the node package for using 
       - [Using an existing Title Escrow Factory](#using-an-existing-title-escrow-factory)
     - [Title Escrow Factory](#title-escrow-factory)
       - [Deploy a new Title Escrow Factory](#deploy-a-new-title-escrow-factory)
+    - [XRPL EVM Mainnet](#xrpl-evm-mainnet)
   - [Verification](#verification)
   - [Network Configuration](#network-configuration)
 - [Configuration](#configuration)
@@ -107,7 +108,7 @@ The actual owners will use the Title Escrow contract to perform their ownership 
 
 > [!IMPORTANT]
 > A new `remark` field has been **introduced** for all contract operations.
-> 
+>
 > The `remark` field is optional and can be left empty by providing an empty string `"0x"`.
 > Please note that any value in the `remark` field is limited to **120** characters, and encryption is **recommended**.
 >
@@ -350,6 +351,29 @@ npx hardhat deploy:factory --network amoy
 👆 This will deploy a new Title Escrow factory on the _Amoyy_ network without verifying the contract.
 To verify the contract, pass in the `--verify` flag.
 
+### XRPL EVM Mainnet
+
+Full stack deployment on XRPL EVM Mainnet (`xrplEvm`):
+
+```sh
+# 1. Factory
+npx hardhat deploy:factory --network xrplEvm
+
+# 2. Token implementation
+npx hardhat deploy:token:impl --network xrplEvm
+
+# 3. TDocDeployer (proxy)
+npx hardhat deploy:tdocdeployer --network xrplEvm
+
+# 4. Register impl ↔ factory (must be TDocDeployer owner)
+npx hardhat add:token:impl --network xrplEvm \
+  --deployer <TDocDeployer_proxy> \
+  --implementation <TradeTrustTokenStandard> \
+  --factory <TitleEscrowFactory>
+```
+
+Replace `<TDocDeployer_proxy>`, `<TradeTrustTokenStandard>`, and `<TitleEscrowFactory>` with the addresses printed by steps 1–3.
+
 ## Verification
 
 When verifying the contracts through either the Hardhat's verify plugin or passing the `--verify` flag to the deployment
@@ -374,6 +398,8 @@ Here's a list of network names currently pre-configured:
 - `stability` (Stability Global Trust Network)
 - `astron` (astron Network MainNet)
 - `astrontestnet` (astron Network TestNet)
+- `xrplEvmTestnet` (XRPL EVM Testnet)
+- `xrplEvm` (XRPL EVM Mainnet)
 
 > [!TIP]
 > 💡 You can configure existing and add other networks you wish to deploy to in the `hardhat.config.ts` file.
