@@ -45,6 +45,8 @@ export const contractInterfaces = {
     "registry()",
     "tokenId()",
     "terminationReason()",
+    "lastBeneficiary()",
+    "lastHolder()",
     "mintBlock()",
     "shredBlock()",
     "isHoldingToken()",

@@ -149,6 +149,8 @@ describe("ObligationEscrow", async () => {
       expect(await cloneContract.nominee()).to.equal(defaultAddress.Zero);
       expect(await cloneContract.prevBeneficiary()).to.equal(defaultAddress.Zero);
       expect(await cloneContract.prevHolder()).to.equal(defaultAddress.Zero);
+      expect(await cloneContract.lastBeneficiary()).to.equal(defaultAddress.Zero);
+      expect(await cloneContract.lastHolder()).to.equal(defaultAddress.Zero);
     });
 
     it("should set terminationReason to None", async () => {
@@ -402,12 +404,21 @@ describe("ObligationEscrow", async () => {
           .withArgs(tokenId, users.holder.address, txnHexRemarks.mintRemark);
         await expect(tx)
           .to.emit(escrow, "Shred")
-          .withArgs(await obligationToken.getAddress(), tokenId, TerminationReason.Rejected, txnHexRemarks.mintRemark);
+          .withArgs(
+            await obligationToken.getAddress(),
+            tokenId,
+            TerminationReason.Rejected,
+            users.beneficiary.address,
+            users.holder.address,
+            txnHexRemarks.mintRemark
+          );
         expect(await escrow.status()).to.equal(Status.Rejected);
         expect(await escrow.active()).to.be.false;
         expect(await escrow.terminationReason()).to.equal(TerminationReason.Rejected);
         expect(await escrow.beneficiary()).to.equal(defaultAddress.Zero);
         expect(await escrow.holder()).to.equal(defaultAddress.Zero);
+        expect(await escrow.lastBeneficiary()).to.equal(users.beneficiary.address);
+        expect(await escrow.lastHolder()).to.equal(users.holder.address);
         expect(await obligationToken.ownerOf(tokenId)).to.equal(BURN_ADDRESS);
         expect(await escrow.shredBlock()).to.equal(receipt!.blockNumber);
         expect(await escrow.mintBlock()).to.equal(mintBlock);
@@ -442,9 +453,23 @@ describe("ObligationEscrow", async () => {
         await expect(tx)
           .to.emit(escrow, "StatusDischarged")
           .withArgs(tokenId, users.beneficiary.address, txnHexRemarks.mintRemark);
+        await expect(tx)
+          .to.emit(escrow, "Shred")
+          .withArgs(
+            await obligationToken.getAddress(),
+            tokenId,
+            TerminationReason.Discharged,
+            users.beneficiary.address,
+            users.holder.address,
+            txnHexRemarks.mintRemark
+          );
         expect(await escrow.status()).to.equal(Status.Discharged);
         expect(await escrow.active()).to.be.false;
         expect(await escrow.terminationReason()).to.equal(TerminationReason.Discharged);
+        expect(await escrow.beneficiary()).to.equal(defaultAddress.Zero);
+        expect(await escrow.holder()).to.equal(defaultAddress.Zero);
+        expect(await escrow.lastBeneficiary()).to.equal(users.beneficiary.address);
+        expect(await escrow.lastHolder()).to.equal(users.holder.address);
         expect(await obligationToken.ownerOf(tokenId)).to.equal(BURN_ADDRESS);
         expect(await escrow.shredBlock()).to.equal(receipt!.blockNumber);
         expect(await escrow.mintBlock()).to.equal(mintBlock);
@@ -859,12 +884,16 @@ describe("ObligationEscrow", async () => {
             await obligationToken.getAddress(),
             await dualEscrow.tokenId(),
             TerminationReason.ReturnToIssuer,
+            users.beneficiary.address,
+            users.beneficiary.address,
             txnHexRemarks.burnRemark
           );
         expect(await dualEscrow.active()).to.be.false;
         expect(await dualEscrow.terminationReason()).to.equal(TerminationReason.ReturnToIssuer);
         expect(await dualEscrow.beneficiary()).to.equal(defaultAddress.Zero);
         expect(await dualEscrow.holder()).to.equal(defaultAddress.Zero);
+        expect(await dualEscrow.lastBeneficiary()).to.equal(users.beneficiary.address);
+        expect(await dualEscrow.lastHolder()).to.equal(users.beneficiary.address);
         expect(await dualEscrow.shredBlock()).to.equal(receipt!.blockNumber);
         expect(await dualEscrow.mintBlock()).to.equal(mintBlock);
       });
