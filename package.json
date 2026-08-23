@@ -138,7 +138,8 @@
     "ts-node": "^10.9.1",
     "typechain": "^8.3.2",
     "typescript": "^5.6.3",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "viem": "^2.55.19"
   },
   "config": {
     "commitizen": {
