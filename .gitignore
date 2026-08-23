@@ -1,20 +1,21 @@
 node_modules
-set_config_folder_dir
-yarn-error.log
-.env
-.env*
-*.iml
-.idea
-/src/contracts
-/dist
-/build
-/types
-/cache
-/artifacts
-/contracts/artifacts
-/contracts/*/artifacts
-/contracts/.deps
-/coverage
-coverage.json
-.openzeppelin/
-config.bat
+  set_config_folder_dir
+  yarn-error.log
+  .env
+  .env*
+  *.iml
+  .idea
+  /src/contracts
+  /dist
+  /build
+  /types
+  /cache
+  /artifacts
+  /contracts/artifacts
+  /contracts/*/artifacts
+  /contracts/.deps
+  /coverage
+  coverage.json
+  .openzeppelin/
+  config.bat
+  
