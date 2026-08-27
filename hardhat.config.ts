@@ -184,7 +184,7 @@ const config: HardhatUserConfig = {
      * XRPL EVM Testnet
      */
     xrplEvmTestnet: {
-      accounts: [DEPLOYER_PK!],
+      ...networkConfig,
       url: "https://rpc.testnet.xrplevm.org",
     },
 
@@ -192,7 +192,7 @@ const config: HardhatUserConfig = {
      * XRPL EVM Mainnet
      */
     xrplEvm: {
-      accounts: [DEPLOYER_PK!],
+      ...networkConfig,
       url: "https://rpc.xrplevm.org",
     },
 
@@ -200,7 +200,7 @@ const config: HardhatUserConfig = {
      * Arc Testnet
      */
     arcTestnet: {
-      accounts: [DEPLOYER_PK!],
+      ...networkConfig,
       url: "https://rpc.testnet.arc.network",
     },
 
