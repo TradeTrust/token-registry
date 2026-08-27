@@ -9,8 +9,8 @@ const ChainId = {
   StabilityTestnet: 20180427,
   Astron: 1338,
   AstronTestnet: 21002,
-  XRPL: 1_440_000,
-  XRPLTestnet: 1_449_000,
+  XRPLEVM: 1_440_000,
+  XRPLEVMTestnet: 1_449_000,
   ArcTestnet: 5042002,
 };
 
@@ -26,8 +26,8 @@ export const contractAddress = {
     [ChainId.StabilityTestnet]: "0xAac003619FA8C7008C73704a550aA2bF20951dbb",
     [ChainId.Astron]: "0xa1fCAE62b69D85BfBb5B447f038123A1e4d8f6eC",
     [ChainId.AstronTestnet]: "0x812A0E71c61A42C8d3d449BdfF51834f85686C73",
-    [ChainId.XRPL]: "0xEa8B2D3C2356f14B625E39c7865de88B41cF69ED",
-    [ChainId.XRPLTestnet]: "0x22890b4A1e76B96F1EB8715442DD5Fc4C0B7651a",
+    [ChainId.XRPLEVM]: "0xEa8B2D3C2356f14B625E39c7865de88B41cF69ED",
+    [ChainId.XRPLEVMTestnet]: "0x22890b4A1e76B96F1EB8715442DD5Fc4C0B7651a",
     [ChainId.ArcTestnet]: "0xeEca11d64cec3b0A969F49B9F9a99A0966bCF8Dc",
   },
   Deployer: {
@@ -41,8 +41,8 @@ export const contractAddress = {
     [ChainId.PolygonAmoy]: "0xfcafea839e576967b96ad1FBFB52b5CA26cd1D25",
     [ChainId.Astron]: "0x79ED245fFecdAF8C87BFE35ccF6A7b9FE9024240",
     [ChainId.AstronTestnet]: "0x1043B46Ad9072fB784492d94F8d25eF679B7AAf8",
-    [ChainId.XRPL]: "0xD9cF9513131d36290097DCbb836dD69841e660C6",
-    [ChainId.XRPLTestnet]: "0xDf2A8d7A03C997a62fC23B296d03b9467FB51D89",
+    [ChainId.XRPLEVM]: "0xD9cF9513131d36290097DCbb836dD69841e660C6",
+    [ChainId.XRPLEVMTestnet]: "0xDf2A8d7A03C997a62fC23B296d03b9467FB51D89",
     [ChainId.ArcTestnet]: "0x118D3dc11EE06F7BF39FEf822894b572e110eC70",
   },
   TokenImplementation: {
@@ -56,8 +56,8 @@ export const contractAddress = {
     [ChainId.XDCApothem]: "0xcc72c1b3f7875fda22bcdb147d462d7da64efc55",
     [ChainId.Astron]: "0x025aF5b49f1755C536d6965093C88d85A7Ec3300",
     [ChainId.AstronTestnet]: "0xA0Da221B3cd3e863425E1F1D34B9307D295a9d03",
-    [ChainId.XRPL]: "0x46df2A9e23760323BF833A565E7134E6061dA52F",
-    [ChainId.XRPLTestnet]: "0xe876Ba83ccb2326d70E0b5739179195A38982030",
+    [ChainId.XRPLEVM]: "0x46df2A9e23760323BF833A565E7134E6061dA52F",
+    [ChainId.XRPLEVMTestnet]: "0xe876Ba83ccb2326d70E0b5739179195A38982030",
     [ChainId.ArcTestnet]: "0xFF267c9DFD1E48972460ac57a589B331DfaD4A79",
   },
 };
