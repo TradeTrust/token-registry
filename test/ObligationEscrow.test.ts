@@ -765,6 +765,60 @@ describe("ObligationEscrow", async () => {
         await expect(tx).to.be.revertedWithCustomError(escrow, "InvalidTransferToZeroAddress");
       });
 
+      it("should revert rejectTransferHolder once that holder has accepted the obligation", async () => {
+        const [newHolder] = users.others;
+        await escrow.connect(users.holder).transferHolder(newHolder.address, txnHexRemarks.holderTransferRemark);
+        await escrow.connect(newHolder).accept(txnHexRemarks.mintRemark);
+
+        expect(await escrow.prevHolder()).to.equal(defaultAddress.Zero);
+
+        const tx = escrow.connect(newHolder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+        await expect(tx).to.be.revertedWithCustomError(escrow, "InvalidTransferToZeroAddress");
+        expect(await escrow.holder()).to.equal(newHolder.address);
+      });
+
+      it("should allow the next holder to reject even though the previous holder already accepted, then block that holder again once returned", async () => {
+        const [accepterHolder, laterHolder] = users.others;
+        await escrow.connect(users.holder).transferHolder(accepterHolder.address, txnHexRemarks.holderTransferRemark);
+        await escrow.connect(accepterHolder).accept(txnHexRemarks.mintRemark);
+        await escrow.connect(accepterHolder).transferHolder(laterHolder.address, txnHexRemarks.holderTransferRemark);
+
+        // A fresh appointment — reject is available again, regardless of the earlier accept.
+        expect(await escrow.prevHolder()).to.equal(accepterHolder.address);
+        await escrow.connect(laterHolder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+        expect(await escrow.holder()).to.equal(accepterHolder.address);
+
+        // Back with the accepter and no pending transfer recorded — reject is blocked again.
+        expect(await escrow.prevHolder()).to.equal(defaultAddress.Zero);
+        const tx = escrow.connect(accepterHolder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+        await expect(tx).to.be.revertedWithCustomError(escrow, "InvalidTransferToZeroAddress");
+      });
+
+      it("should allow a holder reappointed via a fresh transfer to reject, even if they are the original accepter", async () => {
+        const [accepterHolder, otherHolder] = users.others;
+        await escrow.connect(users.holder).transferHolder(accepterHolder.address, txnHexRemarks.holderTransferRemark);
+        await escrow.connect(accepterHolder).accept(txnHexRemarks.mintRemark);
+
+        await escrow.connect(accepterHolder).transferHolder(otherHolder.address, txnHexRemarks.holderTransferRemark);
+        // A fresh transfer back to accepterHolder — not a reject — re-opens their reject window.
+        await escrow.connect(otherHolder).transferHolder(accepterHolder.address, txnHexRemarks.holderTransferRemark);
+
+        expect(await escrow.holder()).to.equal(accepterHolder.address);
+        expect(await escrow.prevHolder()).to.equal(otherHolder.address);
+
+        const tx = escrow.connect(accepterHolder).rejectTransferHolder(txnHexRemarks.rejectTransferRemark);
+        await expect(tx)
+          .to.emit(escrow, "RejectTransferHolder")
+          .withArgs(
+            accepterHolder.address,
+            otherHolder.address,
+            await obligationToken.getAddress(),
+            tokenId,
+            txnHexRemarks.rejectTransferRemark
+          );
+        expect(await escrow.holder()).to.equal(otherHolder.address);
+      });
+
       it("should revert rejectTransferHolder/Beneficiary with DualRoleRejectionRequired when beneficiary==holder", async () => {
         const dualTokenId = faker.datatype.hexaDecimal(64);
         const dualEscrow = await mint(obligationToken, users.beneficiary, users.beneficiary, dualTokenId);

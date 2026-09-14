@@ -96,6 +96,12 @@ interface IObligationEscrow is IERC721Receiver {
 
   function isRegistered() external view returns (bool);
 
+  /**
+   * @notice Allows the holder to accept the obligation, moving status from Issued to Accepted
+   * @dev Clears `prevHolder`, closing this holder's own window to reject the transfer that
+   * appointed them. A later `transferHolder` call re-opens a fresh window for whoever receives
+   * it next, regardless of address history — see {IObligationEscrow-rejectTransferHolder}.
+   */
   function accept(bytes calldata remark) external;
 
   function reject(bytes calldata remark) external;
