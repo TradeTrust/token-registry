@@ -309,6 +309,9 @@ function rejectTransferOwners(bytes calldata _remark) external;
 
 Rejection rules are the same as Title Escrow: reject as the next action after appointment, and use `rejectTransferOwners` when you are both beneficiary and holder.
 
+> [!NOTE]
+> For holdership specifically, `accept` counts as that "next action": it closes only the *current* holder's reject window (clears `prevHolder`) for the transfer that appointed them. It does not block rejection for future holders — a later `transferHolder` call re-opens a fresh window for whoever receives it next, even if that's the same address that accepted earlier.
+
 ### Return Obligation Title to Issuer
 
 ```solidity
