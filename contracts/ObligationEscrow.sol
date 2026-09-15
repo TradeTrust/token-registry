@@ -152,6 +152,11 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
     if (msg.sender != holder) revert CallerNotHolder();
     _assertHoldingToken();
     _transition(Status.Issued, Status.Accepted);
+    // Accepting closes this holder's own reject window (see rejectTransferHolder's
+    // prevHolder == 0 check) without blocking anyone else: transferHolder() unconditionally
+    // overwrites prevHolder on the next handoff, so a later holder — even this same address,
+    // reappointed via a fresh transfer — gets a clean reject window again.
+    prevHolder = address(0);
     remark = _remark;
     emit StatusAccepted(tokenId, holder, _remark);
   }
