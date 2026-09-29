@@ -426,6 +426,36 @@ describe("TitleEscrowSignable", async () => {
             expect(Number(currentNonce)).to.be.greaterThan(Number(initNonce));
           });
 
+          it("should record prevBeneficiary and clear prevHolder for rejection", async () => {
+            const previousBeneficiary = users.beneficiary.address;
+            await titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
+
+            expect(await titleEscrowContract.beneficiary()).to.equal(nominee.address);
+            expect(await titleEscrowContract.prevBeneficiary()).to.equal(previousBeneficiary);
+            expect(await titleEscrowContract.prevHolder()).to.equal(ethers.ZeroAddress);
+          });
+
+          it("should allow new beneficiary to reject and restore immediate predecessor", async () => {
+            const previousBeneficiary = users.beneficiary.address;
+            await titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
+
+            const rejectTx = titleEscrowContract
+              .connect(nominee)
+              .rejectTransferBeneficiary(txnHexRemarks.rejectTransferRemark);
+
+            await expect(rejectTx)
+              .to.emit(titleEscrowContract, "RejectTransferBeneficiary")
+              .withArgs(
+                nominee.address,
+                previousBeneficiary,
+                fakeRegistryContract.target,
+                fakeTokenId,
+                txnHexRemarks.rejectTransferRemark
+              );
+            expect(await titleEscrowContract.beneficiary()).to.equal(previousBeneficiary);
+            expect(await titleEscrowContract.prevBeneficiary()).to.equal(ethers.ZeroAddress);
+          });
+
           it("should revert if Beneficiary Transfer is cancelled", async () => {
             await titleEscrowContract.connect(users.holder).cancelBeneficiaryTransfer(endorsement);
             const cancelStatus = await titleEscrowContract.cancelled(hashStruct);

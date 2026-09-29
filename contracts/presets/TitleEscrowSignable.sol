@@ -66,6 +66,10 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     }
 
     ++nonces[holder];
+    // Match transferBeneficiary: keep rejection state for the immediate predecessor.
+    prevHolder = address(0);
+    prevBeneficiary = beneficiary;
+    remark = "0x0";
     _setBeneficiary(endorsement.nominee, "0x0");
   }
 
