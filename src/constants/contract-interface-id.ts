@@ -6,6 +6,7 @@ export const contractInterfaceId = {
   TradeTrustTokenBurnable: computeInterfaceId(contractInterfaces.TradeTrustTokenBurnable),
   TradeTrustTokenRestorable: computeInterfaceId(contractInterfaces.TradeTrustTokenRestorable),
   TitleEscrow: computeInterfaceId(contractInterfaces.TitleEscrow),
+  ObligationEscrow: computeInterfaceId(contractInterfaces.ObligationEscrow),
   TitleEscrowSignable: computeInterfaceId(contractInterfaces.TitleEscrowSignable),
   TitleEscrowFactory: computeInterfaceId(contractInterfaces.TitleEscrowFactory),
   AccessControl: computeInterfaceId(contractInterfaces.AccessControl),

@@ -3,6 +3,7 @@ on:
     branches:
       - master
       - beta
+      - beta-boe
       - feat/remarks-and-rejection
       - +([0-9])?(.{+([0-9]),x}).x
 
@@ -25,13 +26,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: [tests, linters]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
         with:
           node-version: 18.x
       - run: npm ci
       - run: npm run build
-      - run: npx semantic-release
+      - name: Semantic Release
+        run: npm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
