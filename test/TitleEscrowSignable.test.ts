@@ -456,6 +456,51 @@ describe("TitleEscrowSignable", async () => {
             expect(await titleEscrowContract.prevBeneficiary()).to.equal(ethers.ZeroAddress);
           });
 
+          // VAPT: first sig transfer must set prevBeneficiary so reject is available (was ZeroAddress).
+          it("demonstrates that a first signature transfer records a reject target", async () => {
+            const previousBeneficiary = users.beneficiary.address;
+            await titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
+
+            expect(await titleEscrowContract.prevBeneficiary()).to.equal(previousBeneficiary);
+            expect(await titleEscrowContract.prevHolder()).to.equal(ethers.ZeroAddress);
+
+            await titleEscrowContract.connect(nominee).rejectTransferBeneficiary("0x");
+            expect(await titleEscrowContract.beneficiary()).to.equal(previousBeneficiary);
+          });
+
+          // VAPT: Alice→Charlie (regular) then Charlie→Dave (sig) must reject Dave→Charlie, not Alice.
+          it("demonstrates that a signature transfer rejects to the immediate predecessor", async () => {
+            const [intermediateBeneficiary, finalBeneficiary] = users.others;
+
+            await titleEscrowContract
+              .connect(users.beneficiary)
+              .nominate(intermediateBeneficiary.address, txnHexRemarks.nominateRemark);
+
+            await titleEscrowContract
+              .connect(users.holder)
+              .transferBeneficiary(intermediateBeneficiary.address, txnHexRemarks.beneficiaryTransferRemark);
+
+            const signedEndorsement = {
+              ...endorsement,
+              beneficiary: intermediateBeneficiary.address,
+              nominee: finalBeneficiary.address,
+              nonce: await titleEscrowContract.nonces(users.holder.address),
+            };
+
+            const signedData = await users.holder.signTypedData(domain, beneficiaryTransferTypes, signedEndorsement);
+            const signedSignature = ethers.Signature.from(signedData);
+
+            await titleEscrowContract
+              .connect(intermediateBeneficiary)
+              .transferBeneficiaryWithSig(signedEndorsement, signedSignature);
+
+            expect(await titleEscrowContract.prevBeneficiary()).to.equal(intermediateBeneficiary.address);
+
+            await titleEscrowContract.connect(finalBeneficiary).rejectTransferBeneficiary("0x");
+
+            expect(await titleEscrowContract.beneficiary()).to.equal(intermediateBeneficiary.address);
+          });
+
           it("should revert if Beneficiary Transfer is cancelled", async () => {
             await titleEscrowContract.connect(users.holder).cancelBeneficiaryTransfer(endorsement);
             const cancelStatus = await titleEscrowContract.cancelled(hashStruct);
