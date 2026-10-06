@@ -64,17 +64,12 @@ describe("SigHelper", async () => {
       const expected = ethers.TypedDataEncoder.hashDomain(domain);
 
       // ERC-7201 SigHelperDomainStorage: hashedName@0, hashedVersion@1, cachedDomainSeparator@2, cachedChainId@3
-      const domainStorageBase =
-        "0x9e9b3aff00e0ae142206bb5ff87df1de242547286189f7ee6132c310e5cef200";
+      const domainStorageBase = "0x9e9b3aff00e0ae142206bb5ff87df1de242547286189f7ee6132c310e5cef200";
       const cachedSeparatorSlot = ethers.zeroPadValue(ethers.toBeHex(BigInt(domainStorageBase) + 2n), 32);
       const cachedChainIdSlot = ethers.zeroPadValue(ethers.toBeHex(BigInt(domainStorageBase) + 3n), 32);
 
       const bogusSeparator = ethers.id("bogus-domain-separator");
-      await ethers.provider.send("hardhat_setStorageAt", [
-        sigHelperMock.target,
-        cachedSeparatorSlot,
-        bogusSeparator,
-      ]);
+      await ethers.provider.send("hardhat_setStorageAt", [sigHelperMock.target, cachedSeparatorSlot, bogusSeparator]);
       // Cache still considered valid for current chain → returns poisoned value
       expect(await sigHelperMock.DOMAIN_SEPARATOR()).to.equal(bogusSeparator);
 
