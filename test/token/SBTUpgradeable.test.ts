@@ -302,7 +302,7 @@ describe("SBTUpgradeable", async () => {
           .connect(users.others[1])
           .transferFrom(recipient.address, deployer.address, tokenId, txnHexRemarks.restorerRemark);
 
-        await expect(tx).to.be.revertedWith("SBT: transfer caller is not owner");
+        await expect(tx).to.be.revertedWith("SBT: caller is not owner");
       });
 
       it("should revert if token does not exist", async () => {

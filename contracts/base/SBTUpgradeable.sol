@@ -124,7 +124,7 @@ contract SBTUpgradeable is
    * `transferFrom(address,address,uint256)`.
    */
   function transferFrom(address from, address to, uint256 tokenId, bytes memory _remark) public virtual override {
-    require(_isOwner(_msgSender(), tokenId), "SBT: transfer caller is not owner");
+    require(_isOwner(_msgSender(), tokenId), "SBT: caller is not owner");
     _safeTransfer(from, to, tokenId, _remark);
   }
 
