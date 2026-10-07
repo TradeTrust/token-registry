@@ -3,6 +3,8 @@
 
 pragma solidity ^0.8.20;
 
+/* solhint-disable custom-errors, reason-string, func-name-mixedcase, no-inline-assembly, no-empty-blocks */
+
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";

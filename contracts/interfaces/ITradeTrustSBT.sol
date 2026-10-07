@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import { ISBTUpgradeable, IERC165 } from "./ISBTUpgradeable.sol";
+import { ISBTUpgradeable } from "./ISBTUpgradeable.sol";
 import { ITitleEscrowFactory } from "./ITitleEscrowFactory.sol";
 
 interface ITradeTrustSBT is IERC721Receiver, ISBTUpgradeable {

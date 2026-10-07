@@ -28,6 +28,7 @@ abstract contract RegistryAccess is AccessControlUpgradeable, RegistryAccessErro
    * @param admin Bootstrap address that receives DEFAULT_ADMIN_ROLE and the operational roles.
    * @dev Operators should reassign and revoke roles after deployment; see contract notice.
    */
+  // solhint-disable-next-line func-name-mixedcase
   function __RegistryAccess_init(address admin) internal onlyInitializing {
     if (admin == address(0)) {
       revert InvalidAdminAddress();

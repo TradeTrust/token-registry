@@ -33,6 +33,7 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
     __Ownable_init(msg.sender);
   }
 
+  // solhint-disable-next-line no-empty-blocks
   function _authorizeUpgrade(address) internal view override onlyOwner {}
 
   function deploy(address implementation, bytes memory params) external returns (address) {
@@ -43,6 +44,7 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
 
     address deployed = Clones.clone(implementation);
     bytes memory payload = abi.encodeWithSignature("initialize(bytes)", abi.encode(params, titleEscrowFactory));
+    // solhint-disable-next-line avoid-low-level-calls
     (bool success, ) = address(deployed).call(payload);
     if (!success) {
       revert ImplementationInitializationFailure(payload);

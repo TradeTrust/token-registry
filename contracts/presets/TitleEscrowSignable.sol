@@ -13,6 +13,7 @@ import { TitleEscrowSignableErrors } from "../interfaces/TitleEscrowSignableErro
  * @custom:experimental Note that this is currently an experimental feature. See readme for usage details.
  */
 contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableErrors, ITitleEscrowSignable {
+  // solhint-disable-next-line const-name-snakecase
   string public constant name = "TradeTrust Title Escrow";
 
   // BeneficiaryTransfer(address beneficiary,address holder,address nominee,address registry,uint256 tokenId,uint256 deadline,uint256 nonce)
@@ -23,6 +24,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     __TitleEscrowSignable_init(_registry, _tokenId);
   }
 
+  // solhint-disable-next-line func-name-mixedcase
   function __TitleEscrowSignable_init(address _registry, uint256 _tokenId) internal virtual onlyInitializing {
     super.__TitleEscrow_init(_registry, _tokenId);
     super.__SigHelper_init(name, "1");

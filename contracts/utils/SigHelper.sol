@@ -40,11 +40,13 @@ abstract contract SigHelper is SigHelperErrors {
   }
 
   function _getSigHelperDomainStorage() private pure returns (SigHelperDomainStorage storage $) {
+    // solhint-disable-next-line no-inline-assembly
     assembly {
       $.slot := SIGHELPER_DOMAIN_STORAGE_LOCATION
     }
   }
 
+  // solhint-disable-next-line func-name-mixedcase
   function __SigHelper_init(string memory name, string memory version) internal {
     SigHelperDomainStorage storage $ = _getSigHelperDomainStorage();
     $.hashedName = keccak256(bytes(name));
@@ -58,6 +60,7 @@ abstract contract SigHelper is SigHelperErrors {
    * @dev Rebuilds when `block.chainid` differs from the value cached at init/last match.
    * Falls back to the legacy storage slot if the contract was initialised before this fix.
    */
+  // solhint-disable-next-line func-name-mixedcase
   function DOMAIN_SEPARATOR() public view returns (bytes32) {
     return _domainSeparator();
   }
