@@ -8,11 +8,15 @@ import { ITradeTrustTokenBurnable } from "../interfaces/ITradeTrustTokenBurnable
 
 /**
  * @title TradeTrustTokenBurnable
- * @dev This contract defines the burn functionality for the TradeTrustToken.
+ * @notice Burn sends the token to {BURN_ADDRESS} (`0xdEaD`), not `address(0)`.
+ * @dev Lifecycle for integrators:
+ * - `address(0)` owner → unminted ( `_exists` is false ).
+ * - `0xdEaD` owner → burned ( `_exists` remains true; tokenId cannot be re-minted on this registry ).
+ * Do not treat `_exists(tokenId)` alone as “active title”; check owner / escrow state.
  */
 abstract contract TradeTrustTokenBurnable is TradeTrustSBT, RegistryAccess, ITradeTrustTokenBurnable {
   /**
-   * @dev Internal constant for the burn address.
+   * @dev Burn sink address. Distinct from `address(0)` so unminted vs burned stay distinguishable.
    */
   address internal constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
@@ -36,14 +40,14 @@ abstract contract TradeTrustTokenBurnable is TradeTrustSBT, RegistryAccess, ITra
   }
 
   /**
-   * @dev Internal function to burn a token.
+   * @dev Shreds the escrow then transfers the token to {BURN_ADDRESS}.
    * @param tokenId The ID of the token to burn.
+   * @dev After burn, `_exists(tokenId)` stays true; the same `tokenId` cannot be minted again on this registry.
    */
   function _burnTitle(uint256 tokenId, bytes calldata _remark) internal virtual {
     address titleEscrow = titleEscrowFactory().getEscrowAddress(address(this), tokenId);
     ITitleEscrow(titleEscrow).shred(_remark);
 
-    // Burning token to 0xdead instead to show a differentiate state as address(0) is used for unminted tokens
     _registryTransferTo(BURN_ADDRESS, tokenId, "");
   }
 

@@ -391,12 +391,13 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
     remarkLengthLimit(_remark)
   {
     _setNominee(address(0), "");
-    ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId, "");
     remark = _remark;
     prevBeneficiary = address(0);
     prevHolder = address(0);
 
     emit ReturnToIssuer(msg.sender, registry, tokenId, _remark);
+
+    ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId, "");
   }
 
   /**

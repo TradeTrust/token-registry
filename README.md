@@ -126,6 +126,8 @@ await connectedRegistry.restore(tokenId, remarks);
 await connectedRegistry.burn(tokenId, remarks);
 ```
 
+> **Burn semantics:** tokens are transferred to `0xdEaD`, not `address(0)`. `address(0)` means unminted; `0xdEaD` means burned. Burned IDs still “exist” (`ownerOf` is non-zero) and cannot be re-minted on the same registry—use a new `tokenId` or a new registry for reissuance.
+
 ## Title Escrow
 
 The Title Escrow contract is used to manage and represent the ownership of a token between a **`beneficiary`** and **`holder`**.

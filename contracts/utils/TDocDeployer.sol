@@ -45,9 +45,10 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
     address deployed = Clones.clone(implementation);
     bytes memory payload = abi.encodeWithSignature("initialize(bytes)", abi.encode(params, titleEscrowFactory));
     // solhint-disable-next-line avoid-low-level-calls
-    (bool success, ) = address(deployed).call(payload);
+    (bool success, bytes memory returndata) = address(deployed).call(payload);
     if (!success) {
-      revert ImplementationInitializationFailure(payload);
+      // Surface initialize() revert data (custom error / reason) for operators; same error ABI.
+      revert ImplementationInitializationFailure(returndata);
     }
 
     emit Deployment(deployed, implementation, msg.sender, titleEscrowFactory, params);

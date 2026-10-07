@@ -9,8 +9,12 @@ import { TitleEscrowSignableErrors } from "../interfaces/TitleEscrowSignableErro
 
 /**
  * @title TitleEscrowSignable
- * @dev This Title Escrow allows the holder to perform an off-chain endorsement of beneficiary transfers
- * @custom:experimental Note that this is currently an experimental feature. See readme for usage details.
+ * @notice Experimental escrow that allows the holder to endorse beneficiary transfers off-chain.
+ * @dev Deadline validation is a lower bound only (`deadline < block.timestamp` → expired).
+ * There is no on-chain max TTL: a deadline of `type(uint256).max` never expires via time alone.
+ * Integrators should choose finite deadlines off-chain. Holders can still invalidate via
+ * {cancelBeneficiaryTransfer} or by advancing the holder nonce (transfer / holder change).
+ * @custom:experimental See readme for usage details.
  */
 contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableErrors, ITitleEscrowSignable {
   // solhint-disable-next-line const-name-snakecase
@@ -36,6 +40,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
 
   /**
    * @dev See {ITitleEscrowSignable-transferBeneficiaryWithSig}.
+   * @dev Rejects only when `endorsement.deadline < block.timestamp`. No upper bound on deadline.
    */
   function transferBeneficiaryWithSig(
     BeneficiaryTransferEndorsement memory endorsement,
