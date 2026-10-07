@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { ITitleEscrow } from "./interfaces/ITitleEscrow.sol";
 import { ITradeTrustToken } from "./interfaces/ITradeTrustToken.sol";
 import { TitleEscrowErrors } from "./interfaces/TitleEscrowErrors.sol";
@@ -111,9 +112,13 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   /**
    * @dev See {ERC165-supportsInterface}.
+   * Reports IERC165 and IERC721Receiver so ERC-165 discovery matches onERC721Received support.
    */
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-    return interfaceId == type(ITitleEscrow).interfaceId;
+    return
+      interfaceId == type(ITitleEscrow).interfaceId ||
+      interfaceId == type(IERC721Receiver).interfaceId ||
+      interfaceId == type(IERC165).interfaceId;
   }
 
   /**

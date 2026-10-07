@@ -60,6 +60,18 @@ describe("Title Escrow", async () => {
 
       expect(res).to.be.true;
     });
+
+    it("should support IERC165 interface", async () => {
+      const [titleEscrowContract] = await loadFixture(deployTitleEscrowFixtureRunner);
+
+      expect(await titleEscrowContract.supportsInterface("0x01ffc9a7")).to.be.true;
+    });
+
+    it("should support IERC721Receiver interface", async () => {
+      const [titleEscrowContract] = await loadFixture(deployTitleEscrowFixtureRunner);
+
+      expect(await titleEscrowContract.supportsInterface("0x150b7a02")).to.be.true;
+    });
   });
 
   describe("General Behaviours", () => {
