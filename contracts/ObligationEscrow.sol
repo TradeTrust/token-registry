@@ -42,7 +42,10 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
   address public override lastHolder;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() initializer {}
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
 
   /**
    * @dev Modifier to make a function callable only by the beneficiary.
@@ -220,7 +223,10 @@ contract ObligationEscrow is Initializable, IERC165, ObligationEscrowErrors, IOb
       _status = Status.Issued;
       mintBlock = block.number;
       emit StatusInitialized(tokenId, registry);
-    } else remark = data;
+    } else {
+      if (data.length > 120) revert RemarkLengthExceeded();
+      remark = data;
+    }
 
     emit TokenReceived(beneficiary, holder, isMinting, registry, tokenId, remark);
     return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
