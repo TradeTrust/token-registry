@@ -6,6 +6,8 @@ interface TitleEscrowSignableErrors {
 
   error InvalidSignature();
 
+  error InvalidNonce();
+
   error InvalidEndorsement();
 
   error MismatchedEndorsedNomineeAndOnChainNominee(address endorsedNominee, address onChainNominee);

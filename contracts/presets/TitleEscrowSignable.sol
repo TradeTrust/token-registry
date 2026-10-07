@@ -61,6 +61,11 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     if (endorsement.beneficiary != beneficiary) {
       revert MismatchedEndorsedBeneficiaryAndCurrentBeneficiary(endorsement.beneficiary, beneficiary);
     }
+    // Replay protection: endorsement nonce must be the holder's current nonce.
+    // Cancellation may still target future nonces via endorsement.nonce in _hash.
+    if (endorsement.nonce != nonces[endorsement.holder]) {
+      revert InvalidNonce();
+    }
     if (!_validateSig(_hash(endorsement), holder, sig)) {
       revert InvalidSignature();
     }
@@ -89,7 +94,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     emit CancelBeneficiaryTransferEndorsement(hash, endorsement.holder, endorsement.tokenId);
   }
 
-  function _hash(BeneficiaryTransferEndorsement memory endorsement) internal view returns (bytes32) {
+  function _hash(BeneficiaryTransferEndorsement memory endorsement) internal pure returns (bytes32) {
     return
       keccak256(
         abi.encode(
@@ -100,7 +105,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
           endorsement.registry,
           endorsement.tokenId,
           endorsement.deadline,
-          nonces[endorsement.holder]
+          endorsement.nonce
         )
       );
   }
