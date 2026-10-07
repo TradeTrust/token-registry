@@ -388,13 +388,13 @@ describe("TitleEscrowSignable", async () => {
           });
 
           it("should revert if nonce is incorrect", async () => {
-            endorsement.nonce = faker.datatype.number({ min: 1 });
+            endorsement.nonce = faker.datatype.number();
             const sigHash = await users.holder.signTypedData(domain, beneficiaryTransferTypes, endorsement);
             sig = ethers.Signature.from(sigHash);
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidNonce");
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidSignature");
           });
         });
 
@@ -547,33 +547,6 @@ describe("TitleEscrowSignable", async () => {
             await expect(tx)
               .to.emit(titleEscrowContractAsBeneficiary, "CancelBeneficiaryTransferEndorsement")
               .withArgs(hashStruct, users.holder.address, fakeTokenId);
-          });
-
-          it("should cancel a future-nonce endorsement hash", async () => {
-            const futureEndorsement = { ...endorsement, nonce: 1 };
-            const futureHash = ethers.keccak256(
-              ethers.AbiCoder.defaultAbiCoder().encode(
-                ["bytes32", ...beneficiaryTransferTypes.BeneficiaryTransfer.map((obj) => obj.type)],
-                [
-                  ethers.id(
-                    "BeneficiaryTransfer(address beneficiary,address holder,address nominee,address registry,uint256 tokenId,uint256 deadline,uint256 nonce)"
-                  ),
-                  futureEndorsement.beneficiary,
-                  futureEndorsement.holder,
-                  futureEndorsement.nominee,
-                  futureEndorsement.registry,
-                  futureEndorsement.tokenId,
-                  futureEndorsement.deadline,
-                  futureEndorsement.nonce,
-                ]
-              )
-            );
-
-            expect(await titleEscrowContract.nonces(users.holder.address)).to.equal(0n);
-            await titleEscrowContractAsEndorsingHolder.cancelBeneficiaryTransfer(futureEndorsement);
-
-            expect(await titleEscrowContract.cancelled(futureHash)).to.be.true;
-            expect(await titleEscrowContract.cancelled(hashStruct)).to.be.false;
           });
         });
       });

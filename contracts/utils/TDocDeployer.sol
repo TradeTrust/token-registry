@@ -24,10 +24,7 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
   // mapping: implementation => title escrow factory
   mapping(address => address) public implementations;
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
+  constructor() initializer {}
 
   function initialize() external initializer {
     __Ownable_init(msg.sender);
