@@ -28,10 +28,7 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   bytes public remark;
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
+  constructor() initializer {}
 
   /**
    * @dev Modifier to make a function callable only by the beneficiary.
@@ -140,15 +137,11 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
       if (_beneficiary == address(0) || _holder == address(0)) {
         revert InvalidTokenTransferToZeroAddressOwners(_beneficiary, _holder);
       }
-      if (_remark.length > 120) revert RemarkLengthExceeded();
       _setBeneficiary(_beneficiary, "");
       _setHolder(_holder, "");
       remark = _remark;
       isMinting = true;
-    } else {
-      if (data.length > 120) revert RemarkLengthExceeded();
-      remark = data;
-    }
+    } else remark = data;
 
     emit TokenReceived(beneficiary, holder, isMinting, registry, tokenId, remark);
     return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));

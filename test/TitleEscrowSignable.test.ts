@@ -394,9 +394,8 @@ describe("TitleEscrowSignable", async () => {
 
             const tx = titleEscrowContractAsBeneficiary.transferBeneficiaryWithSig(endorsement, sig);
 
-            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidNonce");
-          });
-        });
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContractAsBeneficiary, "InvalidEndorsement");
+          });        });
 
         describe("When Beneficiary Transfer signature is valid", () => {
           it("should transfer to nominated beneficiary successfully", async () => {

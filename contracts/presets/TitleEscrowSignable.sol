@@ -64,7 +64,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     // Replay protection: endorsement nonce must be the holder's current nonce.
     // Cancellation may still target future nonces via endorsement.nonce in _hash.
     if (endorsement.nonce != nonces[endorsement.holder]) {
-      revert InvalidNonce();
+      revert InvalidEndorsement();
     }
     if (!_validateSig(_hash(endorsement), holder, sig)) {
       revert InvalidSignature();

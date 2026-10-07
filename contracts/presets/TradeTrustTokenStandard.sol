@@ -10,10 +10,7 @@ contract TradeTrustTokenStandard is TradeTrustTokenBase {
   address internal _titleEscrowFactory;
   uint256 internal _genesis;
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
+  constructor() initializer {}
 
   /**
    * @dev Initialize the contract.

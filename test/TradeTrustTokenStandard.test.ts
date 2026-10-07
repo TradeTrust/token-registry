@@ -72,7 +72,7 @@ describe("TradeTrustTokenStandard", async () => {
     it("should initialise implementation", async () => {
       const tx = implContract.initialize(initParams);
 
-      await expect(tx).to.be.revertedWithCustomError(implContract, "InvalidInitialization");
+      expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
     });
 
     it("should not set deployer as admin", async () => {
