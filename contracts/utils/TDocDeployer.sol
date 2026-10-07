@@ -56,6 +56,15 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
   }
 
   function addImplementation(address implementation, address titleEscrowFactory) external onlyOwner {
+    // Only allow adding implementations that are not already added and are not the zero address.
+    if (
+      implementation == address(0) ||
+      titleEscrowFactory == address(0) ||
+      implementation.code.length == 0 ||
+      titleEscrowFactory.code.length == 0
+    ) {
+      revert InvalidImplementation();
+    }
     if (implementations[implementation] != address(0)) {
       revert ImplementationAlreadyAdded();
     }
