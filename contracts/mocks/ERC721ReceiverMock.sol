@@ -33,8 +33,10 @@ contract ERC721ReceiverMock is IERC721Receiver {
     bytes memory data /* data */
   ) public override returns (bytes4) {
     if (_error == Error.RevertWithMessage) {
+      // solhint-disable-next-line custom-errors
       revert("ERC721ReceiverMock: reverting");
     } else if (_error == Error.RevertWithoutMessage) {
+      // solhint-disable-next-line reason-string, custom-errors
       revert();
     } else if (_error == Error.Panic) {
       uint256 a = uint256(0) / uint256(0);

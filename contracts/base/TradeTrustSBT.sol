@@ -2,11 +2,12 @@
 pragma solidity ^0.8.20;
 
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { SBTUpgradeable } from "./SBTUpgradeable.sol";
-import { ITitleEscrow, IERC721Receiver } from "../interfaces/ITitleEscrow.sol";
 import { ITitleEscrowFactory } from "../interfaces/ITitleEscrowFactory.sol";
 import { TradeTrustTokenErrors } from "../interfaces/TradeTrustTokenErrors.sol";
-import { ITradeTrustSBT, IERC165 } from "../interfaces/ITradeTrustSBT.sol";
+import { ITradeTrustSBT } from "../interfaces/ITradeTrustSBT.sol";
 
 /**
  * @title TradeTrustSBT
@@ -24,6 +25,7 @@ abstract contract TradeTrustSBT is SBTUpgradeable, PausableUpgradeable, TradeTru
    * @param name The name of the token.
    * @param symbol The symbol of the token.
    */
+  // solhint-disable-next-line func-name-mixedcase
   function __TradeTrustSBT_init(string memory name, string memory symbol) internal onlyInitializing {
     __SBT_init(name, symbol);
     __Pausable_init();

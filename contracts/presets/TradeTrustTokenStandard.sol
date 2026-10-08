@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.20;
 
-import { TradeTrustTokenBase, ITitleEscrowFactory } from "../base/TradeTrustTokenBase.sol";
+import { TradeTrustTokenBase } from "../base/TradeTrustTokenBase.sol";
+import { ITitleEscrowFactory } from "../interfaces/ITitleEscrowFactory.sol";
 
 /**
  * @title TradeTrustTokenStandard
@@ -10,7 +11,10 @@ contract TradeTrustTokenStandard is TradeTrustTokenBase {
   address internal _titleEscrowFactory;
   uint256 internal _genesis;
 
-  constructor() initializer {}
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
 
   /**
    * @dev Initialize the contract.

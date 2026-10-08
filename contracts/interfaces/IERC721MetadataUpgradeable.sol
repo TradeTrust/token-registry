@@ -6,8 +6,12 @@ pragma solidity ^0.8.20;
 import { ISBTUpgradeable } from "./ISBTUpgradeable.sol";
 
 /**
- * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
- * @dev See https://eips.ethereum.org/EIPS/eip-721
+ * @title SBT metadata extension (ERC-721-shaped)
+ * @notice Optional name/symbol/tokenURI helpers for {ISBTUpgradeable}.
+ * This is **not** the canonical ERC-721 metadata interface: the base token interface
+ * uses a custom four-argument `transferFrom` and omits approvals.
+ * @dev Naming retains historical "IERC721MetadataUpgradeable" for compatibility; do not
+ * treat `supportsInterface` for this type as EIP-721 compliance.
  */
 interface IERC721MetadataUpgradeable is ISBTUpgradeable {
   /**

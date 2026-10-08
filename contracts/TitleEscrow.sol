@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
+import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { ITitleEscrow } from "./interfaces/ITitleEscrow.sol";
 import { ITradeTrustToken } from "./interfaces/ITradeTrustToken.sol";
 import { TitleEscrowErrors } from "./interfaces/TitleEscrowErrors.sol";
@@ -28,7 +29,10 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   bytes public remark;
 
-  constructor() initializer {}
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
 
   /**
    * @dev Modifier to make a function callable only by the beneficiary.
@@ -108,9 +112,13 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
 
   /**
    * @dev See {ERC165-supportsInterface}.
+   * Reports IERC165 and IERC721Receiver so ERC-165 discovery matches onERC721Received support.
    */
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-    return interfaceId == type(ITitleEscrow).interfaceId;
+    return
+      interfaceId == type(ITitleEscrow).interfaceId ||
+      interfaceId == type(IERC721Receiver).interfaceId ||
+      interfaceId == type(IERC165).interfaceId;
   }
 
   /**
@@ -137,11 +145,15 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
       if (_beneficiary == address(0) || _holder == address(0)) {
         revert InvalidTokenTransferToZeroAddressOwners(_beneficiary, _holder);
       }
+      if (_remark.length > 120) revert RemarkLengthExceeded();
       _setBeneficiary(_beneficiary, "");
       _setHolder(_holder, "");
       remark = _remark;
       isMinting = true;
-    } else remark = data;
+    } else {
+      if (data.length > 120) revert RemarkLengthExceeded();
+      remark = data;
+    }
 
     emit TokenReceived(beneficiary, holder, isMinting, registry, tokenId, remark);
     return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
@@ -306,12 +318,13 @@ contract TitleEscrow is Initializable, IERC165, TitleEscrowErrors, ITitleEscrow 
     remarkLengthLimit(_remark)
   {
     _setNominee(address(0), "");
-    ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId, "");
     remark = _remark;
     prevBeneficiary = address(0);
     prevHolder = address(0);
 
     emit ReturnToIssuer(msg.sender, registry, tokenId, _remark);
+
+    ITradeTrustToken(registry).transferFrom(address(this), registry, tokenId, "");
   }
 
   /**

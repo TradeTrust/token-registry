@@ -3,6 +3,8 @@
 
 pragma solidity ^0.8.20;
 
+/* solhint-disable custom-errors, reason-string, func-name-mixedcase, no-inline-assembly, no-empty-blocks */
+
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
@@ -12,8 +14,13 @@ import { ISBTUpgradeable, IERC165 } from "../interfaces/ISBTUpgradeable.sol";
 import { IERC721MetadataUpgradeable } from "../interfaces/IERC721MetadataUpgradeable.sol";
 
 /**
- * @dev A trimmed version of the https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token
- * in OpenZeppelin for use as Soulbound Token.
+ * @title Soulbound Token (SBT) base implementation
+ * @notice Trimmed OpenZeppelin ERC-721-inspired token for Title Escrow custody.
+ * It is **not** a fully canonical IERC721:
+ * - Public transfer is `transferFrom(from,to,tokenId,remark)` only (custom selector).
+ * - Approvals (`approve` / `setApprovalForAll`) are intentionally omitted.
+ * Integrators must use {ISBTUpgradeable}, not assume standard ERC-721 wallets/marketplaces.
+ * @dev ERC-165 reports {ISBTUpgradeable} / {IERC721MetadataUpgradeable}, not IERC721.
  */
 contract SBTUpgradeable is
   Initializable,
@@ -114,10 +121,12 @@ contract SBTUpgradeable is
   }
 
   /**
-   * @dev See {IERC721-safeTransferFrom}.
+   * @dev See {ISBTUpgradeable-transferFrom}.
+   * Custom four-argument transfer (includes remark). Not IERC721
+   * `transferFrom(address,address,uint256)`.
    */
   function transferFrom(address from, address to, uint256 tokenId, bytes memory _remark) public virtual override {
-    require(_isOwner(_msgSender(), tokenId), "ERC721: transfer caller is not owner nor approved");
+    require(_isOwner(_msgSender(), tokenId), "SBT: caller is not owner");
     _safeTransfer(from, to, tokenId, _remark);
   }
 

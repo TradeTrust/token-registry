@@ -95,6 +95,14 @@ describe("ObligationEscrow", async () => {
     it("should support IObligationEscrow interface", async () => {
       expect(await escrow.supportsInterface(contractInterfaceId.ObligationEscrow)).to.be.true;
     });
+
+    it("should support IERC165 interface", async () => {
+      expect(await escrow.supportsInterface("0x01ffc9a7")).to.be.true;
+    });
+
+    it("should support IERC721Receiver interface", async () => {
+      expect(await escrow.supportsInterface("0x150b7a02")).to.be.true;
+    });
   });
 
   describe("General Behaviours", () => {

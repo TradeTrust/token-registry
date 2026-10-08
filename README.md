@@ -92,8 +92,12 @@ This package exposes the [Typechain (Ethers)](https://github.com/dethcrypto/Type
 
 ## TradeTrustToken
 
-The `TradeTrustToken` is a Soulbound Token (SBT) tied to the Title Escrow. The SBT implementation is loosely based on OpenZeppelin's implementation of the [ERC721](http://erc721.org/) standard.
-An SBT is used in this case because the token, while can be transferred to the registry, is largely restricted to its designated Title Escrow contracts.
+The `TradeTrustToken` is a Soulbound Token (SBT) tied to the Title Escrow. The SBT is **ERC-721-shaped but not a canonical IERC721**:
+- Transfer uses custom `transferFrom(address,address,uint256,bytes)` (remark), not the three-argument ERC-721 selector.
+- Approvals (`approve` / `setApprovalForAll`) are intentionally unavailable.
+- Integrators should use the `ISBTUpgradeable` / package Typechain bindings, not assume wallets, marketplaces, or indexers that expect full IERC721 will work unchanged.
+
+An SBT is used because the token, while transferable to the registry, is largely restricted to its designated Title Escrow contracts.
 See issue [#108](https://github.com/Open-Attestation/token-registry/issues/108) for more details.
 
 ### Connect to existing token registry
@@ -121,6 +125,8 @@ await connectedRegistry.restore(tokenId, remarks);
 ```ts
 await connectedRegistry.burn(tokenId, remarks);
 ```
+
+> **Burn semantics:** tokens are transferred to `0xdEaD`, not `address(0)`. `address(0)` means unminted; `0xdEaD` means burned. Burned IDs still “exist” (`ownerOf` is non-zero) and cannot be re-minted on the same registry—use a new `tokenId` or a new registry for reissuance.
 
 ## Title Escrow
 
@@ -369,6 +375,14 @@ Roles are useful for granting users to access certain functions only. Currently,
 
 `TrustVCToken` inherits the same `RegistryAccess` roles as `TradeTrustToken`. Use `grantRole` / `revokeRole` / `setRoleAdmin` on either registry the same way.
 
+> [!WARNING]
+> **Bootstrap privilege concentration.** On deploy/init, a single `admin` address is granted `DefaultAdmin`, `MinterRole`, `RestorerRole`, and `AccepterRole` together. That is intentional for setup convenience, not a recommended long-term posture.
+>
+> **Operational hardening (recommended):**
+> - Hold `DefaultAdmin` on a multisig (or equivalent governance), not a hot single EOA.
+> - Grant `MinterRole` / `RestorerRole` / `AccepterRole` to separate accounts, then `revokeRole` those operational roles from the bootstrap admin if it should only remain as admin.
+> - `setRoleAdmin` takes effect **immediately** (no on-chain timelock). Treat hierarchy changes as high-risk admin actions and apply off-chain change control / monitoring if you need delayed activation.
+
 A trusted user can be granted multiple roles by the admin user to perform different operations.
 The following functions can be called on the token contract by the admin user to grant and revoke roles to and from users.
 
@@ -409,7 +423,8 @@ await connectedRegistry.setRoleAdmin(roleHash.AccepterRole, roleHash.AccepterAdm
 ```
 
 > [!IMPORTANT]
-> Can only be called by **default admin**.
+> Can only be called by **default admin**. Changes apply immediately with no timelock.
+> Prefer a multisig-controlled default admin before using this in production.
 
 # Deployment
 

@@ -37,10 +37,12 @@ describe("TDocDeployer", async () => {
   });
 
   beforeEach(async () => {
-    fakeTitleEscrowFactory = ethers.getAddress(faker.finance.ethereumAddress());
-
     [implContract, deployerContract] = await loadFixture(deployFixturesRunner);
     implContractAddress = await implContract.getAddress();
+
+    // Factory must be a deployed contract (addImplementation checks code.length).
+    const titleEscrowFactory = await (await ethers.getContractFactory("TitleEscrowFactory")).deploy();
+    fakeTitleEscrowFactory = await titleEscrowFactory.getAddress();
 
     deployerContractAsOwner = deployerContract.connect(deployer);
     deployerContractAsNonOwner = deployerContract.connect(users.beneficiary);
@@ -130,6 +132,32 @@ describe("TDocDeployer", async () => {
         await expect(tx)
           .to.be.revertedWithCustomError(deployerContractAsNonOwner, "OwnableUnauthorizedAccount")
           .withArgs(users.beneficiary.address);
+      });
+
+      it("should revert when implementation is zero address", async () => {
+        const tx = deployerContractAsOwner.addImplementation(defaultAddress.Zero, fakeTitleEscrowFactory);
+
+        await expect(tx).to.be.revertedWithCustomError(deployerContractAsOwner, "InvalidImplementation");
+      });
+
+      it("should revert when title escrow factory is zero address", async () => {
+        const tx = deployerContractAsOwner.addImplementation(implContractAddress, defaultAddress.Zero);
+
+        await expect(tx).to.be.revertedWithCustomError(deployerContractAsOwner, "InvalidImplementation");
+      });
+
+      it("should revert when implementation has no code", async () => {
+        const eoa = ethers.getAddress(faker.finance.ethereumAddress());
+        const tx = deployerContractAsOwner.addImplementation(eoa, fakeTitleEscrowFactory);
+
+        await expect(tx).to.be.revertedWithCustomError(deployerContractAsOwner, "InvalidImplementation");
+      });
+
+      it("should revert when title escrow factory has no code", async () => {
+        const eoa = ethers.getAddress(faker.finance.ethereumAddress());
+        const tx = deployerContractAsOwner.addImplementation(implContractAddress, eoa);
+
+        await expect(tx).to.be.revertedWithCustomError(deployerContractAsOwner, "InvalidImplementation");
       });
     });
 
