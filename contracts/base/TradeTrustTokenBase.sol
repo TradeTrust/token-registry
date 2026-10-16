@@ -2,10 +2,12 @@
 pragma solidity ^0.8.20;
 
 import { RegistryAccess } from "./RegistryAccess.sol";
-import { TradeTrustTokenBurnable, TradeTrustSBT, SBTUpgradeable } from "./TradeTrustTokenBurnable.sol"; //check-circular-imports
-import { TradeTrustTokenMintable, TradeTrustSBT, SBTUpgradeable } from "./TradeTrustTokenMintable.sol";
-import { TradeTrustTokenRestorable, TradeTrustSBT, SBTUpgradeable } from "./TradeTrustTokenRestorable.sol";
-import { ITradeTrustToken, ITitleEscrowFactory } from "../interfaces/ITradeTrustToken.sol"; //check-circular-imports
+import { SBTUpgradeable } from "./SBTUpgradeable.sol";
+import { TradeTrustSBT } from "./TradeTrustSBT.sol";
+import { TradeTrustTokenBurnable } from "./TradeTrustTokenBurnable.sol"; //check-circular-imports
+import { TradeTrustTokenMintable } from "./TradeTrustTokenMintable.sol";
+import { TradeTrustTokenRestorable } from "./TradeTrustTokenRestorable.sol";
+import { ITradeTrustToken } from "../interfaces/ITradeTrustToken.sol"; //check-circular-imports
 import { TradeTrustTokenBaseURI } from "./TradeTrustTokenBaseURI.sol";
 
 /**
@@ -25,6 +27,7 @@ abstract contract TradeTrustTokenBase is
    * @param name The name of the token contract.
    * @param symbol The symbol of the token contract.
    */
+  // solhint-disable-next-line func-name-mixedcase
   function __TradeTrustTokenBase_init(
     string memory name,
     string memory symbol,
