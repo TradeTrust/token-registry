@@ -8,6 +8,7 @@ contract SigHelperMock is SigHelper {
     __SigHelper_init(name, "1");
   }
 
+  // solhint-disable-next-line func-name-mixedcase
   function __SigHelper_initInternal(string memory name, string memory version) public {
     super.__SigHelper_init(name, version);
   }

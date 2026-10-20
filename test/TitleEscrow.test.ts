@@ -60,6 +60,18 @@ describe("Title Escrow", async () => {
 
       expect(res).to.be.true;
     });
+
+    it("should support IERC165 interface", async () => {
+      const [titleEscrowContract] = await loadFixture(deployTitleEscrowFixtureRunner);
+
+      expect(await titleEscrowContract.supportsInterface("0x01ffc9a7")).to.be.true;
+    });
+
+    it("should support IERC721Receiver interface", async () => {
+      const [titleEscrowContract] = await loadFixture(deployTitleEscrowFixtureRunner);
+
+      expect(await titleEscrowContract.supportsInterface("0x150b7a02")).to.be.true;
+    });
   });
 
   describe("General Behaviours", () => {
@@ -272,6 +284,19 @@ describe("Title Escrow", async () => {
               .to.be.revertedWithCustomError(titleEscrowContract, "InvalidTokenTransferToZeroAddressOwners")
               .withArgs(users.beneficiary.address, defaultAddress.Zero);
           });
+
+          it("should revert when mint remark length exceeds", async () => {
+            data = new ethers.AbiCoder().encode(
+              ["address", "address", "bytes"],
+              [users.beneficiary.address, users.holder.address, exceededLengthRemark]
+            );
+
+            const tx = titleEscrowContract
+              .connect(fakeRegistry.wallet as Signer)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
+
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RemarkLengthExceeded");
+          });
         });
 
         describe("After Minting Token Receive", () => {
@@ -284,6 +309,18 @@ describe("Title Escrow", async () => {
               .onERC721Received(fakeAddress, fakeAddress, tokenId, "0x");
 
             await expect(tx).to.not.be.reverted;
+          });
+
+          it("should revert when non-mint remark length exceeds", async () => {
+            await titleEscrowContract
+              .connect(fakeRegistry.wallet as Signer)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, data);
+
+            const tx = titleEscrowContract
+              .connect(fakeRegistry.wallet as Signer)
+              .onERC721Received(fakeAddress, fakeAddress, tokenId, exceededLengthRemark);
+
+            await expect(tx).to.be.revertedWithCustomError(titleEscrowContract, "RemarkLengthExceeded");
           });
 
           it("should emit TokenReceived event with correct values", async () => {

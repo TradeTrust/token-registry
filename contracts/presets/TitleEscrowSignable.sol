@@ -9,10 +9,15 @@ import { TitleEscrowSignableErrors } from "../interfaces/TitleEscrowSignableErro
 
 /**
  * @title TitleEscrowSignable
- * @dev This Title Escrow allows the holder to perform an off-chain endorsement of beneficiary transfers
- * @custom:experimental Note that this is currently an experimental feature. See readme for usage details.
+ * @notice Experimental escrow that allows the holder to endorse beneficiary transfers off-chain.
+ * @dev Deadline validation is a lower bound only (`deadline < block.timestamp` → expired).
+ * There is no on-chain max TTL: a deadline of `type(uint256).max` never expires via time alone.
+ * Integrators should choose finite deadlines off-chain. Holders can still invalidate via
+ * {cancelBeneficiaryTransfer} or by advancing the holder nonce (transfer / holder change).
+ * @custom:experimental See readme for usage details.
  */
 contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableErrors, ITitleEscrowSignable {
+  // solhint-disable-next-line const-name-snakecase
   string public constant name = "TradeTrust Title Escrow";
 
   // BeneficiaryTransfer(address beneficiary,address holder,address nominee,address registry,uint256 tokenId,uint256 deadline,uint256 nonce)
@@ -23,6 +28,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     __TitleEscrowSignable_init(_registry, _tokenId);
   }
 
+  // solhint-disable-next-line func-name-mixedcase
   function __TitleEscrowSignable_init(address _registry, uint256 _tokenId) internal virtual onlyInitializing {
     super.__TitleEscrow_init(_registry, _tokenId);
     super.__SigHelper_init(name, "1");
@@ -34,6 +40,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
 
   /**
    * @dev See {ITitleEscrowSignable-transferBeneficiaryWithSig}.
+   * @dev Rejects only when `endorsement.deadline < block.timestamp`. No upper bound on deadline.
    */
   function transferBeneficiaryWithSig(
     BeneficiaryTransferEndorsement memory endorsement,
@@ -61,11 +68,20 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     if (endorsement.beneficiary != beneficiary) {
       revert MismatchedEndorsedBeneficiaryAndCurrentBeneficiary(endorsement.beneficiary, beneficiary);
     }
+    // Replay protection: endorsement nonce must be the holder's current nonce.
+    // Cancellation may still target future nonces via endorsement.nonce in _hash.
+    if (endorsement.nonce != nonces[endorsement.holder]) {
+      revert InvalidEndorsement();
+    }
     if (!_validateSig(_hash(endorsement), holder, sig)) {
       revert InvalidSignature();
     }
 
     ++nonces[holder];
+    // Match transferBeneficiary: keep rejection state for the immediate predecessor.
+    prevHolder = address(0);
+    prevBeneficiary = beneficiary;
+    remark = "0x0";
     _setBeneficiary(endorsement.nominee, "0x0");
   }
 
@@ -85,7 +101,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
     emit CancelBeneficiaryTransferEndorsement(hash, endorsement.holder, endorsement.tokenId);
   }
 
-  function _hash(BeneficiaryTransferEndorsement memory endorsement) internal view returns (bytes32) {
+  function _hash(BeneficiaryTransferEndorsement memory endorsement) internal pure returns (bytes32) {
     return
       keccak256(
         abi.encode(
@@ -96,7 +112,7 @@ contract TitleEscrowSignable is SigHelper, TitleEscrow, TitleEscrowSignableError
           endorsement.registry,
           endorsement.tokenId,
           endorsement.deadline,
-          nonces[endorsement.holder]
+          endorsement.nonce
         )
       );
   }

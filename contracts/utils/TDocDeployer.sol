@@ -24,12 +24,16 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
   // mapping: implementation => title escrow factory
   mapping(address => address) public implementations;
 
-  constructor() initializer {}
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
 
   function initialize() external initializer {
     __Ownable_init(msg.sender);
   }
 
+  // solhint-disable-next-line no-empty-blocks
   function _authorizeUpgrade(address) internal view override onlyOwner {}
 
   function deploy(address implementation, bytes memory params) external returns (address) {
@@ -40,9 +44,11 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
 
     address deployed = Clones.clone(implementation);
     bytes memory payload = abi.encodeWithSignature("initialize(bytes)", abi.encode(params, titleEscrowFactory));
-    (bool success, ) = address(deployed).call(payload);
+    // solhint-disable-next-line avoid-low-level-calls
+    (bool success, bytes memory returndata) = address(deployed).call(payload);
     if (!success) {
-      revert ImplementationInitializationFailure(payload);
+      // Surface initialize() revert data (custom error / reason) for operators; same error ABI.
+      revert ImplementationInitializationFailure(returndata);
     }
 
     emit Deployment(deployed, implementation, msg.sender, titleEscrowFactory, params);
@@ -50,6 +56,15 @@ contract TDocDeployer is OwnableUpgradeable, UUPSUpgradeable, TDocDeployerErrors
   }
 
   function addImplementation(address implementation, address titleEscrowFactory) external onlyOwner {
+    // Only allow adding implementations that are not already added and are not the zero address.
+    if (
+      implementation == address(0) ||
+      titleEscrowFactory == address(0) ||
+      implementation.code.length == 0 ||
+      titleEscrowFactory.code.length == 0
+    ) {
+      revert InvalidImplementation();
+    }
     if (implementations[implementation] != address(0)) {
       revert ImplementationAlreadyAdded();
     }

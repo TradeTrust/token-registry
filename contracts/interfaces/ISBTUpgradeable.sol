@@ -6,7 +6,15 @@ pragma solidity ^0.8.20;
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 /**
- * @dev Required interface of an ERC721 compliant contract.
+ * @title Soulbound Token (SBT) core interface
+ * @notice Custom, non-canonical token interface inspired by ERC-721 shape (balanceOf/ownerOf/Transfer)
+ * but **not** a full {IERC721} implementation.
+ *
+ * Intentionally differs from ERC-721:
+ * - Transfer entrypoint is `transferFrom(address,address,uint256,bytes)` (includes a remark),
+ *   which has a different selector than canonical `transferFrom(address,address,uint256)`.
+ * - No `approve` / `setApprovalForAll` / `getApproved` / `isApprovedForAll`.
+ * - Callers must integrate against {ISBTUpgradeable}, not assume standard IERC721 tooling.
  */
 interface ISBTUpgradeable is IERC165 {
   /**
@@ -29,16 +37,18 @@ interface ISBTUpgradeable is IERC165 {
   function ownerOf(uint256 tokenId) external view returns (address owner);
 
   /**
-   * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
-   * are aware of the ERC721 protocol to prevent tokens from being forever locked.
+   * @dev Transfers `tokenId` from `from` to `to` with an attached `_remark`.
+   *
+   * This is **not** the canonical ERC-721 `transferFrom(address,address,uint256)`.
+   * Only the token owner may call; approvals are intentionally unsupported (SBT design).
    *
    * Requirements:
    *
    * - `from` cannot be the zero address.
    * - `to` cannot be the zero address.
    * - `tokenId` token must exist and be owned by `from`.
-   * - If the caller is not `from`, it must be have been allowed to move this token by either {approve} or {setApprovalForAll}.
-   * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
+   * - Caller must be the token owner.
+   * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}.
    *
    * Emits a {Transfer} event.
    */
